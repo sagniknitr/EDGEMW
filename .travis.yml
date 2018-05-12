@@ -1,0 +1,10 @@
+language: c
+compiler: gcc
+before_install:
+  - pip install --user cpp-coveralls
+
+script: bash build.sh
+
+after_success:
+  - pip install --user cpp-coveralls
+  - coveralls --exclude tests --gcov-options '\-lp'
