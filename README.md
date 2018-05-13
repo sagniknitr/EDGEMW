@@ -1,4 +1,4 @@
-# MWL
+# mwOS
 
 Middleware services distribution for any linux based box
 
