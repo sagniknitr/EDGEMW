@@ -16,3 +16,6 @@ $(CONFIGD_SERVICE_NAME): $(CONFIGD_OBJ)
 %.o: %.c
 	${CC} $(CFLAGS) -c -o $@ $<
 
+
+clean:
+	rm -rf configd cfgd/*.o cfgd/*.gc*
