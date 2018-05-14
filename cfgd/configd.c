@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <getopt.h>
 #include "debug.h"
 
 struct configd_config {
@@ -12,6 +13,8 @@ struct configd_config {
 struct configd_priv {
     struct configd_config *config_head;
 };
+
+static int test_mode = 0;
 
 #define CONFIGD_CONFIG_FILE_PATH "./config.ds"
 
@@ -42,6 +45,7 @@ static int configd_parse_ds(char *config_path, struct configd_priv *priv)
 
         // ignore the comments
         if (line[0] == '#') {
+            memset(line, 0, sizeof(line));
             continue;
         }
 
@@ -58,7 +62,7 @@ static int configd_parse_ds(char *config_path, struct configd_priv *priv)
         i ++;
 
         // strip space
-        while (line[i] == ' ') {
+        while ((line[i] == ' ') || (line[i] == '=')) {
             i ++;
         }
 
@@ -131,15 +135,22 @@ int main(int argc, char **argv)
     char *config_path = CONFIGD_CONFIG_FILE_PATH;
     int ret;
 
+    while ((ret = getopt(argc, argv, "tf:")) != -1) {
+        switch (ret) {
+            case 't':
+                test_mode = 1;
+            break;
+            case 'f':
+                config_path = optarg;
+            break;
+        }
+    }
+
     priv = calloc(1, sizeof(struct configd_priv));
     if (!priv) {
         MWOS_ERR("configd: failed to allocate @ %s %u\n",
                     __func__, __LINE__);
         return -1;
-    }
-
-    if (argc == 2) {
-        config_path = argv[1];
     }
 
     ret = configd_parse_ds(config_path, priv);
@@ -149,7 +160,9 @@ int main(int argc, char **argv)
         return ret;
     }
 
-    //configd_print_db(priv);
+    if (test_mode) {
+        configd_print_db(priv);
+    }
 
     return 0;
 }
