@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <getopt.h>
 #include "debug.h"
+#include "perf.h"
 
 struct configd_config {
     char *var;
@@ -11,6 +12,8 @@ struct configd_config {
 };
 
 struct configd_priv {
+    void *perf_handle;
+    void *cfg_context;
     struct configd_config *config_head;
 };
 
@@ -153,12 +156,32 @@ int main(int argc, char **argv)
         return -1;
     }
 
+    priv->perf_handle = mwos_perf_init(2);
+    if (!priv->perf_handle) {
+        return -1;
+    }
+
+    priv->cfg_context = mwos_perf_create_context(priv->perf_handle, "cfg_read");
+    if (!priv->cfg_context) {
+        return -1;
+    }
+
+    mwos_perf_ctx_record_start(priv->cfg_context);
     ret = configd_parse_ds(config_path, priv);
     if (ret != 0) {
         MWOS_ERR("configd: failed to parse config %s @ %s %u\n",
                                    config_path, __func__, __LINE__);
         return ret;
     }
+    mwos_perf_ctx_record_end(priv->cfg_context);
+
+    struct perf_stats stats;
+
+    mwos_perf_stats_get(priv->cfg_context, &stats);
+
+    printf("last sample: sec: %ju nsec: %ju mean: %f variance: %f stddev: %f\n",
+                    stats.last_sample.tv_sec, stats.last_sample.tv_nsec,
+                    stats.mean, stats.variance, stats.standard_devi);
 
     if (test_mode) {
         configd_print_db(priv);

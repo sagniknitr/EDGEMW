@@ -104,7 +104,8 @@ void mwos_perf_stats_get(void *context, struct perf_stats *stats)
     int n_size;
 
     n_size = sizeof(perf_c->deltas) / sizeof(perf_c->deltas[0]);
-    for (i = 0; i < n_size; i ++) {
+    for (i = 0; i < perf_c->counter; i ++) {
+        stats->last_sample = perf_c->deltas[i];
         delta_ns = (perf_c->deltas[i].tv_sec * 1000000000ULL) + (perf_c->deltas[i].tv_nsec);
         sum += delta_ns;
     }
@@ -113,7 +114,7 @@ void mwos_perf_stats_get(void *context, struct perf_stats *stats)
 
     double sqdiff = 0;
 
-    for (i = 0; i < n_size; i ++) {
+    for (i = 0; i < perf_c->counter; i ++) {
         delta_ns = (perf_c->deltas[i].tv_sec * 1000000000ULL) + (perf_c->deltas[i].tv_nsec);
         sqdiff += ((delta_ns - stats->mean) * (delta_ns - stats->mean));
     }
