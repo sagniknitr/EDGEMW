@@ -1,6 +1,6 @@
 # mwOS (FOR FUN :-) )
 
-[![Build Status](https://travis-ci.org/DevNaga/mwOS.svg?branch=master)](https://travis-ci.org/DevNaga/mwOS)     [![Coverage Status](https://coveralls.io/repos/github/DevNaga/mwOS/badge.svg?branch=master)](https://coveralls.io/github/DevNaga/mwOS?branch=master)
+[![Build Status](https://travis-ci.org/DevNaga/mwOS.svg?branch=master)](https://travis-ci.org/DevNaga/mwOS)     [![Coverage Status](https://coveralls.io/repos/github/DevNaga/mwOS/badge.svg)](https://coveralls.io/github/DevNaga/mwOS)
 
 
 Middleware services distribution for any linux based box
