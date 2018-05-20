@@ -1,11 +1,14 @@
 #include "net_i.h"
 #include <iostream>
+#include "debug.h"
 
 int netSocket::initTcpServer(char *dest, int dest_port, int n_conn,
                              void (*accept_callback)(int sock))
 {
     sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock < 0) {
+        MWOS_ERR("net: failed to socket open @ %s %u\n",
+                        __func__, __LINE__);
         return -1;
     }
 
@@ -14,6 +17,8 @@ int netSocket::initTcpServer(char *dest, int dest_port, int n_conn,
 
     ret = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
     if (ret < 0) {
+        MWOS_ERR("net: failed to setsockopt @ %s %u\n",
+                        __func__, __LINE__);
         goto err;
     }
 
@@ -23,6 +28,8 @@ int netSocket::initTcpServer(char *dest, int dest_port, int n_conn,
 
     ret = bind(sock, (struct sockaddr *)&serv_in, sizeof(serv_in));
     if (ret < 0) {
+        MWOS_ERR("net: failed to bind @ %s %u\n",
+                        __func__, __LINE__);
         goto err;
     }
 
@@ -30,6 +37,8 @@ int netSocket::initTcpServer(char *dest, int dest_port, int n_conn,
 
     ret = listen(sock, n_conn);
     if (ret < 0) {
+        MWOS_ERR("net: failed to listen @ %s %u\n",
+                        __func__, __LINE__);
         goto err;
     }
 
@@ -50,6 +59,8 @@ int netSocket::initTcpClient(char *dest, int dest_port)
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock < 0) {
+        MWOS_ERR("net: failed to socket open @ %s %u\n",
+                        __func__, __LINE__);
         return -1;
     }
 
@@ -59,6 +70,8 @@ int netSocket::initTcpClient(char *dest, int dest_port)
 
     ret = connect(sock, (struct sockaddr *)&serv_in, sizeof(serv_in));
     if (ret < 0) {
+        MWOS_ERR("net: failed to connect @ %s %u\n",
+                        __func__, __LINE__);
         goto err;
     }
 
@@ -78,11 +91,15 @@ int netSocket::initUdpServer(char *dest, int dest_port)
 
     sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0) {
+        MWOS_ERR("net: failed to socket open @ %s %u\n",
+                        __func__, __LINE__);
         return -1;
     }
 
     ret = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
     if (ret < 0) {
+        MWOS_ERR("net: failed to setsockopt @ %s %u\n",
+                        __func__, __LINE__);
         goto err;
     }
 
@@ -92,6 +109,8 @@ int netSocket::initUdpServer(char *dest, int dest_port)
 
     ret = bind(sock, (struct sockaddr *)&serv_in, sizeof(serv_in));
     if (ret < 0) {
+        MWOS_ERR("net: failed to bind @ %s %u\n",
+                        __func__, __LINE__);
         goto err;
     }
 
@@ -110,6 +129,8 @@ int netSocket::initUdpClient(char *dest, int dest_port)
 
     sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0) {
+        MWOS_ERR("net: failed to socket open @ %s %u\n",
+                        __func__, __LINE__);
         return -1;
     }
 
@@ -119,6 +140,8 @@ int netSocket::initUdpClient(char *dest, int dest_port)
 
     ret = connect(sock, (struct sockaddr *)&serv_in, sizeof(serv_in));
     if (ret < 0) {
+        MWOS_ERR("net: failed to connect @ %s %u\n",
+                        __func__, __LINE__);
         goto err;
     }
 
@@ -138,6 +161,8 @@ int netSocket::initTcpServerUnix(char *dest, int n_conn,
 
     sock = socket(AF_UNIX, SOCK_STREAM, 0);
     if (sock < 0) {
+        MWOS_ERR("net: failed to socket open @ %s %u\n",
+                        __func__, __LINE__);
         return -1;
     }
 
@@ -147,11 +172,15 @@ int netSocket::initTcpServerUnix(char *dest, int n_conn,
 
     ret = bind(sock, (struct sockaddr *)&serv_un, sizeof(serv_un));
     if (ret < 0) {
+        MWOS_ERR("net: failed to bind @ %s %u\n",
+                        __func__, __LINE__);
         goto err;
     }
 
     ret = listen(sock, n_conn);
     if (ret < 0) {
+        MWOS_ERR("net: failed to listen @ %s %u\n",
+                        __func__, __LINE__);
         goto err;
     }
 
@@ -172,6 +201,8 @@ int netSocket::initTcpClientUnix(char *dest)
 
     sock = socket(AF_UNIX, SOCK_STREAM, 0);
     if (sock < 0) {
+        MWOS_ERR("net: failed to socket open @ %s %u\n",
+                        __func__, __LINE__);
         return -1;
     }
 
@@ -180,6 +211,8 @@ int netSocket::initTcpClientUnix(char *dest)
 
     ret = connect(sock, (struct sockaddr *)&serv_un, sizeof(serv_un));
     if (ret < 0) {
+        MWOS_ERR("net: failed to connect @ %s %u\n",
+                        __func__, __LINE__);
         goto err;
     }
 
@@ -198,6 +231,8 @@ int netSocket::initUdpServerUnix(char *dest)
 
     sock = socket(AF_UNIX, SOCK_DGRAM, 0);
     if (sock < 0) {
+        MWOS_ERR("net: failed to socket open @ %s %u\n",
+                        __func__, __LINE__);
         return -1;
     }
 
@@ -207,6 +242,8 @@ int netSocket::initUdpServerUnix(char *dest)
 
     ret = bind(sock, (struct sockaddr *)&serv_un, sizeof(serv_un));
     if (ret < 0) {
+        MWOS_ERR("net: failed to bind @ %s %u\n",
+                        __func__, __LINE__);
         goto err;
     }
 
@@ -223,6 +260,8 @@ int netSocket::initUdpClientUnix(char *serv_dest, char *dest)
 {
     sock = socket(AF_UNIX, SOCK_DGRAM, 0);
     if (sock < 0) {
+        MWOS_ERR("net: failed to socket open @ %s %u\n",
+                        __func__, __LINE__);
         return -1;
     }
 
