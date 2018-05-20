@@ -1,3 +1,5 @@
+extern "C" {
+
 #ifndef __MWOS_PERF_H__
 #define __MWOS_PERF_H__
 
@@ -16,3 +18,4 @@ void mwos_perf_stats_get(void *context, struct perf_stats *stats);
 
 #endif
 
+}

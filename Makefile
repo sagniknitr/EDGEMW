@@ -1,12 +1,12 @@
 CONFIGD_SRC += cfgd/configd.c
 
-LIB_SRC += libs/perf.c
+LIB_SRC += libs/perf.c libs/net.c
 
 CONFIGD_SERVICE_NAME = configd
 
 LIB_NAME = libmwos.a
 
-CC = gcc
+CC = g++
 AR = ar
 AR_ARGS = rcv
 CFLAGS += -Iinc/ -Wall -Werror -Wextra -Wshadow -Wno-unused-parameter -fprofile-arcs -ftest-coverage -coverage

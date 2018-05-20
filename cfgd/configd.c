@@ -1,3 +1,4 @@
+extern "C" {
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -18,8 +19,6 @@ struct configd_priv {
 };
 
 static int test_mode = 0;
-
-#define CONFIGD_CONFIG_FILE_PATH "./config.ds"
 
 /**
  * @brief - parse a configuration database store
@@ -84,20 +83,20 @@ static int configd_parse_ds(char *config_path, struct configd_priv *priv)
         //printf("var '%s' val '%s'\n", var, val);
 
         // setup database into memory
-        config_n = calloc(1, sizeof(struct configd_config));
+        config_n = (struct configd_config *)calloc(1, sizeof(struct configd_config));
         if (!config_n) {
             MWOS_ERR("configd: failed to allocate @ %s %u\n",
                           __func__, __LINE__);
             return -1;
         }
-        config_n->var = calloc(1, strlen(var) + 1);
+        config_n->var = (char *)calloc(1, strlen(var) + 1);
         if (!config_n->var) {
             MWOS_ERR("configd: failed to allocate @ %s %u\n",
                           __func__, __LINE__);
             return -1;
         }
 
-        config_n->val = calloc(1, strlen(val) + 1);
+        config_n->val = (char *)calloc(1, strlen(val) + 1);
         if (!config_n->val) {
             MWOS_ERR("configd: failed to allocate @ %s %u\n",
                           __func__, __LINE__);
@@ -135,7 +134,8 @@ void configd_print_db(struct configd_priv *priv)
 int main(int argc, char **argv)
 {
     struct configd_priv *priv;
-    char *config_path = CONFIGD_CONFIG_FILE_PATH;
+    char config_path[200] = "./config.ds";
+    char perf_event_config_read[] = "cfg_read";
     int ret;
 
     while ((ret = getopt(argc, argv, "tf:")) != -1) {
@@ -144,12 +144,12 @@ int main(int argc, char **argv)
                 test_mode = 1;
             break;
             case 'f':
-                config_path = optarg;
+                strncpy(config_path, optarg, sizeof(config_path));
             break;
         }
     }
 
-    priv = calloc(1, sizeof(struct configd_priv));
+    priv = (struct configd_priv *)calloc(1, sizeof(struct configd_priv));
     if (!priv) {
         MWOS_ERR("configd: failed to allocate @ %s %u\n",
                     __func__, __LINE__);
@@ -161,7 +161,7 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    priv->cfg_context = mwos_perf_create_context(priv->perf_handle, "cfg_read");
+    priv->cfg_context = mwos_perf_create_context(priv->perf_handle, perf_event_config_read);
     if (!priv->cfg_context) {
         return -1;
     }
@@ -188,5 +188,7 @@ int main(int argc, char **argv)
     }
 
     return 0;
+}
+
 }
 

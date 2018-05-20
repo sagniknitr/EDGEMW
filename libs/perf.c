@@ -1,3 +1,5 @@
+extern "C" {
+
 #include <math.h>
 #include <stdint.h>
 #include <string.h>
@@ -27,12 +29,12 @@ void* mwos_perf_init(int n_counters) // num conunters
 {
     struct perf_private *priv;
 
-    priv = calloc(1, sizeof(struct perf_private));
+    priv = (struct perf_private *)calloc(1, sizeof(struct perf_private));
     if (!priv) {
         return NULL;
     }
 
-    priv->context = calloc(n_counters, sizeof(struct perf_context));
+    priv->context = (struct perf_context *)calloc(n_counters, sizeof(struct perf_context));
     if (!priv->context) {
         return NULL;
     }
@@ -52,7 +54,7 @@ void* mwos_perf_init(int n_counters) // num conunters
 void* mwos_perf_create_context(void *handle, char *name)
 {
     int i;
-    struct perf_private *priv = handle;
+    struct perf_private *priv = (struct perf_private *)handle;
 
     for (i = 0; i < priv->n_counters; i ++) {
         if (priv->context[i].available) {
@@ -69,14 +71,14 @@ void* mwos_perf_create_context(void *handle, char *name)
 
 void mwos_perf_ctx_record_start(void *context)
 {
-    struct perf_context *perf_c = context;
+    struct perf_context *perf_c = (struct perf_context *)context;
 
     clock_gettime(CLOCK_MONOTONIC, &perf_c->start);
 }
 
 void mwos_perf_ctx_record_end(void *context)
 {
-    struct perf_context *perf_c = context;
+    struct perf_context *perf_c = (struct perf_context *)context;
 
     clock_gettime(CLOCK_MONOTONIC, &perf_c->end);
 
@@ -97,7 +99,7 @@ void mwos_perf_ctx_record_end(void *context)
 
 void mwos_perf_stats_get(void *context, struct perf_stats *stats)
 {
-    struct perf_context *perf_c = context;
+    struct perf_context *perf_c = (struct perf_context *)context;
     int i;
     double sum = 0;
     double delta_ns;
@@ -124,3 +126,4 @@ void mwos_perf_stats_get(void *context, struct perf_stats *stats)
     stats->standard_devi = sqrt(stats->variance);
 }
 
+}
