@@ -1,4 +1,5 @@
 #include "net_i.h"
+#include "net.h"
 #include <iostream>
 #include "debug.h"
 
