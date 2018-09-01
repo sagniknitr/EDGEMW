@@ -1,6 +1,6 @@
 CONFIGD_SRC += cfgd/configd.c
 
-LIB_SRC += libs/perf.c libs/net.c
+LIB_SRC += libs/perf.c libs/net.cpp
 
 CONFIGD_SERVICE_NAME = configd
 
