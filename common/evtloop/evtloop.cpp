@@ -1,3 +1,8 @@
+/**
+ * CopyRight Devnaga <devendra.aaru@gmail.com>
+ * 
+ * License Apache2
+ */
 #include <iostream>
 #include <vector>
 #include <evtloop.hpp>
@@ -103,6 +108,37 @@ evtLoop::~evtLoop()
 
     timerList_.clear();
     socketList_.clear();
+}
+
+static evtLoop *loop;
+
+int runnerInit()
+{
+    loop = new evtLoop;
+
+    return 0;
+}
+
+int runnerRegisterSock(int fd_, void *callbackPtr,
+                       void (*callback)(void *callbackPtr))
+{
+    return loop->registerSock(fd_, callbackPtr, callback);
+}
+
+int runnerRegisterTimer(int sec, int nsec, void *callbackPtr,
+                        void (*callback)(void *callbackPtr))
+{
+    return loop->registerTimer(sec, nsec, callbackPtr, callback);
+}
+
+void run()
+{
+    loop->run();
+}
+
+void runnerDeinit()
+{
+    delete loop;
 }
 
 };

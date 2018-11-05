@@ -1,3 +1,8 @@
+/**
+ * CopyRight Devnaga <devendra.aaru@gmail.com>
+ * 
+ * License Apache2
+ */
 #ifndef __EVTLOOP_HPP__
 #define __EVTLOOP_HPP__
 
@@ -61,7 +66,7 @@ int runnerRegisterSock(int fd_, void *callbackPtr,
                        void (*callback)(void *callbackPtr));
 int runnerRegisterTimer(int sec, int nsec, void *callbackPtr,
                         void (*callback)(void *callbackPtr));
-int run();
+void run();
 void runnerDeinit();
 
 };
