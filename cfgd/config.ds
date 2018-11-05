@@ -1,7 +1,0 @@
-logger.num_clients=100
-logger.port=5888
-logger.local=0 # run on the inet socket
-logger.local_path="/var/mwos_logger.sock"
-
-## comment line
-logger.local_path_2 = "space"
