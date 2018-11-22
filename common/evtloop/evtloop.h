@@ -34,4 +34,13 @@ struct edge_os_evtloop_base {
     struct edge_os_list_base *signal_base;
 };
 
+int edge_os_evtloop_init(struct edge_os_evtloop_base *base, void *priv);
+int edge_os_evtloop_register_timer(void *handle, void *app_priv, int sec, int usec,
+                                      void (*__timer_callback)(void *app_priv));
+int edge_os_evtloop_register_socket(void *handle, void *app_priv, int sock,
+                                       void (*__socket_callback)(void *app_priv));
+int edge_os_evtloop_register_signal(void *handle, void *app_priv, int sig,
+                                       void (*__signal_callback)(void *app_priv));
+void edge_os_evtloop_run(void *handle);
+
 #endif

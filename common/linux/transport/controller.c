@@ -4,6 +4,7 @@
 #include <list.h>
 #include <stdlib.h>
 #include <string.h>
+#include <evtloop.h>
 
 struct shm_transport_pub_priv {
     char *shmem_name;
@@ -14,15 +15,22 @@ struct shm_transport_pub_priv {
 
 struct shm_transport_priv {
     int fd;
+    struct edge_os_evtloop_base base;
     struct edge_os_list_base *pub_list_head;
 };
 
 void *shmtransport_init()
 {
     struct shm_transport_priv *priv;
+    int ret;
 
     priv = calloc(1, sizeof(struct shm_transport_priv));
     if (!priv) {
+        return NULL;
+    }
+
+    ret = edge_os_evtloop_init(&priv->base, NULL);
+    if (ret) {
         return NULL;
     }
 
@@ -57,6 +65,11 @@ int shmtransport_publish(void *tr_pub, void *data, int len)
     return shmem_write(pub->shmem, data, len);
 }
 
+static void shm_transport_callback(void *callback_data)
+{
+
+}
+
 int main()
 {
     struct shm_transport_priv *priv;
@@ -70,6 +83,8 @@ int main()
     if (priv->fd < 0) {
         return -1;
     }
+
+    edge_os_evtloop_register_socket(&priv->base, priv, priv->fd, shm_transport_callback);
     
     return 0;
 }

@@ -279,7 +279,7 @@ void edge_os_evtloop_run(void *handle)
     }
 }
 
-void edge_os_event_loop_deinit(void *handle)
+void edge_os_evtloop_deinit(void *handle)
 {
 
 }
