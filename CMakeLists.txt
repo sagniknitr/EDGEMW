@@ -9,7 +9,8 @@ set(SOURCES
         common/evtloop/evtloop.c
         common/algorithms/list.c
         common/linux/net/socket.c
-        common/logger/edgeos_logger.c)
+        common/logger/edgeos_logger.c
+        common/linux/shmem/shmem.c)
 
 
 include_directories(
@@ -19,12 +20,17 @@ include_directories(
     common/algorithms/
     common/logger/
     common/linux/net/
+    common/linux/shmem/
 )
 
 add_library(EdgeOS SHARED ${SOURCES})
+target_link_libraries(EdgeOS pthread rt)
 
 add_executable(EdgeOSLogger logsrv/edgeos_logsrv.cpp)
 target_link_libraries(EdgeOSLogger pthread)
 
 add_executable(loggerTest logsrv/tests/logsrv_test.c)
 target_link_libraries(loggerTest pthread EdgeOS)
+
+add_executable(shmTransport common/linux/transport/controller.c)
+target_link_libraries(shmTransport pthread EdgeOS)
