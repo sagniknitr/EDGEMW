@@ -1,10 +1,15 @@
 #include <stdio.h>
+#include <stdint.h>
 #include <net_socket.h>
 #include <shmem.h>
 #include <list.h>
 #include <stdlib.h>
 #include <string.h>
 #include <evtloop.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <shm_transport.h>
 
 struct shm_transport_pub_priv {
     char *shmem_name;
@@ -67,7 +72,39 @@ int shmtransport_publish(void *tr_pub, void *data, int len)
 
 static void shm_transport_callback(void *callback_data)
 {
+    struct shm_transport_priv *priv = callback_data;
+    uint8_t msg[4096];
+    struct shm_tsport_ctrl_msg *ctrl;
+    int ret;
 
+    ret = recvfrom(priv->fd, msg, sizeof(msg), 0, NULL, NULL);
+    if (ret < 0) {
+        return;
+    }
+
+    ctrl = (struct shm_tsport_ctrl_msg *)msg;
+
+    switch (ctrl->transport_ctrl) {
+        case SHMCTRL_CREATE_SHMEM_REQ:
+        break;
+        case SHMCTRL_DIST_LOCK_REQ:
+        break;
+        case SHMCTRL_OPEN_SHMEM_REQ:
+        break;
+        case SHMCTRL_READ_SHMEM_REQ:
+        break;
+        case SHMCTRL_WRITE_SHMEM_REQ:
+        break;
+        case SHMCTRL_DESTROY_SHMEM_REQ:
+        break;
+        case SHMCTRL_CREATE_SHMEM_RESP:
+        case SHMCTRL_OPEN_SHMEM_RESP:
+        case SHMCTRL_READ_SHMEM_RESP:
+        case SHMCTRL_WRITE_SHMEM_RESP:
+        case SMHCTRL_DESTROY_SHMEM_RESP:
+        default:
+        break;
+    }
 }
 
 int main()
@@ -85,6 +122,8 @@ int main()
     }
 
     edge_os_evtloop_register_socket(&priv->base, priv, priv->fd, shm_transport_callback);
+
+    edge_os_evtloop_run(&priv->base);
     
     return 0;
 }

@@ -21,6 +21,7 @@ include_directories(
     common/logger/
     common/linux/net/
     common/linux/shmem/
+    common/linux/transport/
 )
 
 add_library(EdgeOS SHARED ${SOURCES})
