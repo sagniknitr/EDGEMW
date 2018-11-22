@@ -17,4 +17,9 @@
     fprintf(stderr, fmt, ##__VA_ARGS__); \
 }
 
+void *logger_init(char *ipaddr, int port);
+void logger_deinit(void *handle);
+int logger_writemsg(void *handle, char *fmt, ...);
+
 #endif
+
