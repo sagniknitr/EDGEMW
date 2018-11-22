@@ -25,3 +25,6 @@ add_library(EdgeOS SHARED ${SOURCES})
 
 add_executable(EdgeOSLogger logsrv/edgeos_logsrv.cpp)
 target_link_libraries(EdgeOSLogger pthread)
+
+add_executable(loggerTest logsrv/tests/logsrv_test.c)
+target_link_libraries(loggerTest pthread EdgeOS)

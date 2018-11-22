@@ -104,8 +104,23 @@ class LogSrv {
         }
         int Run()
         {
+            rxbuf_ = new uint8_t[65535];
+            if (rxbuf_ == nullptr) {
+                std::cerr << "failed to allocate rxbuf" << std::endl;
+                return -1;
+            }
+
+            logRxThread_ = new std::thread(&LogSrv::LogRxThreadF_, this);
+            if (logRxThread_ == nullptr) {
+                std::cerr << "failed to create thread" << std::endl;
+                return -1;
+            }
+
+            std::cout << "log service created .. receive thread started" << std::endl;
+
             logRxThread_->join();
         }
+
         ~LogSrv();
 };
 
@@ -125,6 +140,7 @@ void LogSrv::LogRxThreadF_()
             return;
         }
 
+        
         ret = write(logFd_, rxbuf_, rxlen);
         if (ret != rxlen) {
             syslog(LOG_ERR, "logSrv: cannot write %d bytes .. written %d\n", rxlen, ret);
@@ -189,6 +205,9 @@ LogSrv::LogSrv(int argc, char **argv): logFd_(-1), logSrv_(-1)
         return;
     }
 
+    std::cerr << "ip addr " << args_.ipaddr_.c_str() << std::endl;
+    std::cerr << " port " << args_.port << std::endl;
+
     serv_.sin_addr.s_addr = inet_addr(args_.ipaddr_.c_str());
     serv_.sin_port = htons(args_.port);
     serv_.sin_family = AF_INET;
@@ -204,20 +223,6 @@ LogSrv::LogSrv(int argc, char **argv): logFd_(-1), logSrv_(-1)
         std::cerr << "failed to bind" << std::endl;
         return;
     }
-
-    logRxThread_ = new std::thread(&LogSrv::LogRxThreadF_, this);
-    if (logRxThread_ == nullptr) {
-        std::cerr << "failed to create thread" << std::endl;
-        return;
-    }
-
-    rxbuf_ = new uint8_t[65535];
-    if (rxbuf_ == nullptr) {
-        std::cerr << "failed to allocate rxbuf" << std::endl;
-        return;
-    }
-
-    std::cout << "log service created .. receive thread started" << std::endl;
 }
 
 LogSrv::~LogSrv()

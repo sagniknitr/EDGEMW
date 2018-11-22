@@ -25,7 +25,7 @@ int new_udp_socket()
         return -1;
     }
 
-    return 0;
+    return sock;
 }
 
 
@@ -54,3 +54,4 @@ int udp_recvfrom(int fd, void *msg, int msglen, char *dest, int *dest_len)
 {
     return recvfrom(fd, msg, msglen, 0, NULL, NULL);
 }
+
