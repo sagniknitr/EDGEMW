@@ -91,15 +91,7 @@ class LogSrv {
             if (logSrv_ < 0) {
                 return -1;
             }
-
-            if (logRxThread_ == nullptr) {
-                return -1;
-            }
-
-            if (rxbuf_ == nullptr) {
-                return -1;
-            }
-
+            
             return 0;
         }
         int Run()
@@ -204,9 +196,6 @@ LogSrv::LogSrv(int argc, char **argv): logFd_(-1), logSrv_(-1)
         std::cerr << "failed to create socket" << std::endl;
         return;
     }
-
-    std::cerr << "ip addr " << args_.ipaddr_.c_str() << std::endl;
-    std::cerr << " port " << args_.port << std::endl;
 
     serv_.sin_addr.s_addr = inet_addr(args_.ipaddr_.c_str());
     serv_.sin_port = htons(args_.port);
