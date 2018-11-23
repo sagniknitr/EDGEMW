@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 2.8)
 
 project(EDGEMW)
 
-set(CMAKE_C_FLAGS "-O0 -ggdb -g -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow -fPIE -fPIC")
-set(CMAKE_CXX_FLAGS "-std=c++11")
+set(CMAKE_C_FLAGS "-O0 -ggdb -g -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow -fPIE -fPIC -fprofile-arcs -ftest-coverage")
+set(CMAKE_CXX_FLAGS "-std=c++11 -fprofile-arcs -ftest-coverage")
 
 set(SOURCES
         common/evtloop/evtloop.c
