@@ -1,7 +1,5 @@
 #!/bin/bash
 
-mkdir build
-cd build
-cmake ..
+cmake .
 make
-sudo python ../testing/test_logger.py
+sudo python ./testing/test_logger.py
