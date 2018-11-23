@@ -37,20 +37,25 @@ SHM_TRANSPORT_OBJ = $(patsubst %.c, %.o, ${SHM_TRANSPORT_SRC})
 
 CPP=g++
 GCC=gcc
+AR=ar
 
 LIB_NAME = libEdgeOS.so
+LIB_AR_NAME = libEdgeOS.a
 LIB_TEST_NAME=EOSTest
 LOGGER_NAME = EdgeOSLogger
 LOGGER_TEST_NAME = loggerTest
 SHM_TRANSPORT_NAME = shmTransport
 
-all: $(LIB_NAME)	$(LOGGER_NAME)	$(LOGGER_TEST_NAME) $(SHM_TRANSPORT_NAME) $(LIB_TEST_NAME)
+all: $(LIB_NAME)	$(LIB_AR_NAME)	$(LOGGER_NAME)	$(LOGGER_TEST_NAME) $(SHM_TRANSPORT_NAME) $(LIB_TEST_NAME)
 
 $(LIB_NAME): $(LIB_OBJ)
 	${GCC} -shared $(LIB_OBJ) -lrt -pg -lgcov -o $(LIB_NAME)
 
+$(LIB_AR_NAME): $(LIB_OBJ)
+	$(AR) rcv $(LIB_AR_NAME) $(LIB_OBJ)
+
 $(LIB_TEST_NAME): $(LIB_TEST_OBJ)
-	${GCC} $(CFLAGS) $(INCL_DIR) $(LIB_TEST_OBJ) -L . $(LIB_NAME) -o $(LIB_TEST_NAME) -pthread -pg -lrt -lgcov
+	${GCC} $(CFLAGS) $(INCL_DIR) $(LIB_TEST_OBJ) $(LIB_AR_NAME) -o $(LIB_TEST_NAME) -pthread -pg -lrt -lgcov
 
 $(LOGGER_NAME): $(LOGGER_OBJ)
 	${CPP} $(CXXFLAGS) $(INCL_DIR) $(LOGGER_OBJ) -o $(LOGGER_NAME) -pthread -pg -lrt -lgcov
@@ -59,7 +64,7 @@ $(LOGGER_TEST_NAME): $(LOGGER_TEST_OBJ)
 	${GCC} $(CFLAGS) $(INCL_DIR) $(LOGGER_TEST_OBJ) -L . $(LIB_NAME) -o $(LOGGER_TEST_NAME) -lrt -pg -lgcov
 
 $(SHM_TRANSPORT_NAME): $(SHM_TRANSPORT_OBJ)
-	${GCC} $(CFLAGS) $(INCL_DIR) $(SHM_TRANSPORT_OBJ) -L . -o $(SHM_TRANSPORT_NAME) -lrt -pg -lgcov -lEdgeOS
+	${GCC} $(CFLAGS) $(INCL_DIR) $(SHM_TRANSPORT_OBJ) $(LIB_AR_NAME) -o $(SHM_TRANSPORT_NAME) -lrt -pg -lgcov
 
 %.o: %.c
 	${GCC} $(INCL_DIR) $(CFLAGS) -c -o $@ $<
@@ -72,4 +77,4 @@ clean:
 	find . -iname *.opp | xargs rm -rf
 	find . -iname *.gcda | xargs rm -rf
 	find . -iname *.gcno | xargs rm -rf
-	rm $(LIB_NAME) $(LIB_TEST_NAME) $(LOGGER_NAME) $(LOGGER_TEST_NAME) $(SHM_TRANSPORT_NAME)
+	rm $(LIB_NAME) $(LIB_TEST_NAME) $(LOGGER_NAME) $(LOGGER_TEST_NAME) $(SHM_TRANSPORT_NAME) $(LIB_AR_NAME)
