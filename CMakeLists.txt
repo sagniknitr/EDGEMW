@@ -25,13 +25,13 @@ include_directories(
 )
 
 add_library(EdgeOS SHARED ${SOURCES})
-target_link_libraries(EdgeOS pthread rt)
+target_link_libraries(EdgeOS pthread rt gcov)
 
 add_executable(EdgeOSLogger logsrv/edgeos_logsrv.cpp)
-target_link_libraries(EdgeOSLogger pthread)
+target_link_libraries(EdgeOSLogger pthread gcov)
 
 add_executable(loggerTest logsrv/tests/logsrv_test.c)
-target_link_libraries(loggerTest pthread EdgeOS)
+target_link_libraries(loggerTest pthread EdgeOS gcov)
 
 add_executable(shmTransport common/linux/transport/controller.c)
-target_link_libraries(shmTransport pthread EdgeOS)
+target_link_libraries(shmTransport pthread EdgeOS gcov)
