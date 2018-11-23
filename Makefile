@@ -59,10 +59,17 @@ $(LOGGER_TEST_NAME): $(LOGGER_TEST_OBJ)
 	${GCC} $(CFLAGS) $(INCL_DIR) $(LOGGER_TEST_OBJ) -L . $(LIB_NAME) -o $(LOGGER_TEST_NAME) -lrt -pg -lgcov
 
 $(SHM_TRANSPORT_NAME): $(SHM_TRANSPORT_OBJ)
-	${GCC} $(CFLAGS) $(INCL_DIR) $(SHM_TRANSPORT_OBJ) -L . $(LIB_NAME) -o $(SHM_TRANSPORT_NAME) -lrt -pg -lgcov
+	${GCC} $(CFLAGS) $(INCL_DIR) $(SHM_TRANSPORT_OBJ) -L . -o $(SHM_TRANSPORT_NAME) -lrt -pg -lgcov -lEdgeOS
 
 %.o: %.c
 	${GCC} $(INCL_DIR) $(CFLAGS) -c -o $@ $<
 
 %.opp: %.cpp
 	${GCC} $(INCL_DIR) $(CFLAGS) $(CXXFLAGS) -c -o $@ $<
+
+clean:
+	find . -iname *.o | xargs rm -rf
+	find . -iname *.opp | xargs rm -rf
+	find . -iname *.gcda | xargs rm -rf
+	find . -iname *.gcno | xargs rm -rf
+	rm $(LIB_NAME) $(LIB_TEST_NAME) $(LOGGER_NAME) $(LOGGER_TEST_NAME) $(SHM_TRANSPORT_NAME)
