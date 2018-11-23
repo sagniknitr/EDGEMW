@@ -74,6 +74,7 @@ class LogSrv {
         int closeLogFile_()
         {
             close(logFd_);
+            return 0;
         }
 
         int reopenLogFile_()
@@ -111,6 +112,8 @@ class LogSrv {
             std::cout << "log service created .. receive thread started" << std::endl;
 
             logRxThread_->join();
+
+            return 0;
         }
 
         ~LogSrv();
