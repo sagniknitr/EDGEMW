@@ -9,6 +9,8 @@ LIB_SRC += common/evtloop/evtloop.c \
 		common/logger/edgeos_logger.c \
 		common/linux/shmem/shmem.c \
 
+LIB_TEST_SRC += common/tests/test_socket.c
+
 LOGGER_SRC += logsrv/edgeos_logsrv.cpp
 
 LOGGER_TEST_SRC += logsrv/tests/logsrv_test.c
@@ -28,22 +30,27 @@ CFLAGS = -O0 -ggdb -g -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow -fPIE
 CXXFLAGS = -std=c++11 -fprofile-arcs -ftest-coverage -g -ggdb
 
 LIB_OBJ = $(patsubst %.c, %.o, ${LIB_SRC})
+LIB_TEST_OBJ = $(patsubst %.c, %.o, ${LIB_TEST_SRC})
 LOGGER_OBJ = $(patsubst %.cpp, %.opp, ${LOGGER_SRC})
 LOGGER_TEST_OBJ = $(patsubst %.c, %.o, ${LOGGER_TEST_SRC})
-SHM_TRANSPORT_OBJ = $(patsubst %.c, %.o, %{SHM_TRANSPORT_SRC})
+SHM_TRANSPORT_OBJ = $(patsubst %.c, %.o, ${SHM_TRANSPORT_SRC})
 
 CPP=g++
 GCC=gcc
 
 LIB_NAME = libEdgeOS.so
+LIB_TEST_NAME=EOSTest
 LOGGER_NAME = EdgeOSLogger
 LOGGER_TEST_NAME = loggerTest
 SHM_TRANSPORT_NAME = shmTransport
 
-all: $(LIB_NAME)	$(LOGGER_NAME)	$(LOGGER_TEST_NAME)
+all: $(LIB_NAME)	$(LOGGER_NAME)	$(LOGGER_TEST_NAME) $(SHM_TRANSPORT_NAME) $(LIB_TEST_NAME)
 
 $(LIB_NAME): $(LIB_OBJ)
 	${GCC} -shared $(LIB_OBJ) -lrt -pg -lgcov -o $(LIB_NAME)
+
+$(LIB_TEST_NAME): $(LIB_TEST_OBJ)
+	${GCC} $(CFLAGS) $(INCL_DIR) $(LIB_TEST_OBJ) -L . $(LIB_NAME) -o $(LIB_TEST_NAME) -pthread -pg -lrt -lgcov
 
 $(LOGGER_NAME): $(LOGGER_OBJ)
 	${CPP} $(CXXFLAGS) $(INCL_DIR) $(LOGGER_OBJ) -o $(LOGGER_NAME) -pthread -pg -lrt -lgcov
@@ -52,7 +59,7 @@ $(LOGGER_TEST_NAME): $(LOGGER_TEST_OBJ)
 	${GCC} $(CFLAGS) $(INCL_DIR) $(LOGGER_TEST_OBJ) -L . $(LIB_NAME) -o $(LOGGER_TEST_NAME) -lrt -pg -lgcov
 
 $(SHM_TRANSPORT_NAME): $(SHM_TRANSPORT_OBJ)
-	${GCC} $(CFLAGS) $(INCL_DIR) $(SHM_TRANSPORT_OBJ) -L . $(LIB_NAME) o $(SHM_TRANSPORT_NAME) -lrt -pg -lgcov
+	${GCC} $(CFLAGS) $(INCL_DIR) $(SHM_TRANSPORT_OBJ) -L . $(LIB_NAME) -o $(SHM_TRANSPORT_NAME) -lrt -pg -lgcov
 
 %.o: %.c
 	${GCC} $(INCL_DIR) $(CFLAGS) -c -o $@ $<
