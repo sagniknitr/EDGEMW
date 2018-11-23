@@ -21,6 +21,8 @@ LOGGER_TEST_SRC += logsrv/tests/logsrv_test.c
 
 SHM_TRANSPORT_SRC += common/linux/transport/controller.c
 
+DISTCOM_MASTER_SRC += distcom/master.c
+
 INCL_DIR += -I common/evtloop/ \
 	-I common/linux/net/ \
 	-I remoteLog/ \
@@ -41,6 +43,7 @@ DIST_TEST_OBJ = $(patsubst %.c, %.o, ${DIST_TEST_SRC})
 LOGGER_OBJ = $(patsubst %.cpp, %.opp, ${LOGGER_SRC})
 LOGGER_TEST_OBJ = $(patsubst %.c, %.o, ${LOGGER_TEST_SRC})
 SHM_TRANSPORT_OBJ = $(patsubst %.c, %.o, ${SHM_TRANSPORT_SRC})
+DISTCOMM_MASTER_OBJ = $(patsubst %.c, %.o, ${DISTCOM_MASTER_SRC})
 
 CPP=g++
 GCC=gcc
@@ -53,8 +56,9 @@ DIST_TEST_NAME=DistTest
 LOGGER_NAME = EdgeOSLogger
 LOGGER_TEST_NAME = loggerTest
 SHM_TRANSPORT_NAME = shmTransport
+DISTCOMM_MASTER_NAME = DistCommMaster
 
-all: $(LIB_NAME)	$(LIB_AR_NAME)	$(DIST_TEST_NAME)	$(LOGGER_NAME)	$(LOGGER_TEST_NAME) $(SHM_TRANSPORT_NAME) $(LIB_TEST_NAME)
+all: $(LIB_NAME)	$(LIB_AR_NAME)	$(DIST_TEST_NAME)	$(LOGGER_NAME)	$(LOGGER_TEST_NAME) $(SHM_TRANSPORT_NAME) $(LIB_TEST_NAME)	$(DISTCOMM_MASTER_NAME)
 
 $(LIB_NAME): $(LIB_OBJ)
 	${GCC} -shared $(LIB_OBJ) -lrt -pg -lgcov -o $(LIB_NAME)
@@ -64,6 +68,9 @@ $(LIB_AR_NAME): $(LIB_OBJ)
 
 $(LIB_TEST_NAME): $(LIB_TEST_OBJ)
 	${GCC} $(CFLAGS) $(INCL_DIR) $(LIB_TEST_OBJ) $(LIB_AR_NAME) -o $(LIB_TEST_NAME) -pthread -pg -lrt -lgcov
+
+$(DISTCOMM_MASTER_NAME): $(DISTCOMM_MASTER_OBJ)
+	${GCC} $(CFLAGS) $(INCL_DIR) $(DISTCOMM_MASTER_OBJ) $(LIB_AR_NAME) -o $(DISTCOMM_MASTER_NAME) -pthread -pg -lrt -lgcov
 
 $(DIST_TEST_NAME): $(DIST_TEST_OBJ)
 	${GCC} $(CFLAGS) $(INCL_DIR) $(DIST_TEST_OBJ) $(LIB_AR_NAME) -o $(DIST_TEST_NAME) -pthread -pg -lrt -lgcov

@@ -15,9 +15,9 @@
 
 int edge_os_evtloop_init(struct edge_os_evtloop_base *base, void *priv)
 {
-    base->timer_base = NULL;
-    base->socket_base = NULL;
-    base->signal_base = NULL;
+    edge_os_list_init(&base->timer_base);
+    edge_os_list_init(&base->socket_base);
+    edge_os_list_init(&base->signal_base);
 
     FD_ZERO(&base->allfd_);
     base->maxfd_ = 0;
@@ -71,7 +71,7 @@ int __edge_os_evtloop_register_timer(void *handle, void *app_priv, int sec, int 
     if (timer->fd > base->maxfd_)
         base->maxfd_ = timer->fd;
 
-    edge_os_list_add_tail(base->timer_base, timer);
+    edge_os_list_add_tail(&base->timer_base, timer);
 
     return 0;
 }
@@ -103,7 +103,7 @@ int edge_os_evtloop_register_socket(void *handle, void *app_priv, int sock,
     if (sock > base->maxfd_)
         base->maxfd_ = sock;
 
-    edge_os_list_add_tail(base->socket_base, sock_);
+    edge_os_list_add_tail(&base->socket_base, sock_);
 
     return 0;
 }
@@ -123,7 +123,7 @@ int edge_os_evtloop_register_signal(void *handle, void *app_priv, int sig,
     sig_->callback_data = app_priv;
     sig_->callback = __signal_callback;
 
-    edge_os_list_add_tail(base->signal_base, sig_);
+    edge_os_list_add_tail(&base->signal_base, sig_);
 
     return 0;
 }
@@ -176,10 +176,10 @@ static int _edge_os_evtloop_caller(struct edge_os_evtloop_base *base, fd_set *fd
         }
     }
 
-    ret = edge_os_list_for_each(base->timer_base,
+    ret = edge_os_list_for_each(&base->timer_base,
                                     _edge_os_timer_for_each, fdmask);
 
-    ret = edge_os_list_for_each(base->socket_base,
+    ret = edge_os_list_for_each(&base->socket_base,
                                     _edge_os_socket_for_each, fdmask);
 
     return 0;
@@ -214,10 +214,10 @@ static int __edge_os_evtloop_get_maxfd(struct edge_os_evtloop_base *base)
 {
     int maxfd = 0;
 
-    edge_os_list_for_each(base->timer_base,
+    edge_os_list_for_each(&base->timer_base,
                             _edge_os_get_max_timerfd, &maxfd);
 
-    edge_os_list_for_each(base->socket_base,
+    edge_os_list_for_each(&base->socket_base,
                             _edge_os_get_max_socket_fd, &maxfd);
 
     return maxfd;
@@ -254,6 +254,8 @@ void edge_os_evtloop_run(void *handle)
 
     base->sig_fd = edge_os_evtloop_setup_term_signals();
     if (base->sig_fd < 0) {
+        edge_os_err("evtloop: failed to signalfd @ %s %u\n", 
+                                    __func__, __LINE__);
         return;
     }
 
@@ -271,6 +273,8 @@ void edge_os_evtloop_run(void *handle)
 
             res = _edge_os_evtloop_caller(base, &allset);
             if (res < 0) {
+                edge_os_err("evtloop: exception @ %s %u\n",
+                                    __func__, __LINE__);
                 break;
             }
         } else if (ret < 0) { // signal ! .. error .. ctrl + c

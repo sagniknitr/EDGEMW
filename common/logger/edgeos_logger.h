@@ -17,6 +17,8 @@
     fprintf(stderr, fmt, ##__VA_ARGS__); \
 }
 
+#define edge_os_fatal edge_os_err
+
 void *logger_init(char *ipaddr, int port);
 void logger_deinit(void *handle);
 int logger_writemsg(void *handle, char *fmt, ...);

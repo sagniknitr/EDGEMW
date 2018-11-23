@@ -7,6 +7,7 @@
 #include <net_socket.h>
 #include <sys/un.h>
 #include <fcntl.h>
+#include <edgeos_logger.h>
 
 static int __socket(int family, int protocol)
 {
@@ -83,11 +84,15 @@ int edge_os_create_udp_server(char *ip, int port)
     int sock = edge_os_new_udp_socket();
 
     if (sock < 0) {
+        edge_os_err("socket: failed to create new udp socket @ %s %u\n",
+                            __func__, __LINE__);
         return -1;
     }
 
-    ret = edge_os_socket_ioctl_bind_to_device(sock);
+    ret = edge_os_socket_ioctl_reuse_addr(sock);
     if (ret < 0) {
+        edge_os_err("socket: failed to bind to device @ %s %u\n",
+                            __func__, __LINE__);
         goto fail;
     }
 
@@ -194,6 +199,13 @@ int edge_os_socket_ioctl_bind_to_device(int fd)
     int set = 1;
 
     return setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, &set, sizeof(set));
+}
+
+int edge_os_socket_ioctl_reuse_addr(int fd)
+{
+    int set = 1;
+
+    return setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &set, sizeof(set));
 }
 
 int edge_os_udp_unix_sendto(int fd, void *msg, int msglen, char *dest)
