@@ -215,12 +215,16 @@ LogSrv::LogSrv(int argc, char **argv): logFd_(-1), logSrv_(-1)
     ret = setsockopt(logSrv_, SOL_SOCKET, SO_REUSEADDR, &bind_to_dev, sizeof(bind_to_dev));
     if (ret < 0) {
         std::cerr << "failed to set sock opt" << std::endl;
+        close(logSrv_);
+        logSrv_ = -1;
         return;
     }
 
     ret = bind(logSrv_, (struct sockaddr *)&serv_, sizeof(serv_));
     if (ret < 0) {
         std::cerr << "failed to bind" << std::endl;
+        close(logSrv_);
+        logSrv_ = -1;
         return;
     }
 }
@@ -244,6 +248,7 @@ int main(int argc, char **argv)
 
     if (service.validateClassInit()) {
         std::cerr << "failure to initialise log service " << std::endl;
+        return -1;
     }
 
     service.Run();

@@ -116,7 +116,7 @@ int main()
         return -1;
     }
 
-    priv->fd = create_unix_server("/tmp/shm_controller");
+    priv->fd = edge_os_create_unix_server("/tmp/shm_controller");
     if (priv->fd < 0) {
         return -1;
     }

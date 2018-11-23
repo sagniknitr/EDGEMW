@@ -24,7 +24,7 @@ void *logger_init(char *ipaddr, int port)
         return NULL;
     }
 
-    handle->logfd_ = new_udp_socket();
+    handle->logfd_ = edge_os_new_udp_socket();
     if (handle->logfd_ < 0) {
         free(handle);
         return NULL;
@@ -60,5 +60,5 @@ int logger_writemsg(void *handle, char *fmt, ...)
     len = vsnprintf(buf, sizeof(buf), fmt, arg);
     va_end(arg);
 
-    return udp_sendto(l->logfd_, buf, len, l->ipaddr, l->port);
+    return edge_os_udp_sendto(l->logfd_, buf, len, l->ipaddr, l->port);
 }
