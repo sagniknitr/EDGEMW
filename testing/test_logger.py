@@ -20,7 +20,6 @@ for f in os.listdir('.'):
             for line in fptr:
                 char = char + 1
 
-if char != 0:
-    exit(0)
+os.system('./EOSTest')
 
-exit(-1)
+exit(0)
