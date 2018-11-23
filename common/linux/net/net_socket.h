@@ -12,14 +12,15 @@ int edge_os_create_udp_server(char *ip, int port);
 int edge_os_create_udp_client();
 int edge_os_create_unix_client(char *addr);
 int edge_os_create_unix_server(char *addr);
-int edge_os_create_udp_mcast_server(char *ip, int port);
-int edge_os_create_udp_mcast_client(char *ip, int port, char *mcast_group);
+int edge_os_create_udp_mcast_server(char *ip, int port, char *mcast_ip);
+int edge_os_create_udp_mcast_client(char *ip, int port, char *mcast_group, char *ipaddr);
 
 int edge_os_udp_sendto(int fd, void *msg, int msglen, char *dest, int dest_port);
 int edge_os_udp_recvfrom(int fd, void *msg, int msglen, char *dest, int *dest_len);
 
 int edge_os_socket_ioctl_set_nonblock(int fd);
 int edge_os_socket_ioctl_set_mcast_add_member(int fd, char *ipaddr, char *ifname);
+int edge_os_socket_ioctl_set_mcast_if(int fd, char *ipaddr);
 int edge_os_socket_ioctl_bind_to_device(int fd);
 
 

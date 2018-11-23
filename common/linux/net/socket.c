@@ -91,7 +91,11 @@ int edge_os_create_udp_server(char *ip, int port)
         goto fail;
     }
 
-    serv.sin_addr.s_addr = inet_addr(ip);
+    if (ip)
+        serv.sin_addr.s_addr = inet_addr(ip);
+    else
+        serv.sin_addr.s_addr = INADDR_ANY;
+
     serv.sin_port = htons(port);
     serv.sin_family = AF_INET;
 
@@ -108,21 +112,56 @@ fail:
     return -1;
 }
 
-int edge_os_create_udp_mcast_server(char *ip, int port)
-{
-    return edge_os_create_udp_server(ip, port);
-}
 
-int edge_os_create_udp_mcast_client(char *ip, int port, char *mcast_group)
+int edge_os_create_udp_mcast_server(char *ip, int port, char *mcast_ip)
 {
     int sock;
+    int ret;
 
     sock = edge_os_create_udp_server(ip, port);
     if (sock < 0) {
         return -1;
     }
 
-    return edge_os_socket_ioctl_set_mcast_add_member(sock, ip, NULL);
+    ret = edge_os_socket_ioctl_set_mcast_if(sock, mcast_ip);
+    if (ret < 0) {
+        return -1;
+    }
+
+    ret = edge_os_socket_ioctl_set_mcast_add_member(sock, ip, NULL);
+    if (ret < 0) {
+        return -1;
+    }
+
+    return sock;
+}
+
+int edge_os_create_udp_mcast_client(char *ip, int port, char *mcast_group, char *ipaddr)
+{
+    int sock;
+    int ret;
+
+    sock = edge_os_create_udp_client();
+    if (sock < 0) {
+        return -1;
+    }
+
+    ret = edge_os_socket_ioctl_set_mcast_if(sock, ipaddr);
+    if (ret < 0) {
+        return -1;
+    }
+
+    return sock;
+}
+
+int edge_os_socket_ioctl_set_mcast_if(int fd, char *ipaddr)
+{
+    struct ip_mreq mcast_if;
+
+    mcast_if.imr_interface.s_addr = inet_addr(ipaddr);
+
+    return setsockopt(fd, IPPROTO_IP, IP_MULTICAST_IF,
+                      &mcast_if.imr_interface, sizeof(struct in_addr));
 }
 
 int edge_os_socket_ioctl_set_mcast_add_member(int fd, char *ipaddr, char *ifname)
@@ -174,8 +213,10 @@ int edge_os_udp_sendto(int fd, void *msg, int msglen, char *dest, int dest_port)
         .sin_port = htons(dest_port),
         .sin_family = AF_INET,
     };
+    int ret;
 
-    return sendto(fd, msg, msglen, 0, (struct sockaddr *)&d, sizeof(d));
+    ret = sendto(fd, msg, msglen, 0, (struct sockaddr *)&d, sizeof(d));
+    return ret;
 }
 
 int edge_os_udp_recvfrom(int fd, void *msg, int msglen, char *dest, int *dest_len)
