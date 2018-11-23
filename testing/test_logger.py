@@ -1,16 +1,17 @@
 #!/usr/bin/python
 
+import time
 import os
 
 
-os.system('./build/EdgeOSLogger -i 127.0.0.1 -p 4898 -f ./test &')
-os.system('./build/loggerTest 127.0.0.1 4898 &')
+os.system('./EdgeOSLogger -i 127.0.0.1 -p 4898 -f ./test &')
+os.system('./loggerTest 127.0.0.1 4898 &')
 
 
 char = 0
 
 # let the comm happen and log
-os.sleep(10)
+time.sleep(10)
 
 for f in os.listdir('.'):
     if os.path.isfile(f):
