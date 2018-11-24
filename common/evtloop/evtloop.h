@@ -29,9 +29,9 @@ struct edge_os_evtloop_base {
     fd_set allfd_;
     int sig_fd;
     int maxfd_;
-    struct edge_os_list_base *timer_base;
-    struct edge_os_list_base *socket_base;
-    struct edge_os_list_base *signal_base;
+    struct edge_os_list_base timer_base;
+    struct edge_os_list_base socket_base;
+    struct edge_os_list_base signal_base;
 };
 
 int edge_os_evtloop_init(struct edge_os_evtloop_base *base, void *priv);

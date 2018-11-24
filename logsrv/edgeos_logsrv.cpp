@@ -45,19 +45,19 @@ class LogSrv {
         }
         void makeFileName_(char *filename)
         {
-            struct tm *t;
+            struct tm t;
             time_t now = time(0);
 
-            t = gmtime(&now);
+            gmtime_r(&now, &t);
             
             sprintf(filename, "%s-%04d-%02d-%02d_%02d-%02d-%02d.txt",
                                 args_.fileName_.c_str(),
-                                t->tm_year + 1900,
-                                t->tm_mon,
-                                t->tm_mday,
-                                t->tm_hour,
-                                t->tm_min,
-                                t->tm_sec);
+                                t.tm_year + 1900,
+                                t.tm_mon,
+                                t.tm_mday,
+                                t.tm_hour,
+                                t.tm_min,
+                                t.tm_sec);
         }
         int newLogFile_()
         {
@@ -82,6 +82,7 @@ class LogSrv {
             close(logFd_);
             return newLogFile_();
         }
+
     public:
         LogSrv(int argc, char **argv);
         int validateClassInit() {

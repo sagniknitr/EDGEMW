@@ -44,7 +44,7 @@ int dist_sdp_msg_reg_name(int sock, struct dist_sdp_register_name *reg, char *ip
     memcpy(&txbuf[txbuf_len], &port, sizeof(port));
     txbuf_len += sizeof(port);
 
-    return edge_os_udp_sendto(sock, txbuf, txbuf_len, ip, port);
+    return edge_os_udp_sendto(sock, txbuf, txbuf_len, ip, htons(port));
 }
 
 int dist_sdp_msg_reg_name_resp(int sock, struct dist_sdp_register_resp *resp)

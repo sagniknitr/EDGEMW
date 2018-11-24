@@ -14,7 +14,7 @@ int main()
     void *dist;
     void *pub_node;
 
-    dist = distcomm_init("127.0.0.1", 11214);
+    dist = distcomm_init("127.0.0.1", 12132);
     ERR_FAIL(dist);
 
     pub_node = distcom_create_pub(dist, "/test");
