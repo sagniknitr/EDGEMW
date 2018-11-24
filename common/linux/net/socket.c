@@ -227,7 +227,9 @@ int edge_os_udp_sendto(int fd, void *msg, int msglen, char *dest, int dest_port)
     };
     int ret;
 
+    printf("dest %s port %d\n", dest, dest_port);
     ret = sendto(fd, msg, msglen, 0, (struct sockaddr *)&d, sizeof(d));
+    perror("sendto");
     return ret;
 }
 

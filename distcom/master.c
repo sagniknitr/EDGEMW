@@ -12,6 +12,7 @@
 #include <net_socket.h>
 #include <dist_sdp.h>
 #include <list.h>
+#include <edgeos_logger.h>
 
 struct dist_master_database {
     char name[20];
@@ -36,6 +37,7 @@ static void dist_master_rxmsg(void *callback_ptr)
 
     ret = edge_os_udp_recvfrom(priv->sock, msg, sizeof(msg), ip, &port);
     if (ret < 0) {
+        edge_os_err("master: failed to udp recv from @ %s %u\n", __func__, __LINE__);
         return;
     }
 
@@ -65,6 +67,9 @@ static void dist_master_rxmsg(void *callback_ptr)
         memcpy(&db->port, msg + off, sizeof(db->port));
         off += sizeof(db->port);
 
+        db->port = htons(db->port);
+
+        printf("msg name %s ip %s port %d\n", db->name, db->ip, db->port);
         edge_os_list_add_tail(&priv->db, db);
     }
 }

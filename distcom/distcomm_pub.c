@@ -45,6 +45,7 @@ void* distcomm_init(char *master_addr, int master_port)
     priv->master_addr = strdup(master_addr);
     priv->master_port = master_port;
 
+        printf("maste rport %d\n", priv->master_port);
     return priv;
 
 fail:
@@ -83,6 +84,9 @@ void* distcom_create_pub(void *ctx, char *pubname)
     }
 
     port = 2000 + (port % 65535);
+
+    printf("random port %d\n", port);
+
     sock = edge_os_create_udp_mcast_client(NULL, port, "224.0.0.1", "127.0.0.1");
     if (sock < 0) {
         edge_os_err("distcomm: failed to create udp multi_cast client @ %s %u\n",
