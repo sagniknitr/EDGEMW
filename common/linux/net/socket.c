@@ -19,6 +19,14 @@ int edge_os_new_tcp_socket()
     return __socket(AF_INET, SOCK_STREAM);
 }
 
+int edge_os_del_tcp_socket(int sock)
+{
+    if (sock >= 0)
+        close(sock);
+
+    return 0;
+}
+
 int edge_os_new_udp_socket()
 {
     return __socket(AF_INET, SOCK_DGRAM);
@@ -72,7 +80,67 @@ int edge_os_create_unix_server(char *addr)
     return edge_os_create_unix_client(addr);
 }
 
-int edge_os_create_tcp_server(char *ip, int port)
+int edge_os_create_tcp_server(char *ip, int port, int n_conns)
+{
+    struct sockaddr_in serv;
+    int ret;
+    int sock = edge_os_new_tcp_socket();
+
+    if (sock < 0) {
+        edge_os_err("socket: failed to create new tcp socket @ %s %u\n",
+                                __func__, __LINE__);
+        return -1;
+    }
+
+    ret = edge_os_socket_ioctl_reuse_addr(sock);
+    if (ret < 0) {
+        return -1;
+    }
+
+    if (ip)
+        serv.sin_addr.s_addr = inet_addr(ip);
+    else
+        serv.sin_addr.s_addr = INADDR_ANY;
+
+    serv.sin_port = htons(port);
+    serv.sin_family = AF_INET;
+
+    ret = bind(sock, (struct sockaddr *)&serv, sizeof(serv));
+    if (ret < 0) {
+        goto fail;
+    }
+
+    ret = listen(sock, n_conns);
+    if (ret < 0) {
+        goto fail;
+    }
+    
+    return sock;
+
+fail:
+    if (sock > 0)
+        close(sock);
+
+    return -1;
+}
+
+int edge_os_accept_conn(int sock, char *ip, int *port)
+{
+    struct sockaddr_in serv;
+    socklen_t len;
+    int cli_conn;
+
+    cli_conn = accept(sock, (struct sockaddr *)&serv, &len);
+    if (cli_conn < 0)
+        return -1;
+
+    strcpy(ip, inet_ntoa(serv.sin_addr));
+    *port = htons(serv.sin_port);
+
+    return 0;
+}
+
+int edge_os_create_tcp_unix_server(char *path)
 {
     return 0;
 }
