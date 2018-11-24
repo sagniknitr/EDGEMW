@@ -22,6 +22,8 @@ int edge_os_socket_ioctl_set_nonblock(int fd);
 int edge_os_socket_ioctl_set_mcast_add_member(int fd, char *ipaddr, char *ifname);
 int edge_os_socket_ioctl_set_mcast_if(int fd, char *ipaddr);
 int edge_os_socket_ioctl_bind_to_device(int fd);
+int edge_os_socket_ioctl_reuse_addr(int fd);
+
 
 
 int edge_os_udp_unix_sendto(int fd, void *msg, int msglen, char *dest);
