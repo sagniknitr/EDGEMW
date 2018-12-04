@@ -55,11 +55,14 @@ static void dist_master_rxmsg(void *callback_ptr)
         off ++;
         name_len = msg[off];
 
+        off ++;
+
         memcpy(db->name, msg + off, name_len);
         off += name_len;
 
-        off ++;
         ip_len = msg[off];
+
+        off ++;
 
         memcpy(db->ip, msg + off, ip_len);
         off += ip_len;
@@ -69,8 +72,14 @@ static void dist_master_rxmsg(void *callback_ptr)
 
         db->port = htons(db->port);
 
-        printf("msg name %s ip %s port %d\n", db->name, db->ip, db->port);
         edge_os_list_add_tail(&priv->db, db);
+
+        struct dist_sdp_register_resp resp;
+
+        memcpy(resp.name, db->name, name_len);
+        resp.resp = DIST_SDP_REG_NAME_RES_OK;
+
+        dist_sdp_prepmsg_regname_resp(priv->sock, &resp, ip, port);
     }
 }
 
@@ -91,7 +100,6 @@ int main(int argc, char **argv)
 
     ret = edge_os_evtloop_init(&priv->base, NULL);
     if (ret) {
-        printf("%s %u\n", __func__, __LINE__);
         return -1;
     }
 

@@ -33,7 +33,11 @@ typedef enum {
     DIST_SDP_QUERY_NAME_RESP,
 } dist_sdp_req_t;
 
+// from client to DIstMaster
 int dist_sdp_msg_reg_name(int sock, struct dist_sdp_register_name *reg, char *ip, int port);
+
+// from Distmaster to the Client
+int dist_sdp_prepmsg_regname_resp(int sock, struct dist_sdp_register_resp *resp, char *ip, int port);
 
 int dist_sdp_msg_reg_name_resp(int sock, struct dist_sdp_register_resp *resp);
 

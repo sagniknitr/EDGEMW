@@ -295,14 +295,32 @@ int edge_os_udp_sendto(int fd, void *msg, int msglen, char *dest, int dest_port)
     };
     int ret;
 
-    printf("dest %s port %d\n", dest, dest_port);
     ret = sendto(fd, msg, msglen, 0, (struct sockaddr *)&d, sizeof(d));
-    perror("sendto");
     return ret;
 }
 
-int edge_os_udp_recvfrom(int fd, void *msg, int msglen, char *dest, int *dest_len)
+int edge_os_udp_recvfrom(int fd, void *msg, int msglen, char *dest, int *dest_port)
 {
-    return recvfrom(fd, msg, msglen, 0, NULL, NULL);
+    struct sockaddr_in r;
+    socklen_t r_l = sizeof(struct sockaddr_in);
+    int ret;
+
+    ret = recvfrom(fd, msg, msglen, 0, (struct sockaddr *)&r, &r_l);
+    if (ret < 0) {
+        return -1;
+    }
+
+    char *str;
+
+    str = inet_ntoa(r.sin_addr);
+    if (!str) {
+        return -1;
+    }
+
+    strcpy(dest, str);
+
+    *dest_port = htons(r.sin_port);
+
+    return ret;
 }
 
