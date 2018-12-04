@@ -191,17 +191,17 @@ int edge_os_create_udp_mcast_server(char *ip, int port, char *mcast_ip)
     int sock;
     int ret;
 
-    sock = edge_os_create_udp_server(ip, port);
+    sock = edge_os_create_udp_server(NULL, port);
     if (sock < 0) {
         return -1;
     }
 
-    ret = edge_os_socket_ioctl_set_mcast_if(sock, mcast_ip);
+    ret = edge_os_socket_ioctl_set_mcast_if(sock, ip);
     if (ret < 0) {
         return -1;
     }
 
-    ret = edge_os_socket_ioctl_set_mcast_add_member(sock, ip, NULL);
+    ret = edge_os_socket_ioctl_set_mcast_add_member(sock, ip, mcast_ip);
     if (ret < 0) {
         return -1;
     }
@@ -237,16 +237,24 @@ int edge_os_socket_ioctl_set_mcast_if(int fd, char *ipaddr)
                       &mcast_if.imr_interface, sizeof(struct in_addr));
 }
 
-int edge_os_socket_ioctl_set_mcast_add_member(int fd, char *ipaddr, char *ifname)
+int edge_os_socket_ioctl_set_mcast_add_member(int fd, char *ipaddr, char *group)
 {
     struct ip_mreq mcast_add;
+    int ret;
 
-    mcast_add.imr_multiaddr.s_addr = inet_addr(ipaddr);
-    mcast_add.imr_interface.s_addr = INADDR_ANY;
+    memset(&mcast_add, 0, sizeof(mcast_add));
 
-    return setsockopt(fd, IPPROTO_IP,
+    mcast_add.imr_multiaddr.s_addr = inet_addr(group);
+    mcast_add.imr_interface.s_addr = htonl(INADDR_ANY);
+
+    ret = setsockopt(fd, IPPROTO_IP,
                       IP_ADD_MEMBERSHIP, &mcast_add,
                       sizeof(mcast_add));
+    if (ret < 0) {
+        return -1;
+    }
+
+    return 0;
 }
 
 int edge_os_socket_ioctl_set_nonblock(int fd)

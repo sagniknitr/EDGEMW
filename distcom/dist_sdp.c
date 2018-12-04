@@ -41,7 +41,7 @@ int dist_sdp_msg_reg_name(int sock, struct dist_sdp_register_name *reg, char *ip
     memcpy(&txbuf[txbuf_len], reg->ipaddr, ip_len);
     txbuf_len += ip_len;
 
-    port_be = htons(port);
+    port_be = htons(reg->port);
 
     memcpy(&txbuf[txbuf_len], &port_be, sizeof(port_be));
     txbuf_len += sizeof(port_be);
@@ -110,6 +110,7 @@ int dist_sdp_msg_reg_name_resp(int sock, struct dist_sdp_register_resp *resp)
 int dist_sdp_query_name(int sock, struct dist_sdp_query_name *query, char *ip, int port)
 {
     uint8_t txbuf[2048];
+    int name_len = 0;
     int txbuf_len = 0;
 
     if (!ip) {
@@ -119,8 +120,47 @@ int dist_sdp_query_name(int sock, struct dist_sdp_query_name *query, char *ip, i
     txbuf[txbuf_len] = 0x03;
     txbuf_len ++;
 
-    memcpy(&txbuf[txbuf_len], query->name, strlen(query->name));
-    txbuf_len += strlen(query->name);
+    name_len = strlen(query->name);
+
+    txbuf[txbuf_len] = name_len;
+    txbuf_len ++;
+
+    memcpy(&txbuf[txbuf_len], query->name, name_len);
+    txbuf_len += name_len;
+
+    return edge_os_udp_sendto(sock, txbuf, txbuf_len, ip, port);
+}
+
+int dist_sdp_prepmsg_query_response(int sock, struct dist_sdp_query_name_resp *query, char *ip, int port)
+{
+    uint8_t txbuf[2048];
+    int name_len = 0;
+    int ip_len = 0;
+    int port_be = 0;
+    int txbuf_len = 0;
+
+    txbuf[txbuf_len] = 0x04;
+    txbuf_len ++;
+
+    name_len = strlen(query->name);
+    ip_len = strlen(query->ipaddr);
+
+    txbuf[txbuf_len] = name_len;
+    txbuf_len ++;
+
+    memcpy(&txbuf[txbuf_len], query->name, name_len);
+    txbuf_len += name_len;
+
+    txbuf[txbuf_len] = ip_len;
+    txbuf_len ++;
+    
+    memcpy(&txbuf[txbuf_len], query->ipaddr, ip_len);
+    txbuf_len += ip_len;
+
+    port_be = htons(query->port);
+
+    memcpy(&txbuf[txbuf_len], &port_be, sizeof(port_be));
+    txbuf_len += sizeof(port_be);
 
     return edge_os_udp_sendto(sock, txbuf, txbuf_len, ip, port);
 }
@@ -129,16 +169,18 @@ int dist_sdp_query_name_resp(int sock, struct dist_sdp_query_name_resp *query)
 {
     uint8_t rxbuf[2048];
     int name_len = 0;
+    char ip[20];
+    int port;
     int ip_len = 0;
     int off = 0;
     int ret;
 
-    ret = edge_os_udp_recvfrom(sock, rxbuf, sizeof(rxbuf), NULL, NULL);
+    ret = edge_os_udp_recvfrom(sock, rxbuf, sizeof(rxbuf), ip, &port);
     if (ret < 0) {
         return -1;
     }
 
-    if (rxbuf[0] != 0x04) {
+    if (rxbuf[0] == 0x04) {
         off ++;
 
         name_len = rxbuf[off];
@@ -146,6 +188,9 @@ int dist_sdp_query_name_resp(int sock, struct dist_sdp_query_name_resp *query)
 
         memcpy(query->name, &rxbuf[off], name_len);
         off += name_len;
+
+        ip_len = rxbuf[off];
+        off ++;
 
         memcpy(query->ipaddr, &rxbuf[off], ip_len);
         off += ip_len;

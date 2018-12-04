@@ -87,7 +87,7 @@ void* distcom_create_pub(void *ctx, char *pubname)
 
     printf("random port %d\n", port);
 
-    sock = edge_os_create_udp_mcast_client(NULL, port, "224.0.0.1", "127.0.0.1");
+    sock = edge_os_create_udp_mcast_client(NULL, port, "224.0.0.1", "10.1.22.84");
     if (sock < 0) {
         edge_os_err("distcomm: failed to create udp multi_cast client @ %s %u\n",
                                 __func__, __LINE__);
@@ -102,7 +102,7 @@ void* distcom_create_pub(void *ctx, char *pubname)
     struct dist_sdp_register_name reg;
 
     strcpy(reg.name, pubname);
-    strcpy(reg.ipaddr, "244.0.0.1");
+    strcpy(reg.ipaddr, "224.0.0.1");
     reg.port = port;
 
     ret = dist_sdp_msg_reg_name(sock, &reg, priv->master_addr, priv->master_port);
@@ -152,9 +152,11 @@ struct distcomm_sub_node {
 void sub_generic_func(void *callback_ptr)
 {
     struct distcomm_sub_node *sub = callback_ptr;
+    char ip[20];
+    int port;
     int ret;
 
-    ret = edge_os_udp_recvfrom(sub->sock, sub->data_ptr, sub->dataptr_len, NULL, NULL);
+    ret = edge_os_udp_recvfrom(sub->sock, sub->data_ptr, sub->dataptr_len, ip, &port);
     if (ret < 0) {
         return;
     }
@@ -172,6 +174,8 @@ void* distcom_create_sub(void *ctx, char *subname, void (sub_callback)(void *pri
 
     sub_node = calloc(1, sizeof(struct distcomm_sub_node));
     if (!sub_node) {
+        edge_os_err("dist: failed to allocate sub_node @ %s %u\n",
+                                __func__, __LINE__);
         return NULL;
     }
 
@@ -209,7 +213,7 @@ void* distcom_create_sub(void *ctx, char *subname, void (sub_callback)(void *pri
 
     edge_os_del_udp_socket(sock);
 
-    sock = edge_os_create_udp_mcast_server("127.0.0.1", resp.port, resp.ipaddr);
+    sock = edge_os_create_udp_mcast_server("10.1.22.84", resp.port, resp.ipaddr);
     if (sock < 0) {
         return NULL;
     }
@@ -219,9 +223,17 @@ void* distcom_create_sub(void *ctx, char *subname, void (sub_callback)(void *pri
         return NULL;
     }
 
+    sub_node->sub_callback = sub_callback;
     sub_node->dataptr_len = 65535;
 
     edge_os_evtloop_register_socket(&priv->base, sub_node, sock, sub_generic_func);
 
     return sub_node;
+}
+
+void distcomm_run(void *ctx)
+{
+    struct distcomm_priv *priv = ctx;
+
+    edge_os_evtloop_run(&priv->base);
 }

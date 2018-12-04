@@ -41,6 +41,8 @@ int dist_sdp_prepmsg_regname_resp(int sock, struct dist_sdp_register_resp *resp,
 
 int dist_sdp_msg_reg_name_resp(int sock, struct dist_sdp_register_resp *resp);
 
+int dist_sdp_prepmsg_query_response(int sock, struct dist_sdp_query_name_resp *query, char *ip, int port);
+
 int dist_sdp_query_name(int sock, struct dist_sdp_query_name *query, char *ip, int port);
 
 int dist_sdp_query_name_resp(int sock, struct dist_sdp_query_name_resp *query);

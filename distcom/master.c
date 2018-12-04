@@ -26,6 +26,32 @@ struct dist_master_node {
     struct edge_os_list_base db;
 };
 
+struct dist_query_msg {
+    char name[20];
+    char ip[20];
+    int port;
+    void *priv;
+};
+
+void find_query_name(void *priv_data, void *ctx)
+{
+    struct dist_master_database *db = priv_data;
+    struct dist_query_msg *query = ctx;
+    struct dist_master_node *priv = query->priv;
+
+    if (!strcmp(query->name, db->name)) {
+        struct dist_sdp_query_name_resp resp;
+
+        strcpy(resp.name, db->name);
+        strcpy(resp.ipaddr, db->ip);
+        resp.port = db->port;
+
+        dist_sdp_prepmsg_query_response(priv->sock, &resp, query->ip, query->port);
+    }
+
+    free(query);
+}
+
 static void dist_master_rxmsg(void *callback_ptr)
 {
     struct dist_master_node *priv = callback_ptr;
@@ -80,6 +106,31 @@ static void dist_master_rxmsg(void *callback_ptr)
         resp.resp = DIST_SDP_REG_NAME_RES_OK;
 
         dist_sdp_prepmsg_regname_resp(priv->sock, &resp, ip, port);
+    } else if (msg[0] == 0x03) {
+        int name_len = 0;
+        char name[20];
+
+        off ++;
+
+        name_len = msg[off];
+        off ++;
+
+        memcpy(name, &msg[off], name_len);
+        off += name_len;
+
+        struct dist_query_msg *query;
+
+        query = calloc(1, sizeof(struct dist_query_msg));
+        if (!query) {
+            return;
+        }
+
+        strcpy(query->name, name);
+        query->priv = priv;
+        strcpy(query->ip, ip);
+        query->port = port;
+
+        edge_os_list_for_each(&priv->db, find_query_name, query);
     }
 }
 
