@@ -87,7 +87,7 @@ void* distcom_create_pub(void *ctx, char *pubname)
 
     printf("random port %d\n", port);
 
-    sock = edge_os_create_udp_mcast_client(NULL, port, "224.0.0.1", "10.1.22.84");
+    sock = edge_os_create_udp_mcast_client(NULL, port, "224.0.0.1", "192.168.1.1");
     if (sock < 0) {
         edge_os_err("distcomm: failed to create udp multi_cast client @ %s %u\n",
                                 __func__, __LINE__);
@@ -213,7 +213,7 @@ void* distcom_create_sub(void *ctx, char *subname, void (sub_callback)(void *pri
 
     edge_os_del_udp_socket(sock);
 
-    sock = edge_os_create_udp_mcast_server("10.1.22.84", resp.port, resp.ipaddr);
+    sock = edge_os_create_udp_mcast_server("192.168.1.1", resp.port, resp.ipaddr);
     if (sock < 0) {
         return NULL;
     }
