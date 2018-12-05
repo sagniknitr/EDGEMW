@@ -54,4 +54,6 @@ int main(int argc, char **argv)
 
         distcomm_run(dist);
     }
+
+    return 0;
 }
