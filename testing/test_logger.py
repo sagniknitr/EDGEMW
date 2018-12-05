@@ -22,4 +22,10 @@ for f in os.listdir('.'):
 
 os.system('./EOSTest')
 
+os.system('./DistCommMaster&')
+os.system('./DistTest -p&')
+os.system('./DistTest -s&')
+
+time.sleep(10);
+
 exit(0)
