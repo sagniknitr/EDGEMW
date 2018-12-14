@@ -13,7 +13,9 @@ set(SOURCES
         common/linux/shmem/shmem.c
         distcom/distcomm_pub.c
         common/linux/crypto/prng.c
-        distcom/dist_sdp.c)
+        distcom/dist_sdp.c
+        gpslib/src/nmea/nmea_parser.cpp
+        common/util/csvparse.cpp)
 
 set(LIB_TEST_SOURCES
         common/tests/test_socket.c)
@@ -24,6 +26,8 @@ set(DISTCOMM_SOURCES
 set(DIST_TEST_SOURCES
         common/tests/test_distcom.c)
 
+set(NMEA_TEST_SOURCES
+        gpslib/src/tests/unit_tests/unit_core.cpp)
 
 include_directories(
     common/evtloop/
@@ -36,6 +40,8 @@ include_directories(
     common/linux/transport/
     common/linux/crypto/
     distcom/
+    gpslib/src/nmea/
+    common/util/
 )
 
 add_library(EdgeOS SHARED ${SOURCES})
@@ -58,3 +64,6 @@ target_link_libraries(EOSTest pthread EdgeOS gcov)
 
 add_executable(DistTest ${DIST_TEST_SOURCES})
 target_link_libraries(DistTest pthread EdgeOS gcov)
+
+add_executable(nmeaTest ${NMEA_TEST_SOURCES})
+target_link_libraries(nmeaTest pthread EdgeOS gcov)
