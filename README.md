@@ -1,6 +1,5 @@
 # EDGE OS - Lightweight Middleware distribution
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/c7b509cdc4f843f19eab25e7f40c3a20)](https://app.codacy.com/app/devendra.aaru/EDGEMW?utm_source=github.com&utm_medium=referral&utm_content=DevNaga/EDGEMW&utm_campaign=Badge_Grade_Dashboard)
 [![Build Status](https://travis-ci.org/DevNaga/EDGEMW.svg?branch=master)](https://travis-ci.org/DevNaga/EDGEMW) [![Coverage Status](https://coveralls.io/repos/github/DevNaga/EDGEMW/badge.svg?branch=master)](https://coveralls.io/github/DevNaga/EDGEMW?branch=master)
 
 
