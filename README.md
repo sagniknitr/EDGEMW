@@ -19,7 +19,7 @@ Below are some of the features. More to come soon.
         4. different multicast ip partitioning 
 2. Framework for timers, sockets and signals 
 3. socket library API -
-    
+4. GPS parser library - for NMEA messages: GPGGA, GPGSA, GPGSV, GPRMB, GPRMC, GPGGLL
 
 
 ### Services:
