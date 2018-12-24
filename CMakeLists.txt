@@ -17,7 +17,9 @@ set(SOURCES
         gpslib/src/nmea/nmea_parser.cpp
         common/util/csvparse.cpp
         common/init.c
-        common/linux/file_system/fsapi.c)
+        common/linux/file_system/fsapi.c
+        common/util/tokenparse.c
+        common/util/TokParse.cpp)
 
 set(LIB_TEST_SOURCES
         common/tests/test_socket.c)
@@ -30,6 +32,9 @@ set(DIST_TEST_SOURCES
 
 set(NMEA_TEST_SOURCES
         gpslib/src/tests/unit_tests/unit_core.cpp)
+
+set(TOK_PARSE_SOURCES
+        common/tests/test_tokparse.cpp)
 
 include_directories(
     common/evtloop/
@@ -71,3 +76,7 @@ target_link_libraries(DistTest pthread EdgeOS gcov)
 
 add_executable(nmeaTest ${NMEA_TEST_SOURCES})
 target_link_libraries(nmeaTest pthread EdgeOS gcov)
+
+add_executable(tokTest ${TOK_PARSE_SOURCES})
+target_link_libraries(tokTest pthread EdgeOS gcov)
+
