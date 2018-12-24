@@ -179,12 +179,14 @@ fail:
 int edge_os_accept_conn(int sock, char *ip, int *port)
 {
     struct sockaddr_in serv;
-    socklen_t len;
+    socklen_t len = sizeof(serv);
     int cli_conn;
 
     cli_conn = accept(sock, (struct sockaddr *)&serv, &len);
-    if (cli_conn < 0)
+    if (cli_conn < 0) {
+        perror("accept");
         return -1;
+    }
 
     if (ip)
         strcpy(ip, inet_ntoa(serv.sin_addr));

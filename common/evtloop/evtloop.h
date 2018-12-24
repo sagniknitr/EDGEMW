@@ -44,3 +44,4 @@ int edge_os_evtloop_register_signal(void *handle, void *app_priv, int sig,
 void edge_os_evtloop_run(void *handle);
 
 #endif
+

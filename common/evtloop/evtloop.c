@@ -67,6 +67,7 @@ int __edge_os_evtloop_register_timer(void *handle, void *app_priv, int sec, int 
         return -1;
     }
 
+    printf("set timer %d\n", timer->fd);
     FD_SET(timer->fd, &base->allfd_);
     if (timer->fd > base->maxfd_)
         base->maxfd_ = timer->fd;
@@ -133,14 +134,13 @@ static void _edge_os_timer_for_each(void *callback_data, void *priv)
 {
     struct edge_os_evtloop_timer *timer = callback_data;
     fd_set *fdset = priv;
-    int expiry = 0;
+    uint64_t expiry = 0;
     int ret;
 
     if (FD_ISSET(timer->fd, fdset)) {
         ret = read(timer->fd, &expiry, sizeof(expiry));
         if (ret > 0) {
             timer->callback(timer->callback_data);
-        } else {
         }
     }
 }

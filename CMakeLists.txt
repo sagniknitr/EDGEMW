@@ -39,6 +39,9 @@ set(TOK_PARSE_SOURCES
 set(FSAPI_TEST_SOURCES
         common/tests/test_fsapi.cpp)
 
+set(EVTLOOP_TEST_SOURCES
+        common/tests/test_evtloop.cpp)
+
 include_directories(
     common/evtloop/
     common/linux/net/
@@ -85,4 +88,7 @@ target_link_libraries(tokTest pthread EdgeOS gcov)
 
 add_executable(fsAPITests ${FSAPI_TEST_SOURCES})
 target_link_libraries(fsAPITests pthread EdgeOS gcov)
+
+add_executable(ELTest ${EVTLOOP_TEST_SOURCES})
+target_link_libraries(ELTest pthread EdgeOS gcov)
 
