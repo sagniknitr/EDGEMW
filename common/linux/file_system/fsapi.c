@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -30,6 +31,55 @@ int edgeos_create_file_truncated(const char *filename, const int filesize)
     return fd;
 }
 
+int edgeos_open_file(const char *filename, const char *mode)
+{
+    int fd;
+    int opts = O_RDONLY;
+
+    if (!strcmp(mode, "r")) {
+        opts = O_RDONLY;
+    } else if (!strcmp(mode, "w")) {
+        opts = O_WRONLY;
+    } else if (!strcmp(mode, "rw")) {
+        opts = O_RDWR;
+    } else if (!strcmp(mode, "a")) {
+        opts = O_RDWR | O_APPEND;
+    } else {
+        return -1;
+    }
+
+    fd = open(filename, opts);
+    if (fd < 0)
+        return -1;
+
+    return fd;
+}
+
+int edgeos_read_file__cb(const void *priv, const char *filename, void (*read_callback)(const void *ptr, void *data, int data_len))
+{
+    uint8_t stream[1024];
+    int fd;
+    int ret;
+
+    if (!read_callback)
+        return -1;
+
+    fd = open(filename, O_RDONLY);
+    if (fd < 0)
+        return -1;
+
+    while (1) {
+        ret = read(fd, stream, sizeof(stream) - 1);
+        if (ret < 0) {
+            break;
+        }
+
+        read_callback(priv, stream, ret);
+    }
+
+    return 0;
+}
+
 int edgeos_write_file(int fd, void *msg, int msg_len)
 {
     return write(fd, msg, msg_len);
@@ -37,6 +87,22 @@ int edgeos_write_file(int fd, void *msg, int msg_len)
 
 int edgeos_read_file(int fd, void *msg, int msg_len)
 {
+    return read(fd, msg, msg_len);
+}
+
+int edgeos_write_file__safe(int fd, void *msg, int msg_len)
+{
+    if (!msg || (msg_len <= 0))
+        return -1;
+
+    return write(fd, msg, msg_len);
+}
+
+int edgeos_read_file__safe(int fd, void *msg, int msg_len)
+{
+    if (!msg || (msg_len <= 0))
+        return -1;
+
     return read(fd, msg, msg_len);
 }
 

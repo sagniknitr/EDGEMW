@@ -36,6 +36,9 @@ set(NMEA_TEST_SOURCES
 set(TOK_PARSE_SOURCES
         common/tests/test_tokparse.cpp)
 
+set(FSAPI_TEST_SOURCES
+        common/tests/test_fsapi.cpp)
+
 include_directories(
     common/evtloop/
     common/linux/net/
@@ -79,4 +82,7 @@ target_link_libraries(nmeaTest pthread EdgeOS gcov)
 
 add_executable(tokTest ${TOK_PARSE_SOURCES})
 target_link_libraries(tokTest pthread EdgeOS gcov)
+
+add_executable(fsAPITests ${FSAPI_TEST_SOURCES})
+target_link_libraries(fsAPITests pthread EdgeOS gcov)
 

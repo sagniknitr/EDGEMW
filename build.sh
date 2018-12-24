@@ -7,5 +7,6 @@ make -j12
 cd ..
 
 ./build/tokTest
+./build/fsAPITests
 sudo python ./testing/test_socket.py
 sudo python ./testing/test_logger.py
