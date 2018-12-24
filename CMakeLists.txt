@@ -19,7 +19,9 @@ set(SOURCES
         common/init.c
         common/linux/file_system/fsapi.c
         common/util/tokenparse.c
-        common/util/TokParse.cpp)
+        common/util/TokParse.cpp
+        common/linux/net/TcpServer.cpp
+        common/linux/net/ClientMgr.cpp)
 
 set(LIB_TEST_SOURCES
         common/tests/test_socket.c)
@@ -42,6 +44,9 @@ set(FSAPI_TEST_SOURCES
 set(EVTLOOP_TEST_SOURCES
         common/tests/test_evtloop.cpp)
 
+set(TCPSERVER_TEST_SOURCES
+        common/tests/test_TcpServer.cpp)
+        
 include_directories(
     common/evtloop/
     common/linux/net/
@@ -92,3 +97,5 @@ target_link_libraries(fsAPITests pthread EdgeOS gcov)
 add_executable(ELTest ${EVTLOOP_TEST_SOURCES})
 target_link_libraries(ELTest pthread EdgeOS gcov)
 
+add_executable(TcpServerTest ${TCPSERVER_TEST_SOURCES})
+target_link_libraries(TcpServerTest pthread EdgeOS gcov)

@@ -1,5 +1,7 @@
 #include <getopt.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
 #include <stdio.h>
 #include <net_socket.h>
 
@@ -84,6 +86,20 @@ int main(int argc, char **argv)
     }
 
     fprintf(stderr, "socket %d created\n", sock);
+
+    while (1) {
+        char hello[ ] = "testing message..\n";
+
+        if (tcp) {
+            if (unix_conn) {
+            } else {
+                edge_os_tcp_send(sock, hello, strlen(hello));
+
+                printf("send msg ..\n");
+            }
+        }
+        sleep(1);
+    }
 
     return 0;
 }
