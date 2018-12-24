@@ -15,7 +15,8 @@ set(SOURCES
         common/linux/crypto/prng.c
         distcom/dist_sdp.c
         gpslib/src/nmea/nmea_parser.cpp
-        common/util/csvparse.cpp)
+        common/util/csvparse.cpp
+        common/init.c)
 
 set(LIB_TEST_SOURCES
         common/tests/test_socket.c)
@@ -40,6 +41,7 @@ include_directories(
     common/linux/transport/
     common/linux/crypto/
     distcom/
+    common/
     gpslib/src/nmea/
     common/util/
 )

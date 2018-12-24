@@ -124,6 +124,32 @@ fail:
     return -1;
 }
 
+int edge_os_create_tcp_client(const char *ip, int port)
+{
+    int ret;
+    int sock;
+
+    sock = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sock < 0)
+        return -1;
+
+    struct sockaddr_in serv;
+
+    serv.sin_addr.s_addr = inet_addr(ip);
+    serv.sin_port = htons(port);
+    serv.sin_family = AF_INET;
+
+    ret = connect(sock, (struct sockaddr *)&serv, sizeof(serv));
+    if (ret < 0)
+        goto fail;
+
+    return sock;
+
+fail:
+    close(sock);
+    return -1;
+}
+
 int edge_os_accept_conn(int sock, char *ip, int *port)
 {
     struct sockaddr_in serv;
@@ -134,10 +160,13 @@ int edge_os_accept_conn(int sock, char *ip, int *port)
     if (cli_conn < 0)
         return -1;
 
-    strcpy(ip, inet_ntoa(serv.sin_addr));
-    *port = htons(serv.sin_port);
+    if (ip)
+        strcpy(ip, inet_ntoa(serv.sin_addr));
 
-    return 0;
+    if (port)
+        *port = htons(serv.sin_port);
+
+    return cli_conn;
 }
 
 int edge_os_create_tcp_unix_server(char *path)
@@ -292,6 +321,16 @@ int edge_os_udp_unix_sendto(int fd, void *msg, int msglen, char *dest)
     d.sun_family = AF_UNIX;
 
     return sendto(fd, msg, msglen, 0, (struct sockaddr *)&d, sizeof(d));
+}
+
+int edge_os_tcp_send(int fd, void *msg, int msglen)
+{
+    return send(fd, msg, msglen, 0);
+}
+
+int edge_os_tcp_recv(int fd, void *msg, int msglen)
+{
+    return recv(fd, msg, msglen, 0);
 }
 
 int edge_os_udp_sendto(int fd, void *msg, int msglen, char *dest, int dest_port)
