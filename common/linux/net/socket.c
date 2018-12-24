@@ -47,7 +47,7 @@ int edge_os_create_udp_client()
     return edge_os_new_udp_socket();
 }
 
-int edge_os_create_unix_client(char *addr)
+int edge_os_create_udp_unix_client(char *addr)
 {
     struct sockaddr_un serv;
     int sock;
@@ -75,9 +75,35 @@ err:
     return -1;
 }
 
-int edge_os_create_unix_server(char *addr)
+int edge_os_create_udp_unix_server(char *addr)
 {
-    return edge_os_create_unix_client(addr);
+    return edge_os_create_udp_unix_client(addr);
+}
+
+int edge_os_create_tcp_unix_client(const char *path)
+{
+    int sock;
+    int ret;
+
+    sock = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (sock < 0)
+        return -1;
+
+    struct sockaddr_un serv;
+
+    strcpy(serv.sun_path, path);
+    serv.sun_family = AF_UNIX;
+
+    ret = connect(sock, (struct sockaddr *)&serv, sizeof(serv));
+    if (ret < 0)
+        goto fail;
+
+    return sock;
+
+fail:
+    close(sock);
+
+    return -1;
 }
 
 int edge_os_create_tcp_server(char *ip, int port, int n_conns)
@@ -129,7 +155,7 @@ int edge_os_create_tcp_client(const char *ip, int port)
     int ret;
     int sock;
 
-    sock = socket(AF_INET, SOCK_DGRAM, 0);
+    sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock < 0)
         return -1;
 
@@ -169,9 +195,36 @@ int edge_os_accept_conn(int sock, char *ip, int *port)
     return cli_conn;
 }
 
-int edge_os_create_tcp_unix_server(char *path)
+int edge_os_create_tcp_unix_server(const char *path, const int n_conns)
 {
-    return 0;
+    int sock;
+    int ret;
+
+    sock = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (sock < 0)
+        return -1;
+
+    unlink(path);
+
+    struct sockaddr_un serv;
+
+    strcpy(serv.sun_path, path);
+    serv.sun_family = AF_UNIX;
+
+    ret = bind(sock, (struct sockaddr *)&serv, sizeof(serv));
+    if (ret < 0)
+        goto fail;
+
+    ret = listen(sock, n_conns);
+    if (ret < 0)
+        goto fail;
+
+    return sock;
+
+fail:
+    close(sock);
+
+    return -1;
 }
 
 int edge_os_create_udp_server(char *ip, int port)

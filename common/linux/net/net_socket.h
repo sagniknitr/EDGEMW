@@ -20,9 +20,12 @@ int edge_os_del_tcp_socket(int sock);
 
 
 
+int edge_os_create_tcp_unix_client(const char *path);
 
-int edge_os_create_unix_client(char *addr);
-int edge_os_create_unix_server(char *addr);
+int edge_os_create_tcp_unix_server(const char *path, const int n_conns);
+
+int edge_os_create_udp_unix_client(char *addr);
+int edge_os_create_udp_unix_server(char *addr);
 
 
 int edge_os_create_udp_mcast_server(char *ip, int port, char *mcast_ip);
