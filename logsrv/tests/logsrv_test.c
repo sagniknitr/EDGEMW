@@ -11,13 +11,13 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    handle = logger_init(argv[1], atoi(argv[2]));
+    handle = edge_os_logger_init(argv[1], atoi(argv[2]));
     if (!handle) {
         return -1;
     }
 
     while (1) {
-        logger_writemsg(handle, "hello logger");
+        edge_os_logger_writemsg(handle, "hello logger");
         usleep(100 * 1000);
     }
 

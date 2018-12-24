@@ -19,9 +19,9 @@
 
 #define edge_os_fatal edge_os_err
 
-void *logger_init(char *ipaddr, int port);
-void logger_deinit(void *handle);
-int logger_writemsg(void *handle, char *fmt, ...);
+void *edge_os_logger_init(char *ipaddr, int port);
+void edge_os_logger_deinit(void *handle);
+int edge_os_logger_writemsg(void *handle, char *fmt, ...);
 
 #endif
 

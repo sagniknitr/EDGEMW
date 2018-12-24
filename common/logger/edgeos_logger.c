@@ -9,17 +9,17 @@
 #include <edgeos_logger.h>
 #include <string.h>
 
-struct logger_ctx {
+struct edge_os_logger_ctx {
     int logfd_;
     char *ipaddr;
     int port;
 };
 
-void *logger_init(char *ipaddr, int port)
+void *edge_os_logger_init(char *ipaddr, int port)
 {
-    struct logger_ctx *handle;
+    struct edge_os_logger_ctx *handle;
 
-    handle = calloc(1, sizeof(struct logger_ctx));
+    handle = calloc(1, sizeof(struct edge_os_logger_ctx));
     if (!handle) {
         return NULL;
     }
@@ -36,9 +36,9 @@ void *logger_init(char *ipaddr, int port)
     return handle;
 }
 
-void logger_deinit(void *handle)
+void edge_os_logger_deinit(void *handle)
 {
-    struct logger_ctx *_l = handle;
+    struct edge_os_logger_ctx *_l = handle;
 
     if (_l) {
         free(_l->ipaddr);
@@ -47,9 +47,9 @@ void logger_deinit(void *handle)
     }
 }
 
-int logger_writemsg(void *handle, char *fmt, ...)
+int edge_os_logger_writemsg(void *handle, char *fmt, ...)
 {
-    struct logger_ctx *l;
+    struct edge_os_logger_ctx *l;
     char buf[4096];
     va_list arg;
     int len;
@@ -62,3 +62,4 @@ int logger_writemsg(void *handle, char *fmt, ...)
 
     return edge_os_udp_sendto(l->logfd_, buf, len, l->ipaddr, l->port);
 }
+
