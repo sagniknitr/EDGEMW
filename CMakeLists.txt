@@ -16,7 +16,8 @@ set(SOURCES
         distcom/dist_sdp.c
         gpslib/src/nmea/nmea_parser.cpp
         common/util/csvparse.cpp
-        common/init.c)
+        common/init.c
+        common/linux/file_system/fsapi.c)
 
 set(LIB_TEST_SOURCES
         common/tests/test_socket.c)
@@ -44,13 +45,14 @@ include_directories(
     common/
     gpslib/src/nmea/
     common/util/
+    common/linux/file_system/
 )
 
-add_library(EdgeOS SHARED ${SOURCES})
+add_library(EdgeOS ${SOURCES})
 target_link_libraries(EdgeOS pthread rt gcov)
 
 add_executable(EdgeOSLogger logsrv/edgeos_logsrv.cpp)
-target_link_libraries(EdgeOSLogger pthread gcov)
+target_link_libraries(EdgeOSLogger pthread EdgeOS gcov rt)
 
 add_executable(loggerTest logsrv/tests/logsrv_test.c)
 target_link_libraries(loggerTest pthread EdgeOS gcov)

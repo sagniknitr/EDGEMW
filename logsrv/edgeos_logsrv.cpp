@@ -3,16 +3,15 @@
 #include <stdint.h>
 #include <vector>
 #include <thread>
-#include <sys/socket.h>
 #include <sys/time.h>
 #include <time.h>
-#include <arpa/inet.h>
-#include <netinet/in.h>
 #include <getopt.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 #include <unistd.h>
 #include <syslog.h>
+extern "C" {
+#include <fsapi.h>
+#include <net_socket.h>
+}
 
 namespace EdgeOS {
 
@@ -32,7 +31,6 @@ class LogSrv {
         int logFd_;
         int logSrv_;
         struct LogSrvArgs args_;
-        struct sockaddr_in serv_;
         std::thread *logRxThread_;
         void LogRxThreadF_();
         uint8_t *rxbuf_;
@@ -64,7 +62,7 @@ class LogSrv {
             char filename[200];
 
             makeFileName_(filename);
-            logFd_ = open(filename, O_RDWR | O_CREAT, S_IRWXU);
+            logFd_ = edgeos_create_file_truncated(filename, args_.fileSize_);
             if (logFd_ < 0)
                 return -1;
 
@@ -122,16 +120,15 @@ class LogSrv {
 
 void LogSrv::LogRxThreadF_()
 {
-    struct sockaddr_in sender;
-    socklen_t sender_len;
+    char dest[80];
+    int dest_port = 0;
     int rxlen;
     int ret;
     int off = 0;
 
-    sender_len = 0;
     while (1) {
-        rxlen = recvfrom(logSrv_, rxbuf_, sizeof(rxbuf_), 0,
-                       (struct sockaddr *)&sender, &sender_len);
+        rxlen = edge_os_udp_recvfrom(logSrv_, rxbuf_, sizeof(rxbuf_),
+                       dest, &dest_port);
         if (ret < 0) {
             return;
         }
@@ -193,31 +190,9 @@ LogSrv::LogSrv(int argc, char **argv): logFd_(-1), logSrv_(-1)
         return;
     }
 
-    ftruncate(logFd_, args_.fileSize_ * 1024);
-
-    logSrv_ = socket(AF_INET, SOCK_DGRAM, 0);
+    logSrv_ = edge_os_create_udp_server(args_.ipaddr_.c_str(), args_.port);
     if (logSrv_ < 0) {
-        std::cerr << "failed to create socket" << std::endl;
-        return;
-    }
-
-    serv_.sin_addr.s_addr = inet_addr(args_.ipaddr_.c_str());
-    serv_.sin_port = htons(args_.port);
-    serv_.sin_family = AF_INET;
-
-    ret = setsockopt(logSrv_, SOL_SOCKET, SO_REUSEADDR, &bind_to_dev, sizeof(bind_to_dev));
-    if (ret < 0) {
-        std::cerr << "failed to set sock opt" << std::endl;
-        close(logSrv_);
-        logSrv_ = -1;
-        return;
-    }
-
-    ret = bind(logSrv_, (struct sockaddr *)&serv_, sizeof(serv_));
-    if (ret < 0) {
-        std::cerr << "failed to bind" << std::endl;
-        close(logSrv_);
-        logSrv_ = -1;
+        std::cerr << "failed to create udp server " << args_.ipaddr_.c_str() << ":" << args_.port << std::endl;
         return;
     }
 }

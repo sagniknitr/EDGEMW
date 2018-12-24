@@ -6,11 +6,11 @@ int edge_os_new_unix_socket();
 int edge_os_new_tcp_socket();
 
 
-int edge_os_create_tcp_server(char *ip, int port, int n_conn);
+int edge_os_create_tcp_server(const char *ip, int port, int n_conn);
 
 int edge_os_create_tcp_client(const char *ip, int port);
 
-int edge_os_create_udp_server(char *ip, int port);
+int edge_os_create_udp_server(const char *ip, int port);
 
 int edge_os_create_udp_client();
 
