@@ -17,7 +17,7 @@ int main(int argc, char **argv)
     }
 
     while (1) {
-        edge_os_logger_writemsg(handle, "hello logger");
+        edge_os_logger_writemsg(handle, "logger: hello logger");
         usleep(100 * 1000);
     }
 

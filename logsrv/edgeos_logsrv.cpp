@@ -62,7 +62,7 @@ class LogSrv {
             char filename[200];
 
             makeFileName_(filename);
-            logFd_ = edgeos_create_file_truncated(filename, args_.fileSize_);
+            logFd_ = edgeos_create_file_truncated(filename, args_.fileSize_ * 1024 * 1024);
             if (logFd_ < 0)
                 return -1;
 
@@ -125,9 +125,12 @@ void LogSrv::LogRxThreadF_()
     int rxlen;
     int ret;
     int off = 0;
+    int effectiveFileSize = 0;
+
+    effectiveFileSize = args_.fileSize_ * 1024 * 1024;
 
     while (1) {
-        rxlen = edge_os_udp_recvfrom(logSrv_, rxbuf_, sizeof(rxbuf_),
+        rxlen = edge_os_udp_recvfrom(logSrv_, rxbuf_, 65535,
                        dest, &dest_port);
         if (ret < 0) {
             return;
@@ -141,7 +144,7 @@ void LogSrv::LogRxThreadF_()
 
         off += ret;
 
-        if (off > args_.fileSize_) {
+        if (off > effectiveFileSize) {
             reopenLogFile_();
             off = 0;
         }
@@ -158,6 +161,7 @@ LogSrv::LogSrv(int argc, char **argv): logFd_(-1), logSrv_(-1)
         return;
     }
 
+    rxbuf_ = nullptr;
     args_.fileSize_ = 100;
 
     while ((ret = getopt(argc, argv, "i:p:f:s:l:S:")) != -1) {
@@ -182,6 +186,7 @@ LogSrv::LogSrv(int argc, char **argv): logFd_(-1), logSrv_(-1)
             break;
             default:
                 displayHelp(argv[0]);
+                return;
         }
     }
 
