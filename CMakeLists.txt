@@ -28,7 +28,7 @@ set(SOURCES
         common/linux/crypto/prng.c
         distcom/dist_sdp.c
         gpslib/src/nmea/nmea_parser.cpp
-        common/util/csvparse.cpp
+        common/util/csvclass.cpp
         common/init.c
         common/linux/file_system/fsapi.c
         common/util/tokenparse.c
