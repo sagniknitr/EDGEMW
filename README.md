@@ -18,9 +18,14 @@ Below are some of the features. More to come soon.
         2. aim to achieve machine to machine communication with topic only
         3. topic collision and port assignments pending.
         4. different multicast ip partitioning 
-2. Framework for timers, sockets and signals 
+2. Framework for timers, sockets and signals - event Loop library
 3. socket library API -
+    1. UNIX and IPv4  TCP and UDP server and clients
+    2. C++ abstraction to the TCP server and client with Socket library and the Eventloop
 4. GPS parser library - for NMEA messages: GPGGA, GPGSA, GPGSV, GPRMB, GPRMC, GPGGLL
+5. Utilities -
+    1. CSV File reader / writer / parser
+    2. Token parser
 
 
 ### Services:
