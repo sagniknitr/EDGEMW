@@ -17,7 +17,6 @@ run_gcc_tests() {
     ./build/fsAPITests
     sudo python ./testing/test_socket.py
     sudo python ./testing/test_logger.py
-    rm -rf build/
 }
 
 run_gcc_tests $1
