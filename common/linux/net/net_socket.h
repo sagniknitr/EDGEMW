@@ -1,7 +1,13 @@
 #ifndef __NET_SOCKET_H__
 #define __NET_SOCKET_H__
 
+/**
+ * @brief - create new udp socket
+ * 
+ * @return returns socket address
+ */
 int edge_os_new_udp_socket();
+
 int edge_os_new_unix_socket();
 int edge_os_new_tcp_socket();
 

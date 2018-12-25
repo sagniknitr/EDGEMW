@@ -3,19 +3,30 @@ cmake_minimum_required(VERSION 2.8)
 project(EDGEMW)
 
 option(CONFIG_USE_CLANG "test with clang / clang++" off)
+option(CONFIG_RELEASE off)
+
+set(OS_FLAGS "-DOS_LINUX")
 
 if (CONFIG_USE_CLANG)
     message("using clang..")
     set(CMAKE_C_COMPILER "clang")
-    set(CMAKE_C_FLAGS "-Wall -Weverything")
+    set(CMAKE_C_FLAGS "-Wall -Weverything ${OS_FLAGS}")
     set(CMAKE_CXX_COMPILER "clang++")
-    set(CMAKE_CXX_FLAGS "-Wall -std=c++11 -Weverything")
+    set(CMAKE_CXX_FLAGS "-Wall -std=c++11 -Weverything ${OS_FLAGS}")
 else()
     message("using gcc..")
     set(CMAKE_C_COMPILER "gcc")
-    set(CMAKE_C_FLAGS "-O0 -ggdb -g -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow -fPIE -fPIC -fprofile-arcs -ftest-coverage -D_FORTIFY_SOURCE=2 -pg -fstack-usage -Wstack-usage=8192 -DCONFIG_UNIT_TESTS")
+
+    if (CONFIG_RELEASE)
+        set(CMAKE_C_FLAGS "-O3 -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow -fPIE -fPIC -D_FORTIFY_SOURCE=2 -fstack-usage -Wstack-usage=8192 ${OS_FLAGS}")
+        set(CMAKE_CXX_FLAGS "-O3 -Wall -Wextra -Werror -Wno-unused-parameter -Wshadow -fPIC -fPIE -std=c++11 -fstack-usage -Wstack-usage=8192 ${OS_FLAGS}")
+    else()
+        set(CMAKE_C_FLAGS "-O0 -ggdb -g -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow -fPIE -fPIC -fprofile-arcs -ftest-coverage -D_FORTIFY_SOURCE=2 -pg -fstack-usage -Wstack-usage=8192 -DCONFIG_UNIT_TESTS ${OS_FLAGS}")
+        set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -Wno-unused-parameter -Wshadow -fPIC -fPIE -std=c++11 -pg -fprofile-arcs -ftest-coverage -pg -std=c++11 -DCONFIG_UNIT_TESTS -fstack-usage -Wstack-usage=8192 ${OS_FLAGS}")
+    endif()
+
     set(CMAKE_CXX_COMPILER "g++")
-    set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -Wno-unused-parameter -Wshadow -fPIC -fPIE -std=c++11 -pg -fprofile-arcs -ftest-coverage -pg -std=c++11 -DCONFIG_UNIT_TESTS -fstack-usage -Wstack-usage=8192")
+
 endif()
 
 set(SOURCES
@@ -26,6 +37,7 @@ set(SOURCES
         common/linux/shmem/shmem.c
         distcom/distcomm_pub.c
         common/linux/crypto/prng.c
+        common/util/errormsg.c
         distcom/dist_sdp.c
         gpslib/src/nmea/nmea_parser.cpp
         common/util/csvclass.cpp
@@ -70,6 +82,7 @@ include_directories(
     common/linux/shmem/
     common/linux/transport/
     common/linux/crypto/
+    common/incl/
     distcom/
     common/
     gpslib/src/nmea/

@@ -21,12 +21,17 @@ int edgeos_create_file(const char *filename)
 int edgeos_create_file_truncated(const char *filename, const int filesize)
 {
     int fd;
+    int ret;
 
     fd = edgeos_create_file(filename);
     if (fd < 0)
         return -1;
 
-    ftruncate(fd, filesize);
+    ret = ftruncate(fd, filesize);
+    if (ret < 0) {
+        close(fd);
+        return -1;
+    }
 
     return fd;
 }

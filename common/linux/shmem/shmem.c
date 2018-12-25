@@ -21,6 +21,7 @@ struct shmem_priv {
 void* shmem_create(char *name, int mapping_size)
 {
     struct shmem_priv *priv;
+    int ret;
 
     priv = calloc(1, sizeof(struct shmem_priv));
     if (!priv) {
@@ -32,7 +33,10 @@ void* shmem_create(char *name, int mapping_size)
         return NULL;
     }
 
-    ftruncate(priv->shmfd, mapping_size);
+    ret = ftruncate(priv->shmfd, mapping_size);
+    if (ret < 0) {
+        return NULL;
+    }
 
     priv->map = mmap(NULL, mapping_size, PROT_READ | PROT_WRITE,
                      MAP_SHARED, priv->shmfd, 0);

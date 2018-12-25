@@ -6,7 +6,11 @@
 #include <fcntl.h>
 #include <prng.h>
 
+#ifdef OS_LINUX
 #define PRNG_DEV "/dev/urandom"
+#elif OS_QNX
+#define PRNG_DEV "/dev/random"
+#endif
 
 int edge_os_prng_init(char *prngdev)
 {
@@ -37,3 +41,4 @@ void edge_os_prng_deinit(int fd)
 {
     close(fd);
 }
+
