@@ -7,6 +7,8 @@
 int rxData(int fd, void *data, int dataLen)
 {
     std::cerr << reinterpret_cast<char *>(data) << std::endl;
+
+    return 0;
 }
 
 int main()
@@ -19,3 +21,4 @@ int main()
 
     m.run();
 }
+

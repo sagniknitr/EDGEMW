@@ -6,7 +6,6 @@ extern "C" {
 
 class fsAPITests {
     private:
-        int fd_;
 
         void testOpenNewFail()
         {

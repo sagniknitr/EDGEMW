@@ -132,11 +132,10 @@ void LogSrv::LogRxThreadF_()
     while (1) {
         rxlen = edge_os_udp_recvfrom(logSrv_, rxbuf_, 65535,
                        dest, &dest_port);
-        if (ret < 0) {
+        if (rxlen < 0) {
             return;
         }
 
-        
         ret = write(logFd_, rxbuf_, rxlen);
         if (ret != rxlen) {
             syslog(LOG_ERR, "logSrv: cannot write %d bytes .. written %d\n", rxlen, ret);
@@ -153,7 +152,6 @@ void LogSrv::LogRxThreadF_()
 
 LogSrv::LogSrv(int argc, char **argv): logFd_(-1), logSrv_(-1)
 {
-    int bind_to_dev = 1;
     int ret;
 
     if (argc == 1) {

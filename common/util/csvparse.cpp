@@ -2,9 +2,9 @@
 #include <string>
 #include <cstring>
 #include <vector>
-#include <csvparse.hpp>
+#include <csvclass.hpp>
 
-csvParse::csvParse(std::string input, std::vector<std::string> &output)
+int csvClass::csvParse(std::string input, std::vector<std::string> &output)
 {
     size_t i;
     int j;
@@ -34,6 +34,8 @@ csvParse::csvParse(std::string input, std::vector<std::string> &output)
 
     s[j] = '\0';
     output.push_back(std::string(s));
+
+    return output.size();
 }
 
 #if 0

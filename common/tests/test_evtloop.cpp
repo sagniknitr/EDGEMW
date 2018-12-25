@@ -100,8 +100,6 @@ void repeated_timer(void *priv)
 
 int main(int argc, char **argv)
 {
-    int ret;
-
     if (argc != 2) {
         fprintf(stderr, "<%s> server/client\n", argv[0]);
         return -1;

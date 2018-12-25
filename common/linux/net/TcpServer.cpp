@@ -10,8 +10,8 @@ extern "C" {
 #include <MasterLoop.hpp>
 #include <TcpServer.hpp>
 
-static receiveNotifier *r__ = nullptr;
-static newConnNotifier *n__ = nullptr;
+//static receiveNotifier *r__ = nullptr;
+//static newConnNotifier *n__ = nullptr;
 
 void autoReceiveData(void *priv)
 {

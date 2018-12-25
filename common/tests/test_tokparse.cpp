@@ -1,6 +1,6 @@
 #include <iostream>
 #include <TokParse.hpp>
-#include <csvparse.hpp>
+#include <csvclass.hpp>
 
 void printVector(std::vector<std::string> s)
 {
@@ -26,7 +26,9 @@ int main()
     r = s.parseTokens(c, ';');
     printVector(r);
 
-    csvParse c_(c, r);
+    csvClass c_;
+
+    c_.csvParse(c, r);
     printVector(r);
 }
 

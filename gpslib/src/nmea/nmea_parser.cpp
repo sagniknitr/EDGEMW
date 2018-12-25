@@ -2,7 +2,7 @@
 #include <string.h>
 #include <vector>
 #include <string>
-#include <csvparse.hpp>
+#include <csvclass.hpp>
 #include <cstring>
 #include <stdint.h>
 #include <map>
@@ -520,7 +520,13 @@ void dumpContents(std::vector<std::string> values)
 nmeaString_t nmeaParser::parseNMEA(std::string nmeaString)
 {
     std::vector<std::string> values;
-    csvParse csv(nmeaString, values);
+    csvClass csv;
+    int ret;
+
+    ret = csv.csvParse(nmeaString, values);
+    if (ret <= 0) {
+        return UNKNOWN;
+    }
 
     std::vector<std::string>::reverse_iterator it;
     char lastMsg[20];
@@ -554,6 +560,7 @@ nmeaString_t nmeaParser::parseNMEA(std::string nmeaString)
 
     cksum[j] = '\0';
 
+    // FIXME: handle checksum validation
     
     values.pop_back();
 
