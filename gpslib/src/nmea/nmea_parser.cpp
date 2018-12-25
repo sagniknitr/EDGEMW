@@ -19,7 +19,7 @@ inline void nmeaParser::safeInc(size_t *pos, size_t total)
 }
 
 bool
-nmeaParser::parseGGA(std::vector<std::string> &values, size_t offset)
+nmeaParser::parseGGA(std::vector<std::string> &values)
 {
     size_t vecSize = values.size();
     size_t pos = 1;
@@ -105,14 +105,13 @@ nmeaParser::parseGGA(std::vector<std::string> &values, size_t offset)
 
     safeInc(&pos, vecSize);
 
-    offset = offset;
     GGA.isValid = true;
 
     return true;
 }
 
 bool
-nmeaParser::parseGLL(std::vector<std::string> &values, size_t offset)
+nmeaParser::parseGLL(std::vector<std::string> &values)
 {
     size_t vecSize = values.size();
     size_t pos = 1;
@@ -157,13 +156,11 @@ nmeaParser::parseGLL(std::vector<std::string> &values, size_t offset)
         GLL.isValid = true;
     }
 
-    offset = offset;
-
     return true;
 }
 
 bool
-nmeaParser::parseGSA(std::vector<std::string> &values, size_t offset)
+nmeaParser::parseGSA(std::vector<std::string> &values)
 {
     size_t vecSize = values.size();
     size_t pos = 1;
@@ -215,13 +212,11 @@ nmeaParser::parseGSA(std::vector<std::string> &values, size_t offset)
 
     GSA.isValid = 1;
     
-    offset = offset;
-
     return true;
 }
 
 bool
-nmeaParser::parseGSV(std::vector<std::string> &values, size_t offset)
+nmeaParser::parseGSV(std::vector<std::string> &values)
 {
     size_t vecSize = values.size();
     size_t pos = 1;
@@ -282,13 +277,11 @@ nmeaParser::parseGSV(std::vector<std::string> &values, size_t offset)
 
     GSV.isValid = 1;
 
-    offset = offset;
-
     return true;
 }
 
 bool
-nmeaParser::parseRMB(std::vector<std::string> &values, size_t offset)
+nmeaParser::parseRMB(std::vector<std::string> &values)
 {
     size_t vecSize = values.size();
     size_t pos = 1;
@@ -381,13 +374,11 @@ nmeaParser::parseRMB(std::vector<std::string> &values, size_t offset)
 
     RMB.isValid = 1;
 
-    offset = offset;
-
     return true;
 }
 
 bool
-nmeaParser::parseRMC(std::vector<std::string> &values, size_t offset)
+nmeaParser::parseRMC(std::vector<std::string> &values)
 {
     size_t vecSize = values.size();
     size_t pos = 1;
@@ -465,15 +456,13 @@ nmeaParser::parseRMC(std::vector<std::string> &values, size_t offset)
         RMC.W = true;
     }
 
-    offset = offset;
-    
     RMC.isValid = 1;
 
     return true;
 }
 
 bool
-nmeaParser::parseVTG(std::vector<std::string> &values, size_t offset)
+nmeaParser::parseVTG(std::vector<std::string> &values)
 {
     size_t vecSize = values.size();
     size_t pos = 1;
@@ -514,8 +503,6 @@ nmeaParser::parseVTG(std::vector<std::string> &values, size_t offset)
     safeInc(&pos, vecSize);
 
     VTG.isValid = 1;
-
-    offset = offset;
 
     return true;
 }
@@ -583,7 +570,7 @@ nmeaString_t nmeaParser::parseNMEA(std::string nmeaString)
     //dumpContents(values);
 
     if (nmeaString.compare(3, 3, "GGA") == 0) {
-        if (!parseGGA(values, 6))
+        if (!parseGGA(values))
             return UNKNOWN;
 
         printGGA();
@@ -591,7 +578,7 @@ nmeaString_t nmeaParser::parseNMEA(std::string nmeaString)
     }
 
     if (nmeaString.compare(3, 3, "GLL") == 0) {
-        if (!parseGLL(values, 6))
+        if (!parseGLL(values))
             return UNKNOWN;
 
         printGLL();
@@ -599,7 +586,7 @@ nmeaString_t nmeaParser::parseNMEA(std::string nmeaString)
     }
 
     if (nmeaString.compare(3, 3, "GSA") == 0) {
-        if (!parseGSA(values, 6))
+        if (!parseGSA(values))
             return UNKNOWN;
 
         printGSA();
@@ -607,7 +594,7 @@ nmeaString_t nmeaParser::parseNMEA(std::string nmeaString)
     }
 
     if (nmeaString.compare(3, 3, "GSV") == 0) {
-        if (!parseGSV(values, 6))
+        if (!parseGSV(values))
             return UNKNOWN;
 
         printGSV();
@@ -615,7 +602,7 @@ nmeaString_t nmeaParser::parseNMEA(std::string nmeaString)
     }
 
     if (nmeaString.compare(3, 3, "RMB") == 0) {
-        if (!parseRMB(values, 6))
+        if (!parseRMB(values))
             return UNKNOWN;
 
         printRMB();
@@ -623,7 +610,7 @@ nmeaString_t nmeaParser::parseNMEA(std::string nmeaString)
     }
 
     if (nmeaString.compare(3, 3, "RMC") == 0) {
-        if (!parseRMC(values, 6))
+        if (!parseRMC(values))
             return UNKNOWN;
 
         printRMC();
@@ -631,7 +618,7 @@ nmeaString_t nmeaParser::parseNMEA(std::string nmeaString)
     }
 
     if (nmeaString.compare(3, 3, "VTG") == 0) {
-        if (!parseVTG(values, 6))
+        if (!parseVTG(values))
             return UNKNOWN;
 
         printVTG();

@@ -16,9 +16,10 @@ int main(int argc, char **argv)
     char *ip = NULL;
     int port = 0;
     int conn = 0;
+    int exec_mode = 0;
     int ret;
 
-    while ((ret = getopt(argc, argv, "i:p:tuUcsC:")) != -1) {
+    while ((ret = getopt(argc, argv, "i:p:tuUcsC:e")) != -1) {
         switch (ret) {
             case 'i':
                 ip = optarg;
@@ -40,6 +41,9 @@ int main(int argc, char **argv)
             break;
             case 's':
                 server = 1;
+            break;
+            case 'e':
+                exec_mode = 1;
             break;
             case 'C':
                 conn = atoi(optarg);
@@ -87,7 +91,7 @@ int main(int argc, char **argv)
 
     fprintf(stderr, "socket %d created\n", sock);
 
-    while (1) {
+    while (exec_mode) {
         char hello[ ] = "testing message..\n";
 
         if (tcp) {

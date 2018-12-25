@@ -4,6 +4,9 @@
 
 void edge_os_list_init(struct edge_os_list_base *base)
 {
+    if (!base)
+        return;
+
     base->tail = NULL;
     base->head = NULL;
 }

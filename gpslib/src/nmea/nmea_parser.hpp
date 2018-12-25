@@ -208,19 +208,19 @@ class nmeaParser {
 
         struct nmeaSentenceVTG VTG;
 
-        bool parseGGA(std::vector<std::string> &values, size_t offset);
+        bool parseGGA(std::vector<std::string> &values);
 
-        bool parseGLL(std::vector<std::string> &values, size_t offset);
+        bool parseGLL(std::vector<std::string> &values);
 
-        bool parseGSA(std::vector<std::string> &values, size_t offset);
+        bool parseGSA(std::vector<std::string> &values);
 
-        bool parseGSV(std::vector<std::string> &values, size_t offset);
+        bool parseGSV(std::vector<std::string> &values);
 
-        bool parseRMB(std::vector<std::string> &values, size_t offset);
+        bool parseRMB(std::vector<std::string> &values);
 
-        bool parseRMC(std::vector<std::string> &values, size_t offset);
+        bool parseRMC(std::vector<std::string> &values);
 
-        bool parseVTG(std::vector<std::string> &values, size_t offset);
+        bool parseVTG(std::vector<std::string> &values);
 
         inline void safeInc(size_t *pos, size_t total);
 };

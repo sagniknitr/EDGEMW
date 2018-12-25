@@ -2,8 +2,21 @@ cmake_minimum_required(VERSION 2.8)
 
 project(EDGEMW)
 
-set(CMAKE_C_FLAGS "-O0 -ggdb -g -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow -fPIE -fPIC -fprofile-arcs -ftest-coverage -D_FORTIFY_SOURCE=2 -pg -fstack-usage -Wstack-usage=8192 -DCONFIG_UNIT_TESTS")
-set(CMAKE_CXX_FLAGS "-std=c++11 -pg -fprofile-arcs -ftest-coverage -std=c++11 -DCONFIG_UNIT_TESTS -fstack-usage -Wstack-usage=8192")
+option(CONFIG_USE_CLANG "test with clang / clang++" off)
+
+if (CONFIG_USE_CLANG)
+    message("using clang..")
+    set(CMAKE_C_COMPILER "clang")
+    set(CMAKE_C_FLAGS "-Wall")
+    set(CMAKE_CXX_COMPILER "clang++")
+    set(CMAKE_CXX_FLAGS "-Wall -std=c++11")
+else()
+    message("using gcc..")
+    set(CMAKE_C_COMPILER "gcc")
+    set(CMAKE_C_FLAGS "-O0 -ggdb -g -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow -fPIE -fPIC -fprofile-arcs -ftest-coverage -D_FORTIFY_SOURCE=2 -pg -fstack-usage -Wstack-usage=8192 -DCONFIG_UNIT_TESTS")
+    set(CMAKE_CXX_COMPILER "g++")
+    set(CMAKE_CXX_FLAGS "-std=c++11 -pg -fprofile-arcs -ftest-coverage -std=c++11 -DCONFIG_UNIT_TESTS -fstack-usage -Wstack-usage=8192")
+endif()
 
 set(SOURCES
         common/evtloop/evtloop.c
