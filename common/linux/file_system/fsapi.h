@@ -21,5 +21,9 @@ int edgeos_open_file(const char *filename, const char *mode);
 
 int edgeos_read_file__cb(const void *priv, const char *filename, void (*read_callback)(const void *ptr, void *data, int data_len));
 
+int edgeos_get_filesize(const char *filename, size_t *file_size);
+
+int edgeos_read_directory(void *priv, const char *dir,
+                        void (*read_callback)(void *priv, const char *filename));
 #endif
 

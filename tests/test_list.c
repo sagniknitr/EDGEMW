@@ -92,6 +92,15 @@ static int large_list_test()
     if (edge_os_list_find_elem(&b, cmp_f, &array[1004]))
         return -1;
 
+    if (edge_os_list_delete(&b, &array[0], NULL) != 1)
+        return -1;
+
+    if (edge_os_list_delete(&b, &array[999], free_f) != 1)
+        return -1;
+
+    if (edge_os_list_delete(&b, &array[1004], NULL) != 0)
+        return -1;
+
     edge_os_list_free(&b, free_f);
 
     if (counter == 1000)

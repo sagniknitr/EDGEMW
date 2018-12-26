@@ -11,7 +11,10 @@ int edgeos_create_file(const char *filename)
 {
     int fd;
 
-    fd = open(filename, O_CREAT | O_RDWR, S_IRWXU);
+    if (!filename)
+        return -1;
+
+    fd = open(filename, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
     if (fd < 0)
         return -1;
 
@@ -126,6 +129,9 @@ int edgeos_get_filesize(const char *filename, size_t *file_size)
     struct stat s;
     int ret;
 
+    if (!file_size)
+        return -1;
+
     ret = stat(filename, &s);
     if (ret)
         return -1;
@@ -140,7 +146,7 @@ int edgeos_read_directory(void *priv, const char *dir,
     struct dirent *e;
     DIR *d;
 
-    if (!read_callback)
+    if (!read_callback || !dir)
         return -1;
 
     d = opendir(dir);
@@ -161,6 +167,9 @@ int edgeos_file_in_directory(const char *dir, const char *filename)
     struct dirent *e;
     int file_present = 0;
     DIR *d;
+
+    if (!dir || !filename)
+        return -1;
 
     d = opendir(dir);
     if (!d)

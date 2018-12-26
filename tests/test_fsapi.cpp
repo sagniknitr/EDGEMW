@@ -4,6 +4,12 @@ extern "C" {
 #include <fsapi.h>
 }
 
+
+void callback_(void *priv, const char *filename)
+{
+    std::cerr << "file : " << filename << std::endl;
+}
+
 class fsAPITests {
     private:
 
@@ -55,6 +61,37 @@ class fsAPITests {
             edgeos_close_file(fd);
         }
 
+        void testFileDelete(const char *file)
+        {
+            int fd;
+
+            fd = edgeos_create_file(file);
+            if (fd < 0)
+                return;
+
+            edgeos_delete_file(file);
+        }
+
+        void testFileSize(const char *file)
+        {
+            int ret;
+            size_t size;
+
+            ret = edgeos_get_filesize(file, &size);
+            if (ret < 0)
+                return;
+
+            std::cerr << "file size : " << size << std::endl;
+        }
+
+        void testReadDirectory(const char *dir)
+        {
+            edgeos_read_directory(NULL, dir, callback_);
+
+            edgeos_read_directory(NULL, NULL, callback_);
+
+            edgeos_read_directory(NULL, NULL, NULL);
+        }
 
     public:
         fsAPITests() { }
@@ -65,6 +102,9 @@ class fsAPITests {
             testOpenNewSuccess("./t");
             testFileWrite("./t");
             testFileRead("./t");
+            testFileDelete("./t");
+            testFileSize("./t");
+            testReadDirectory("./");
         }
 };
 
