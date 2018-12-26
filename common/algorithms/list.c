@@ -48,6 +48,44 @@ void edge_os_list_free(struct edge_os_list_base *base,
     }
 }
 
+int edge_os_list_delete(struct edge_os_list_base *base,
+                        void *item,
+                        void (*free_callback)(void *data))
+{
+    struct edge_os_list *t;
+    struct edge_os_list *t_old;
+
+    t = t_old = base->head;
+
+    if (t->data == item) {
+        base->head = t->next;
+
+        if (free_callback)
+            free_callback(t->data);
+
+        free(t);
+
+        return 1;
+    }
+
+    while (t) {
+        if (t->data == item) {
+            t_old->next = t->next;
+
+            if (free_callback)
+                free_callback(t->data);
+
+            free(t);
+
+            return 1;
+        }
+        t_old = t;
+        t = t->next;
+    }
+
+    return 0;
+}
+
 int edge_os_list_for_each(struct edge_os_list_base *base,
                           void (*list_for_callback)(void *data, void *priv),
                           void *priv)

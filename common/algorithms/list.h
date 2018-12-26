@@ -47,5 +47,9 @@ void *edge_os_list_find_elem(struct edge_os_list_base *base,
                            int (*cmpare_cb)(void *data, void *given),
                            void *given);
 
+int edge_os_list_delete(struct edge_os_list_base *base,
+                        void *item,
+                        void (*free_callback)(void *data));
+
 #endif
 
