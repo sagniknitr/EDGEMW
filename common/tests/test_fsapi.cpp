@@ -32,7 +32,7 @@ class fsAPITests {
                 if (ret <= 0)
                     break;
 
-                edgeos_write_file(2, data, ret);
+                //edgeos_write_file(2, data, ret);
             }
 
             edgeos_close_file(fd);
@@ -68,10 +68,12 @@ class fsAPITests {
         }
 };
 
-int main()
+int fsAPI_test(int argc, char **argv)
 {
     fsAPITests t;
 
     t.testAll();
+
+    return 0;
 }
 

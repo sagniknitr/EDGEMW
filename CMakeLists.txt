@@ -63,9 +63,6 @@ set(NMEA_TEST_SOURCES
 set(TOK_PARSE_SOURCES
         common/tests/test_tokparse.cpp)
 
-set(FSAPI_TEST_SOURCES
-        common/tests/test_fsapi.cpp)
-
 set(EVTLOOP_TEST_SOURCES
         common/tests/test_evtloop.cpp)
 
@@ -74,6 +71,7 @@ set(TCPSERVER_TEST_SOURCES
 
 set(TEST_CASES_SOURCES
         common/tests/test_framework.cpp
+        common/tests/test_fsapi.cpp
         common/tests/test_list.c
         common/tests/test_prng.c)
         
@@ -121,9 +119,6 @@ target_link_libraries(nmeaTest pthread EdgeOS gcov)
 
 add_executable(tokTest ${TOK_PARSE_SOURCES})
 target_link_libraries(tokTest pthread EdgeOS gcov)
-
-add_executable(fsAPITests ${FSAPI_TEST_SOURCES})
-target_link_libraries(fsAPITests pthread EdgeOS gcov)
 
 add_executable(ELTest ${EVTLOOP_TEST_SOURCES})
 target_link_libraries(ELTest pthread EdgeOS gcov)

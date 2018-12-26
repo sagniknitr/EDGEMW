@@ -7,12 +7,15 @@ int prng_test(int argc, char **argv);
 int list_test(int argc, char **argv);
 }
 
+int fsAPI_test(int argc, char **argv);
+
 static struct test_cases {
     std::string name;
     int (*executor)(int argc, char **argv);
 } test_case[] = {
     {"list_test", list_test},
     {"prng_test", prng_test},
+    {"fsapi_test", fsAPI_test},
 };
 
 int main(int argc, char **argv)
