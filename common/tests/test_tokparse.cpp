@@ -11,7 +11,7 @@ void printVector(std::vector<std::string> s)
     }
 }
 
-int main()
+int tokparse_test(int argc, char **argv)
 {
     std::string b = "/home/dev/test1/test2/test3/test4/test5/";
     std::string c = "/home,dev,test1,test2,test3,test4,test5";
@@ -30,5 +30,7 @@ int main()
 
     c_.csvParse(c, r);
     printVector(r);
+
+    return 0;
 }
 
