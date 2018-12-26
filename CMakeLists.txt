@@ -74,7 +74,8 @@ set(TCPSERVER_TEST_SOURCES
 
 set(TEST_CASES_SOURCES
         common/tests/test_framework.cpp
-        common/tests/test_list.c)
+        common/tests/test_list.c
+        common/tests/test_prng.c)
         
 include_directories(
     common/evtloop/
