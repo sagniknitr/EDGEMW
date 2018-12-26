@@ -13,6 +13,9 @@ char = 0
 # let the comm happen and log
 time.sleep(10)
 
+os.system("killall EdgeOSLogger")
+os.system("killall loggerTest")
+
 for f in os.listdir('.'):
     if os.path.isfile(f):
         if 'test' in f:
