@@ -7,16 +7,21 @@
 int csvClass::csvParse(std::string input, std::vector<std::string> &output)
 {
     size_t i;
-    int j;
+    size_t len = input.length();
+    size_t j;
+
+    if (input.length() == 0) {
+        return -1;
+    }
 
     j = 0;
 
     char s[1024];
 
-    for (i = 0; i != input.length(); i ++) {
+    for (i = 0; i != len; i ++) {
 
-        if ((input[i] != '\0') && (input[i] != ',')) {
-            if (j >= 1024) {
+        if (input[i] != ',') {
+            if (j >= sizeof(s) - 1) {
                 break;
             }
             s[j] = input[i];
