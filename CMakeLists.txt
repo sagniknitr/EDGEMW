@@ -71,6 +71,10 @@ set(EVTLOOP_TEST_SOURCES
 
 set(TCPSERVER_TEST_SOURCES
         common/tests/test_TcpServer.cpp)
+
+set(TEST_CASES_SOURCES
+        common/tests/test_framework.cpp
+        common/tests/test_list.c)
         
 include_directories(
     common/evtloop/
@@ -125,3 +129,6 @@ target_link_libraries(ELTest pthread EdgeOS gcov)
 
 add_executable(TcpServerTest ${TCPSERVER_TEST_SOURCES})
 target_link_libraries(TcpServerTest pthread EdgeOS gcov)
+
+add_executable(TestExecutor ${TEST_CASES_SOURCES})
+target_link_libraries(TestExecutor pthread EdgeOS gcov)

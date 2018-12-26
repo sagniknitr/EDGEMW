@@ -7,6 +7,8 @@
 #include <net_socket.h>
 #include <sys/un.h>
 #include <fcntl.h>
+#include <evtloop.h>
+#include <stdlib.h>
 #include <edgeos_logger.h>
 
 static int __socket(int family, int protocol)
@@ -47,7 +49,7 @@ int edge_os_create_udp_client()
     return edge_os_new_udp_socket();
 }
 
-int edge_os_create_udp_unix_client(char *addr)
+int edge_os_create_udp_unix_client(const char *addr)
 {
     struct sockaddr_un serv;
     int sock;
@@ -75,7 +77,7 @@ err:
     return -1;
 }
 
-int edge_os_create_udp_unix_server(char *addr)
+int edge_os_create_udp_unix_server(const char *addr)
 {
     return edge_os_create_udp_unix_client(addr);
 }
@@ -412,17 +414,181 @@ int edge_os_udp_recvfrom(int fd, void *msg, int msglen, char *dest, int *dest_po
         return -1;
     }
 
-    char *str;
+    if (dest) {
+        char *str;
 
-    str = inet_ntoa(r.sin_addr);
-    if (!str) {
-        return -1;
+        str = inet_ntoa(r.sin_addr);
+        if (!str)
+            return -1;
+
+        strcpy(dest, str);
     }
 
-    strcpy(dest, str);
-
-    *dest_port = htons(r.sin_port);
+    if (dest_port)
+        *dest_port = htons(r.sin_port);
 
     return ret;
+}
+
+struct edge_os_client_list {
+    int fd;
+    char ip[40];
+    int port;
+};
+
+struct edge_os_managed_server_config {
+    struct edge_os_list_base client_list;
+    void *evtloop_base;
+    uint8_t *buf;
+    void *app_ctx;
+    edge_os_server_type_t type;
+    int bufsize;
+    int fd;
+    void (*default_acceptor)(int fd, char *ip, int port);
+    int (*default_recv)(int fd, void *data, int datalen);
+};
+
+int edge_os_client_list_for_each(void *data, void *priv)
+{
+    struct edge_os_client_list *cl = data;
+    struct edge_os_client_list *cl_given = priv;
+
+    if (cl->fd == cl_given->fd) {
+        return 1;
+    }
+
+    return 0;
+}
+
+static int edge_os_client_list_add(struct edge_os_list_base *base, struct edge_os_client_list *cl)
+{
+    int elem_id;
+
+    elem_id = edge_os_list_find_elem(base, edge_os_client_list_for_each, cl);
+    if (elem_id == 0)
+        edge_os_list_add_tail(base, cl);
+
+    return elem_id ? 0: 1;
+}
+
+static void __edge_os_default_recv(void *priv)
+{
+    struct edge_os_managed_server_config *config = priv;
+    int fd = -1;
+    int rxsize;
+
+    rxsize = edge_os_tcp_recv(fd, config->buf, config->bufsize);
+    if (rxsize <= 0)
+        return;
+
+    if (config->default_recv)
+        config->default_recv(fd, config->buf, rxsize);
+}
+
+static void __edge_os_default_rfrm(void *priv)
+{
+    struct edge_os_managed_server_config *config = priv;
+    int fd = -1;
+    int rxsize;
+
+    rxsize = edge_os_udp_recvfrom(fd, config->buf, config->bufsize, NULL, NULL);
+    if (rxsize <= 0)
+        return;
+
+    if (config->default_recv)
+        config->default_recv(fd, config->buf, rxsize);
+}
+
+static void edge_os_default_acceptor(void *priv)
+{
+    struct edge_os_managed_server_config *config = priv;
+    struct edge_os_client_list *cl;
+    int ret;
+
+    cl = calloc(1, sizeof(struct edge_os_client_list));
+    if (!cl) {
+        return;
+    }
+
+    cl->fd = edge_os_accept_conn(config->fd, cl->ip, &cl->port);
+    if (cl->fd < 0)
+        goto bad;
+
+    if (config->default_acceptor)
+        config->default_acceptor(cl->fd, cl->ip, cl->port);
+
+    ret = edge_os_client_list_add(&config->client_list, cl);
+    if (ret == 0)
+        goto bad;
+
+    if ((config->type == EDGEOS_SERVER_TCP) ||
+            (config->type == EDGEOS_SERVER_TCP_UNIX))
+        edge_os_evtloop_register_socket(config->evtloop_base, config, cl->fd,
+                                        __edge_os_default_recv);
+    else
+        edge_os_evtloop_register_socket(config->evtloop_base, config, cl->fd,
+                                        __edge_os_default_rfrm);
+
+    return;
+
+bad:
+    free(cl);
+}
+
+void* edge_os_create_server_managed(void *evtloop_base,
+                                    void *app_ctx,
+                                    edge_os_server_type_t type,
+                                    const char *ip,
+                                    int port,
+                                    int n_conns,
+                                    int expect_bufsize,
+                                    void (*default_accept)(int fd, char *ip, int port),
+                                    int (*default_recv)(int fd, void *data, int datalen))
+{
+    struct edge_os_managed_server_config *config;
+    int fd;
+
+    config = calloc(1, sizeof(struct edge_os_managed_server_config));
+    if (!config) {
+        return NULL;
+    }
+
+    config->buf = calloc(1, expect_bufsize);
+    if (!config->buf)
+        goto bad;
+
+    config->bufsize = expect_bufsize;
+
+    edge_os_list_init(&config->client_list);
+
+    switch (type) {
+        case EDGEOS_SERVER_TCP:
+            fd = edge_os_create_tcp_server(ip, port, n_conns);
+        break;
+        case EDGEOS_SERVER_UDP:
+            fd = edge_os_create_udp_server(ip, port);
+        break;
+        case EDGEOS_SERVER_TCP_UNIX:
+            fd = edge_os_create_tcp_unix_server(ip, n_conns);
+        break;
+        case EDGEOS_SERVER_UDP_UNIX:
+            fd = edge_os_create_udp_unix_server(ip);
+        break;
+        default:
+            return NULL;
+    }
+
+    config->type = type;
+    config->default_acceptor = default_accept;
+    config->evtloop_base = evtloop_base;
+    config->default_recv = default_recv;
+
+    edge_os_evtloop_register_socket(evtloop_base, config, fd,
+                                    edge_os_default_acceptor);
+
+    return config;
+bad:
+    free(config);
+    return NULL;
 }
 

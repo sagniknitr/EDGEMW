@@ -13,6 +13,7 @@ run_gcc_tests() {
     make -j12
     cd ..
 
+    ./build/TestExecutor
     ./build/tokTest
     ./build/fsAPITests
     sudo python ./testing/test_socket.py

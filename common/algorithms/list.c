@@ -62,3 +62,20 @@ int edge_os_list_for_each(struct edge_os_list_base *base,
     return 0;
 }
 
+int edge_os_list_find_elem(struct edge_os_list_base *base,
+                           int (*cmpare_cb)(void *data, void *given),
+                           void *given)
+{
+    struct edge_os_list *t = base->head;
+
+    while (t) {
+        if (cmpare_cb(t->data, given))
+            return 1;
+
+        t = t->next;
+    }
+
+    return 0;
+}
+
+

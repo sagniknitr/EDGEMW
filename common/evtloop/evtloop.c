@@ -91,6 +91,9 @@ int edge_os_evtloop_register_socket(void *handle, void *app_priv, int sock,
     struct edge_os_evtloop_base *base = handle;
     struct edge_os_evtloop_socket *sock_;
 
+    if (sock < 0)
+        return -1;
+
     sock_ = calloc(1, sizeof(struct edge_os_evtloop_socket));
     if (!sock_) {
         return -1;
