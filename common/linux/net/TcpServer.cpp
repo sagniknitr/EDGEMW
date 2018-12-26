@@ -22,7 +22,7 @@ void autoReceiveData(int sock, void *priv)
     
     ret = edge_os_tcp_recv(sock, buf, sizeof(buf));
     if (ret < 0) {
-        return;
+        edge_os_del_tcp_socket(sock);
     }
 
     if (s->r_) {

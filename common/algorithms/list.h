@@ -43,7 +43,7 @@ void edge_os_list_free(struct edge_os_list_base *base,
 int edge_os_list_for_each(struct edge_os_list_base *base,
                           void (*list_for_callback)(void *data, void *priv), void *priv);
 
-int edge_os_list_find_elem(struct edge_os_list_base *base,
+void *edge_os_list_find_elem(struct edge_os_list_base *base,
                            int (*cmpare_cb)(void *data, void *given),
                            void *given);
 

@@ -462,7 +462,7 @@ int edge_os_client_list_for_each(void *data, void *priv)
 
 static int edge_os_client_list_add(struct edge_os_list_base *base, struct edge_os_client_list *cl)
 {
-    int elem_id;
+    void *elem_id;
 
     elem_id = edge_os_list_find_elem(base, edge_os_client_list_for_each, cl);
     if (elem_id == 0)

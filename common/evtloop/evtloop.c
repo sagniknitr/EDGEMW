@@ -84,7 +84,6 @@ int edge_os_evtloop_register_timer(void *handle, void *app_priv, int sec, int us
                                                __timer_callback);
 }
 
-
 int edge_os_evtloop_register_socket(void *handle, void *app_priv, int sock,
                                        void (*__socket_callback)(int sock, void *app_priv))
 {

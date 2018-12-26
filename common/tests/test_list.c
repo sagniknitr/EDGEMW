@@ -89,7 +89,7 @@ static int large_list_test()
         return -1;
 
     array[1004] = 1004;
-    if (edge_os_list_find_elem(&b, cmp_f, &array[1004]) == 1)
+    if (edge_os_list_find_elem(&b, cmp_f, &array[1004]))
         return -1;
 
     edge_os_list_free(&b, free_f);
