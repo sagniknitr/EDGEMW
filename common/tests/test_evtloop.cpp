@@ -9,8 +9,8 @@ extern "C" {
 static struct edge_os_evtloop_base base;
 
 // FIXME: std::bind 
-void accept_callback(void *priv);
-void recv_callback(void *priv);
+void accept_callback(int sock, void *priv);
+void recv_callback(int sock, void *priv);
 
 class TcpServer {
     private:
@@ -42,7 +42,7 @@ class TcpServer {
 
 };
 
-void accept_callback(void *app_priv)
+void accept_callback(int sock, void *app_priv)
 {
     int clientFd;
     TcpServer *s = reinterpret_cast<TcpServer *>(app_priv);
@@ -55,7 +55,7 @@ void accept_callback(void *app_priv)
     s->setClientFd(clientFd);
 }
 
-void recv_callback(void *app_priv)
+void recv_callback(int sock, void *app_priv)
 {
     char msg[80];
     TcpServer *s = reinterpret_cast<TcpServer *>(app_priv);

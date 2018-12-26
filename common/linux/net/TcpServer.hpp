@@ -16,8 +16,8 @@ class TcpServer {
 
         void registerNotifiers(receiveNotifier r, newConnNotifier n);
 
-        friend void autoAcceptConnections(void *priv);
-        friend void autoReceiveData(void *priv);
+        friend void autoAcceptConnections(int sock, void *priv);
+        friend void autoReceiveData(int sock, void *priv);
         int sendMessage(int fd, void *data, int dataLen);
 
     private:

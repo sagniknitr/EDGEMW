@@ -13,26 +13,25 @@ extern "C" {
 //static receiveNotifier *r__ = nullptr;
 //static newConnNotifier *n__ = nullptr;
 
-void autoReceiveData(void *priv)
+void autoReceiveData(int sock, void *priv)
 {
     TcpServer *s = reinterpret_cast<TcpServer *>(priv);
 
     uint8_t buf[4096];
-    int fd = s->cMgr_->firstFd(); // FIXME: fix this at the evtloop.c: make the callback accept a socket fd
     int ret;
     
-    ret = edge_os_tcp_recv(fd, buf, sizeof(buf));
+    ret = edge_os_tcp_recv(sock, buf, sizeof(buf));
     if (ret < 0) {
         return;
     }
 
     if (s->r_) {
         receiveNotifier r = s->r_;
-        (r)(fd, buf, ret);
+        (r)(sock, buf, ret);
     }
 }
 
-void autoAcceptConnections(void *priv)
+void autoAcceptConnections(int sock, void *priv)
 {
     TcpServer *s = reinterpret_cast<TcpServer *>(priv);
     char ip[20];

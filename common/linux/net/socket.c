@@ -471,35 +471,33 @@ static int edge_os_client_list_add(struct edge_os_list_base *base, struct edge_o
     return elem_id ? 0: 1;
 }
 
-static void __edge_os_default_recv(void *priv)
+static void __edge_os_default_recv(int sock, void *priv)
 {
     struct edge_os_managed_server_config *config = priv;
-    int fd = -1;
     int rxsize;
 
-    rxsize = edge_os_tcp_recv(fd, config->buf, config->bufsize);
+    rxsize = edge_os_tcp_recv(sock, config->buf, config->bufsize);
     if (rxsize <= 0)
         return;
 
     if (config->default_recv)
-        config->default_recv(fd, config->buf, rxsize);
+        config->default_recv(sock, config->buf, rxsize);
 }
 
-static void __edge_os_default_rfrm(void *priv)
+static void __edge_os_default_rfrm(int sock, void *priv)
 {
     struct edge_os_managed_server_config *config = priv;
-    int fd = -1;
     int rxsize;
 
-    rxsize = edge_os_udp_recvfrom(fd, config->buf, config->bufsize, NULL, NULL);
+    rxsize = edge_os_udp_recvfrom(sock, config->buf, config->bufsize, NULL, NULL);
     if (rxsize <= 0)
         return;
 
     if (config->default_recv)
-        config->default_recv(fd, config->buf, rxsize);
+        config->default_recv(sock, config->buf, rxsize);
 }
 
-static void edge_os_default_acceptor(void *priv)
+static void edge_os_default_acceptor(int sock, void *priv)
 {
     struct edge_os_managed_server_config *config = priv;
     struct edge_os_client_list *cl;

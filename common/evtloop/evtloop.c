@@ -86,7 +86,7 @@ int edge_os_evtloop_register_timer(void *handle, void *app_priv, int sec, int us
 
 
 int edge_os_evtloop_register_socket(void *handle, void *app_priv, int sock,
-                                       void (*__socket_callback)(void *app_priv))
+                                       void (*__socket_callback)(int sock, void *app_priv))
 {
     struct edge_os_evtloop_base *base = handle;
     struct edge_os_evtloop_socket *sock_;
@@ -154,7 +154,7 @@ static void _edge_os_socket_for_each(void *callback_data, void *priv)
     fd_set *fdset = priv;
 
     if (FD_ISSET(sock->fd, fdset)) {
-        sock->callback(sock->callback_data);
+        sock->callback(sock->fd, sock->callback_data);
     }
 }
 

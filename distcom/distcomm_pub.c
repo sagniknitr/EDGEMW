@@ -149,7 +149,7 @@ struct distcomm_sub_node {
     void (*sub_callback)(void *priv_ptr, void *data, int datalen);
 };
 
-void sub_generic_func(void *callback_ptr)
+void sub_generic_func(int sock, void *callback_ptr)
 {
     struct distcomm_sub_node *sub = callback_ptr;
     char ip[20];

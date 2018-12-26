@@ -52,7 +52,7 @@ void find_query_name(void *priv_data, void *ctx)
     free(query);
 }
 
-static void dist_master_rxmsg(void *callback_ptr)
+static void dist_master_rxmsg(int sock, void *callback_ptr)
 {
     struct dist_master_node *priv = callback_ptr;
     uint8_t msg[4096];
