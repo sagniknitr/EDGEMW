@@ -4,6 +4,7 @@ import time
 import os
 
 
+os.system('./build/EdgeOSLogger')
 os.system('./build/EdgeOSLogger -i 127.0.0.1 -p 4898 -f ./test &')
 os.system('./build/loggerTest 127.0.0.1 4898 &')
 
