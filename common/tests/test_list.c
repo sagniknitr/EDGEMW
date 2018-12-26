@@ -2,12 +2,6 @@
 #include <stdlib.h>
 #include <list.h>
 
-#define RET_IF_FAIL(__test) { \
-    if (__test) { \
-        return -1; \
-    } \
-}
-
 static int static_ptr_test()
 {
     struct edge_os_list_base b;
@@ -78,6 +72,7 @@ static int large_list_test()
     edge_os_list_init(&b);
 
     for (i = 0; i < 1000; i ++) {
+        array[i] = i;
         if (edge_os_list_add_tail(&b, &array[i]))
             return -1;
     }
@@ -93,6 +88,7 @@ static int large_list_test()
     if (edge_os_list_find_elem(&b, cmp_f, &array[0]) == 0)
         return -1;
 
+    array[1004] = 1004;
     if (edge_os_list_find_elem(&b, cmp_f, &array[1004]) == 1)
         return -1;
 
@@ -106,10 +102,14 @@ static int large_list_test()
 
 int list_test(int argc, char **argv)
 {
-    RET_IF_FAIL(static_ptr_test());
-    RET_IF_FAIL(dynamic_ptr_test());
-    RET_IF_FAIL(small_list_test());
-    RET_IF_FAIL(large_list_test());
+    if (static_ptr_test())
+        return -1;
+    if (dynamic_ptr_test())
+        return -1;
+    if (small_list_test())
+        return -1;
+    if (large_list_test())
+        return -1;
 
     return 0;
 }
