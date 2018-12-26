@@ -12,6 +12,7 @@ extern "C" {
 #include <fsapi.h>
 #include <net_socket.h>
 }
+#include <csignal>
 
 namespace EdgeOS {
 
@@ -154,12 +155,13 @@ LogSrv::LogSrv(int argc, char **argv): logFd_(-1), logSrv_(-1)
 {
     int ret;
 
+    rxbuf_ = nullptr;
+
     if (argc == 1) {
         displayHelp(argv[0]);
         return;
     }
 
-    rxbuf_ = nullptr;
     args_.fileSize_ = 100;
 
     while ((ret = getopt(argc, argv, "i:p:f:s:l:S:")) != -1) {
@@ -213,8 +215,18 @@ LogSrv::~LogSrv()
 
 };
 
+void termHandler(int signal)
+{
+    std::cerr << "term handle invoked" << std::endl;
+    exit(0);
+}
+
 int main(int argc, char **argv)
 {
+    std::signal(SIGINT, termHandler);
+    std::signal(SIGQUIT, termHandler);
+    std::signal(SIGTERM, termHandler);
+
     EdgeOS::LogSrv::LogSrv service(argc, argv);
 
     if (service.validateClassInit()) {
