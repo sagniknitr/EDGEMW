@@ -544,7 +544,6 @@ void* edge_os_create_server_managed(void *evtloop_base,
                                     int (*default_recv)(int fd, void *data, int datalen))
 {
     struct edge_os_managed_server_config *config;
-    int fd;
 
     config = calloc(1, sizeof(struct edge_os_managed_server_config));
     if (!config) {
@@ -561,16 +560,16 @@ void* edge_os_create_server_managed(void *evtloop_base,
 
     switch (type) {
         case EDGEOS_SERVER_TCP:
-            fd = edge_os_create_tcp_server(ip, port, n_conns);
+            config->fd = edge_os_create_tcp_server(ip, port, n_conns);
         break;
         case EDGEOS_SERVER_UDP:
-            fd = edge_os_create_udp_server(ip, port);
+            config->fd = edge_os_create_udp_server(ip, port);
         break;
         case EDGEOS_SERVER_TCP_UNIX:
-            fd = edge_os_create_tcp_unix_server(ip, n_conns);
+            config->fd = edge_os_create_tcp_unix_server(ip, n_conns);
         break;
         case EDGEOS_SERVER_UDP_UNIX:
-            fd = edge_os_create_udp_unix_server(ip);
+            config->fd = edge_os_create_udp_unix_server(ip);
         break;
         default:
             return NULL;
@@ -581,7 +580,7 @@ void* edge_os_create_server_managed(void *evtloop_base,
     config->evtloop_base = evtloop_base;
     config->default_recv = default_recv;
 
-    edge_os_evtloop_register_socket(evtloop_base, config, fd,
+    edge_os_evtloop_register_socket(evtloop_base, config, config->fd,
                                     edge_os_default_acceptor);
 
     return config;

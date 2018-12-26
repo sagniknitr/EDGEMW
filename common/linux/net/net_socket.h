@@ -63,13 +63,15 @@ int edge_os_socket_ioctl_reuse_addr(int fd);
 
 
 
-
-
-#define format_inet_sockaddr(__serv, __ip, __port) { \
-    __serv->sin_addr.s_addr = inet_addr(__ip); \
-    __serv->sin_port = htons(__port); \
-    __serv->sin_family = AF_INET; \
-};
+void* edge_os_create_server_managed(void *evtloop_base,
+                                    void *app_ctx,
+                                    edge_os_server_type_t type,
+                                    const char *ip,
+                                    int port,
+                                    int n_conns,
+                                    int expect_bufsize,
+                                    void (*default_accept)(int fd, char *ip, int port),
+                                    int (*default_recv)(int fd, void *data, int datalen));
 
 #endif
 

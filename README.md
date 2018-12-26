@@ -32,3 +32,9 @@ Below are some of the features. More to come soon.
 =============
 
 1. Logger service - remote logging, local logging yet to be done over unix domain
+
+
+Below are some of the screenshots of the tests that are run on the current software WIP master.
+
+[TCP perf test](tests/tcp_perf_test.png)
+

@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <net_socket.h>
+#include <evtloop.h>
 
 static int sock = -1;
 static int tcp = 0;
@@ -15,6 +16,19 @@ static char *ip = NULL;
 static int port = 0;
 static int conn = 0;
 static int exec_mode = 0;
+static int managed = 0;
+
+void accept_cb(int fd, char *ip1, int port1)
+{
+    printf("conn [%d] from ip %s port %d]\n", fd, ip1, port1);
+}
+
+int rx_cb(int fd, void *data, int datalen)
+{
+    printf("data from client %s\n", (char *)data);
+
+    return datalen;
+}
 
 int executor()
 {
@@ -45,7 +59,7 @@ int main(int argc, char **argv)
 {
     int ret;
 
-    while ((ret = getopt(argc, argv, "i:p:tuUcsC:e")) != -1) {
+    while ((ret = getopt(argc, argv, "i:p:tuUcsC:eP")) != -1) {
         switch (ret) {
             case 'i':
                 ip = optarg;
@@ -73,6 +87,9 @@ int main(int argc, char **argv)
             break;
             case 'C':
                 conn = atoi(optarg);
+            break;
+            case 'P':
+                managed = 1;
             break;
         }
     }
@@ -125,6 +142,25 @@ int main(int argc, char **argv)
 
             edge_os_del_udp_socket(sock);
         }
+    }
+
+    struct edge_os_evtloop_base evtloop_handle;
+
+    if (managed) {
+
+        edge_os_evtloop_init(&evtloop_handle, NULL);
+
+        edge_os_create_server_managed(&evtloop_handle,
+                                      NULL,
+                                      EDGEOS_SERVER_TCP,
+                                      ip,
+                                      port,
+                                      conn,
+                                      1000,
+                                      accept_cb,
+                                      rx_cb);
+
+        edge_os_evtloop_run(&evtloop_handle);
     }
 
     return 0;
