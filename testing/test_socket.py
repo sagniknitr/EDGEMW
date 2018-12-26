@@ -20,5 +20,3 @@ os.system('./build/EOSTest -i 127.0.0.1 -p 4898 -u -c')
 
 os.system('./build/EOSTest -i 127.0.0.1 -p 4898 -t -s -C -10')
 
-
-exit(0)

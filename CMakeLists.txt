@@ -49,29 +49,29 @@ set(SOURCES
         common/linux/net/ClientMgr.cpp)
 
 set(LIB_TEST_SOURCES
-        common/tests/test_socket.c)
+        tests/test_socket.c)
 
 set(DISTCOMM_SOURCES
         distcom/master.c)
 
 set(DIST_TEST_SOURCES
-        common/tests/test_distcom.c)
+        tests/test_distcom.c)
 
 set(NMEA_TEST_SOURCES
         gpslib/src/tests/unit_tests/unit_core.cpp)
 
 set(EVTLOOP_TEST_SOURCES
-        common/tests/test_evtloop.cpp)
+        tests/test_evtloop.cpp)
 
 set(TCPSERVER_TEST_SOURCES
-        common/tests/test_TcpServer.cpp)
+        tests/test_TcpServer.cpp)
 
 set(TEST_CASES_SOURCES
-        common/tests/test_framework.cpp
-        common/tests/test_fsapi.cpp
-        common/tests/test_tokparse.cpp
-        common/tests/test_list.c
-        common/tests/test_prng.c)
+        tests/test_framework.cpp
+        tests/test_fsapi.cpp
+        tests/test_tokparse.cpp
+        tests/test_list.c
+        tests/test_prng.c)
         
 include_directories(
     common/evtloop/
