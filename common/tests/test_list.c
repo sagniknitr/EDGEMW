@@ -96,10 +96,10 @@ static int large_list_test()
     if (edge_os_list_find_elem(&b, cmp_f, &array[1004]) == 1)
         return -1;
 
+    edge_os_list_free(&b, free_f);
+
     if (counter == 1000)
         return 0;
-
-    edge_os_list_free(&b, free_f);
 
     return -1;
 }
