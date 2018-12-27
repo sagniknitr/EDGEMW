@@ -12,10 +12,10 @@ namespace gpslib {
 
 inline void nmeaParser::safeInc(size_t *pos, size_t total)
 {
-    if (*pos >= total)
+    if ((*pos) >= total)
         std::out_of_range(std::to_string(*pos) + " is out of range ");
 
-        (*pos) ++;
+    (*pos) ++;
 }
 
 bool
