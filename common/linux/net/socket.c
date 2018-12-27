@@ -71,8 +71,7 @@ int edge_os_create_udp_unix_client(const char *addr)
 
     return sock;
 err:
-    if (sock > 0)
-        close(sock);
+    close(sock);
 
     return -1;
 }
@@ -115,14 +114,14 @@ int edge_os_create_tcp_server(const char *ip, int port, int n_conns)
     int sock = edge_os_new_tcp_socket();
 
     if (sock < 0) {
-        edge_os_err("socket: failed to create new tcp socket @ %s %u\n",
+        edge_os_log("socket: failed to create new tcp socket @ %s %u\n",
                                 __func__, __LINE__);
         return -1;
     }
 
     ret = edge_os_socket_ioctl_reuse_addr(sock);
     if (ret < 0) {
-        return -1;
+        goto fail;
     }
 
     if (ip)
@@ -146,8 +145,7 @@ int edge_os_create_tcp_server(const char *ip, int port, int n_conns)
     return sock;
 
 fail:
-    if (sock > 0)
-        close(sock);
+    close(sock);
 
     return -1;
 }
@@ -238,14 +236,14 @@ int edge_os_create_udp_server(const char *ip, int port)
     int sock = edge_os_new_udp_socket();
 
     if (sock < 0) {
-        edge_os_err("socket: failed to create new udp socket @ %s %u\n",
+        edge_os_log("socket: failed to create new udp socket @ %s %u\n",
                             __func__, __LINE__);
         return -1;
     }
 
     ret = edge_os_socket_ioctl_reuse_addr(sock);
     if (ret < 0) {
-        edge_os_err("socket: failed to bind to device @ %s %u\n",
+        edge_os_log("socket: failed to bind to device @ %s %u\n",
                             __func__, __LINE__);
         goto fail;
     }

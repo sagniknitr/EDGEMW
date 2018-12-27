@@ -35,6 +35,7 @@ set(SOURCES
         common/linux/net/socket.c
         common/logger/edgeos_logger.c
         common/linux/shmem/shmem.c
+        common/logger/logger.c
         distcom/distcomm_pub.c
         common/linux/crypto/prng.c
         common/util/errormsg.c

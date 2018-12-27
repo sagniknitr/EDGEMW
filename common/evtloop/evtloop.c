@@ -44,7 +44,7 @@ int __edge_os_evtloop_register_timer(void *handle, void *app_priv, int sec, int 
 
     timer->fd = timerfd_create(CLOCK_MONOTONIC, 0);
     if (timer->fd < 0) {
-        edge_os_err("evt: failed to timerfd_create @ %s %u\n", __func__, __LINE__);
+        edge_os_log("evt: failed to timerfd_create @ %s %u\n", __func__, __LINE__);
         return -1;
     }
 
@@ -62,7 +62,7 @@ int __edge_os_evtloop_register_timer(void *handle, void *app_priv, int sec, int 
 
     ret = timerfd_settime(timer->fd, 0, &its, NULL);
     if (ret < 0) {
-        edge_os_err("evt: failed to timerfd_settime sec [%d] usec [%d] @ %s %u\n",
+        edge_os_log("evt: failed to timerfd_settime sec [%d] usec [%d] @ %s %u\n",
                                         sec, usec, __func__, __LINE__);
         return -1;
     }
@@ -247,7 +247,7 @@ void edge_os_evtloop_run(void *handle)
 
     base->sig_fd = edge_os_evtloop_setup_term_signals();
     if (base->sig_fd < 0) {
-        edge_os_err("evtloop: failed to signalfd @ %s %u\n", 
+        edge_os_log("evtloop: failed to signalfd @ %s %u\n", 
                                     __func__, __LINE__);
         return;
     }
@@ -269,7 +269,7 @@ void edge_os_evtloop_run(void *handle)
 
             res = _edge_os_evtloop_caller(base, &allset);
             if (res < 0) {
-                edge_os_err("evtloop: exception @ %s %u\n",
+                edge_os_log("evtloop: exception @ %s %u\n",
                                     __func__, __LINE__);
                 break;
             }

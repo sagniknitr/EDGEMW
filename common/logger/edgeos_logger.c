@@ -74,7 +74,7 @@ int edge_os_logger_writemsg(void *handle, char *fmt, ...)
     ret = edge_os_udp_sendto(l->logfd_, buf, len, l->ipaddr, l->port);
     if (ret < 0) {
         if (l->fallback_to_local) {
-            edge_os_err(fmt, buf);
+            edge_os_log(fmt, buf);
         }
     }
 
@@ -93,7 +93,7 @@ int edge_os_logger_write_valist(void *handle, char *fmt, va_list arg)
     ret = edge_os_udp_sendto(_l->logfd_, buf, len, _l->ipaddr, _l->port);
     if (ret < 0) {
         if (_l->fallback_to_local) {
-            edge_os_err(fmt, buf);
+            edge_os_log(fmt, buf);
         }
     }
 

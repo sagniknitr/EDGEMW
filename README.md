@@ -10,7 +10,6 @@ Below are some of the features. More to come soon.
 
 
 ### Library interface:
-======================
 
 1. OS abstraction library for Linux
     1. Distributed publisher and subscriber system based on topics instead of ip address  - preliminary code
@@ -29,7 +28,6 @@ Below are some of the features. More to come soon.
 
 
 ### Services:
-=============
 
 1. Logger service - remote logging, local logging yet to be done over unix domain
 
