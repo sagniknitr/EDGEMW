@@ -15,6 +15,7 @@ os.system('./build/EOSTest -i 127.0.0.1 -p 4898 -u -s')
 os.system('./build/EOSTest -i 127.0.0.1 -p 4898 -u -c')
 os.system('./build/EOSTest -i 127.0.0.1 -p 4898 -u -U -c')
 os.system('./build/EOSTest -i 127.0.0.1 -s -u -U')
+os.system('./build/EOSTest -c -u -U')
 
 
 

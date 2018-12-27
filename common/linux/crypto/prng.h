@@ -4,7 +4,7 @@
 /**
  * @brief - PRNG seeding initialisation
  *
- * @param - PRNG device name (Linux has /dev/urandom and QNX has /dev/random..
+ * @param prngdev - PRNG device name (Linux has /dev/urandom and QNX has /dev/random..
  *
  *          pass in NULL and the library takes care of which one to use for OS
  *

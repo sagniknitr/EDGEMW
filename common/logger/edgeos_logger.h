@@ -5,6 +5,7 @@
 #include <stdarg.h>
 
 void edge_os_log(char *fmt, ...);
+void edge_os_log_with_error(int error, char *fmt, ...);
 
 void *edge_os_logger_init(char *ipaddr, int port);
 void edge_os_logger_deinit(void *handle);

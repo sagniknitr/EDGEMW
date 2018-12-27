@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <string.h>
+#include <errno.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <arpa/inet.h>
@@ -54,6 +56,12 @@ int edge_os_create_udp_unix_client(const char *addr)
     struct sockaddr_un serv;
     int sock;
     int ret;
+
+    if (!addr) {
+        edge_os_log("net: invalid addr %p @ %s %u\n",
+                                    addr, __func__, __LINE__);
+        return -1;
+    }
 
     sock = edge_os_new_unix_socket();
     if (sock < 0) {
@@ -114,13 +122,15 @@ int edge_os_create_tcp_server(const char *ip, int port, int n_conns)
     int sock = edge_os_new_tcp_socket();
 
     if (sock < 0) {
-        edge_os_log("socket: failed to create new tcp socket @ %s %u\n",
-                                __func__, __LINE__);
+        edge_os_log_with_error(errno, "net: failed to create tcp socket @ %s %u ",
+                                    __func__, __LINE__);
         return -1;
     }
 
     ret = edge_os_socket_ioctl_reuse_addr(sock);
     if (ret < 0) {
+        edge_os_log_with_error(errno, "net: failed to set reuse addr @ %s %u ",
+                                    __func__, __LINE__);
         goto fail;
     }
 
@@ -166,8 +176,11 @@ int edge_os_create_tcp_client(const char *ip, int port)
     serv.sin_family = AF_INET;
 
     ret = connect(sock, (struct sockaddr *)&serv, sizeof(serv));
-    if (ret < 0)
+    if (ret < 0) {
+        edge_os_log_with_error(errno, "net: failed to connect @ %s %u ",
+                                    __func__, __LINE__);
         goto fail;
+    }
 
     return sock;
 
@@ -184,7 +197,6 @@ int edge_os_accept_conn(int sock, char *ip, int *port)
 
     cli_conn = accept(sock, (struct sockaddr *)&serv, &len);
     if (cli_conn < 0) {
-        perror("accept");
         return -1;
     }
 
@@ -236,14 +248,14 @@ int edge_os_create_udp_server(const char *ip, int port)
     int sock = edge_os_new_udp_socket();
 
     if (sock < 0) {
-        edge_os_log("socket: failed to create new udp socket @ %s %u\n",
+        edge_os_log_with_error(errno, "socket: failed to create new udp socket @ %s %u ",
                             __func__, __LINE__);
         return -1;
     }
 
     ret = edge_os_socket_ioctl_reuse_addr(sock);
     if (ret < 0) {
-        edge_os_log("socket: failed to bind to device @ %s %u\n",
+        edge_os_log_with_error(errno, "socket: failed to bind to device @ %s %u ",
                             __func__, __LINE__);
         goto fail;
     }

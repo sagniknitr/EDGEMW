@@ -15,18 +15,46 @@ typedef enum {
  */
 int edge_os_new_udp_socket();
 
+/**
+ * @brief - create new unix socket
+ *
+ * @return - returns socket address
+ */
 int edge_os_new_unix_socket();
+
+/**
+ * @brief - create new tcp socket
+ *
+ * @return - return socket address
+ */
 int edge_os_new_tcp_socket();
 
 
+/**
+ * @brief - create tcp server
+ *
+ * @param ip - ip address of the server
+ * @param port - port number
+ * @param n_conns - number of connects to listen
+ *
+ * @return return socket address on success -1 on failure
+ */
 int edge_os_create_tcp_server(const char *ip, int port, int n_conn);
 
 int edge_os_create_tcp_client(const char *ip, int port);
 
 int edge_os_create_udp_server(const char *ip, int port);
 
+/**
+ * @brief - create UDP client
+ *
+ * @return - returns the UDP socket
+ */
 int edge_os_create_udp_client();
 
+/**
+ * @brief - delete UDP socket
+ */
 void edge_os_del_udp_socket(int sock);
 
 int edge_os_del_tcp_socket(int sock);
