@@ -1,3 +1,13 @@
+/**
+ * @brief - evtloop.c
+ *
+ * event loop framework
+ *
+ * @Author: Dev Naga (devendra.aaru@gmail.com)
+ *
+ * License Apache
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -34,6 +44,8 @@ int __edge_os_evtloop_register_timer(void *handle, void *app_priv, int sec, int 
 
     timer = calloc(1, sizeof(struct edge_os_evtloop_timer));
     if (!timer) {
+        edge_os_log("evtloop: failed to allocate @ %s %u\n",
+                                    __func__, __LINE__);
         return -1;
     }
 
@@ -67,7 +79,6 @@ int __edge_os_evtloop_register_timer(void *handle, void *app_priv, int sec, int 
         return -1;
     }
 
-    printf("set timer %d\n", timer->fd);
     FD_SET(timer->fd, &base->allfd_);
     if (timer->fd > base->maxfd_)
         base->maxfd_ = timer->fd;
@@ -82,6 +93,35 @@ int edge_os_evtloop_register_timer(void *handle, void *app_priv, int sec, int us
 {
     return __edge_os_evtloop_register_timer(handle, app_priv, sec, usec, 0,
                                                __timer_callback);
+}
+
+int _socklist_find(void *ptr, void *pass)
+{
+    struct edge_os_evtloop_socket *socket_node = ptr;
+    int *fd = pass;
+
+    return (socket_node->fd == *fd);
+}
+
+void _socklist_free_item(void *ptr)
+{
+    struct edge_os_evtloop_socket *sock = ptr;
+
+    free(sock);
+}
+
+int edge_os_evtloop_unregister_socket(void *handle, int sock)
+{
+    struct edge_os_evtloop_base *base = handle;
+    struct edge_os_evtloop_socket *data;
+
+    data = edge_os_list_find_elem(&base->socket_base, _socklist_find, &sock);
+    if (!data)
+        return -1;
+
+    edge_os_list_delete(&base->socket_base, data, _socklist_free_item);
+
+    return 0;
 }
 
 int edge_os_evtloop_register_socket(void *handle, void *app_priv, int sock,

@@ -4,8 +4,8 @@ before_install:
   - pip install --user cpp-coveralls
 
 script:
-  - bash build.sh clang
-  - bash build.sh
+  - bash build.sh run_gcc_tests clang
+  - bash build.sh run_gcc_tests
 
 after_success:
   - pip install --user cpp-coveralls

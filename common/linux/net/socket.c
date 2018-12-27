@@ -475,10 +475,27 @@ static int edge_os_client_list_add(struct edge_os_list_base *base, struct edge_o
     void *elem_id;
 
     elem_id = edge_os_list_find_elem(base, edge_os_client_list_for_each, cl);
-    if (elem_id == 0)
+    if (elem_id == NULL)
         edge_os_list_add_tail(base, cl);
 
     return elem_id ? 0: 1;
+}
+
+static void edge_os_client_list_del(void *ptr)
+{
+    struct edge_os_client_list *cl = ptr;
+
+    close(cl->fd);
+    free(cl);
+}
+
+static void edge_os_client_list_remove(struct edge_os_list_base *base, struct edge_os_client_list *cl)
+{
+    struct edge_os_client_list *cl1;
+
+    cl1 = edge_os_list_find_elem(base, edge_os_client_list_for_each, cl);
+    if (cl1)
+        edge_os_list_delete(base, cl1, edge_os_client_list_del);
 }
 
 static void __edge_os_default_recv(int sock, void *priv)
@@ -487,8 +504,15 @@ static void __edge_os_default_recv(int sock, void *priv)
     int rxsize;
 
     rxsize = edge_os_tcp_recv(sock, config->buf, config->bufsize);
-    if (rxsize <= 0)
+    if (rxsize <= 0) {
+        struct edge_os_client_list cl = {
+            .fd = sock,
+        };
+
+        edge_os_client_list_remove(&config->client_list, &cl);
+        edge_os_evtloop_unregister_socket(config->evtloop_base, sock);
         return;
+    }
 
     if (config->default_recv)
         config->default_recv(sock, config->buf, rxsize);
@@ -500,8 +524,10 @@ static void __edge_os_default_rfrm(int sock, void *priv)
     int rxsize;
 
     rxsize = edge_os_udp_recvfrom(sock, config->buf, config->bufsize, NULL, NULL);
-    if (rxsize <= 0)
+    if (rxsize <= 0) {
+        edge_os_evtloop_unregister_socket(config->evtloop_base, sock);
         return;
+    }
 
     if (config->default_recv)
         config->default_recv(sock, config->buf, rxsize);

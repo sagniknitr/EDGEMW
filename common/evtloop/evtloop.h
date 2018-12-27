@@ -43,5 +43,7 @@ int edge_os_evtloop_register_signal(void *handle, void *app_priv, int sig,
                                        void (*__signal_callback)(void *app_priv));
 void edge_os_evtloop_run(void *handle);
 
+int edge_os_evtloop_unregister_socket(void *handle, int sock);
+
 #endif
 

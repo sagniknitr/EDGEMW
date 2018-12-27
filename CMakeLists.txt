@@ -106,9 +106,6 @@ target_link_libraries(EdgeOSLogger pthread EdgeOS gcov rt)
 add_executable(loggerTest logsrv/tests/logsrv_test.c)
 target_link_libraries(loggerTest pthread EdgeOS gcov)
 
-#add_executable(shmTransport common/linux/transport/controller.c)
-#target_link_libraries(shmTransport pthread EdgeOS gcov)
-
 add_executable(distCommMaster ${DISTCOMM_SOURCES})
 target_link_libraries(distCommMaster pthread EdgeOS gcov)
 
@@ -132,3 +129,6 @@ target_link_libraries(TestExecutor pthread EdgeOS gcov)
 
 add_executable(TransferTest ${TRANSFER_TEST_SOURCES})
 target_link_libraries(TransferTest pthread EdgeOS gcov)
+
+
+

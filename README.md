@@ -4,12 +4,12 @@
 
 For planned features see [roadmap](roadmap.md)
 
-## Features:
+## Features
 
 Below are some of the features. More to come soon.
 
 
-### Library interface:
+### Library interface
 
 1. OS abstraction library for Linux
     1. Distributed publisher and subscriber system based on topics instead of ip address  - preliminary code
@@ -27,9 +27,10 @@ Below are some of the features. More to come soon.
     2. Token parser
 
 
-### Services:
+### Services
 
-1. Logger service - remote logging, local logging yet to be done over unix domain
+1. Logger service
+    1. remote logging, local logging yet to be done over unix domain
 
 
 Below are some of the screenshots of the tests that are run on the current software WIP master.

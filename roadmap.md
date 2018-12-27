@@ -10,7 +10,10 @@ the below list is based on the capture most commonly used calls to general algor
 
 Right now testing is only done with in Travis with Linux, X86 architecture (mostly 64 bits) - free opensource tier.
 
-1. supervisor service - monitor and restart specific services with in the system
+1. supervisor service
+    1. monitor and restart specific services with in the system
+    2. dynamic monitoring register and unregister (protobuf)
+    3. periodic update from each process via unix domain udp
 
 2. CLI for EDGE OS services
     1. remote monitoring via a simple console
@@ -37,12 +40,15 @@ Right now testing is only done with in Travis with Linux, X86 architecture (most
 7. File systems
     1. use MMAP for larger file seeks, writes and reads
     2. support sync and async features when CPU in idling mode
+    3. watching the files with inotify and notifying it to the corresponding registered callbak
+    4. unix domain socket interface support for `LogSrv`
 
 8. Thread pools
     1. worker threads independent of the evtloop - thread scheduling
 
 9. Networking
     1. raw socket API - with ether_header, iphdr, udphdr, tcphdr
+
 
 ## minor features
 
