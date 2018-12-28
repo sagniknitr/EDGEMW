@@ -174,6 +174,7 @@ int dc_subscriber_create(void *evtloop_base, const char *topic, void *usr_priv, 
     }
 
     if (priv->sm == STATE_DREQ_SENT) {
+        printf("read subscriber msg\n");
         _ds_subscriber_recv_msg(priv->fd, priv);
     }
 

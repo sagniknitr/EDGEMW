@@ -64,3 +64,41 @@ bad:
     return -1;
 }
 
+int edge_os_get_hwaddr(const char *ifname, uint8_t *macaddr)
+{
+    if (!macaddr) {
+        return -1;
+    }
+
+    int fd;
+    int ret;
+
+    fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (fd < 0) {
+        return -1;
+    }
+
+    struct ifreq ifr;
+
+    ifr.ifr_addr.sa_family = AF_INET;
+    strcpy(ifr.ifr_name, ifname);
+
+    ret = ioctl(fd, SIOCGIFHWADDR, &ifr);
+    if (ret < 0) {
+        goto bad;
+    }
+
+    void *ptr = &ifr.ifr_hwaddr;
+
+    memcpy(macaddr, ptr, 6);
+
+    close(fd);
+
+    return 0;
+
+bad:
+    close(fd);
+
+    return -1;
+}
+

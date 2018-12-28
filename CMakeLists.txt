@@ -80,7 +80,8 @@ set(TEST_CASES_SOURCES
         tests/test_fsapi.cpp
         tests/test_tokparse.cpp
         tests/test_list.c
-        tests/test_prng.c)
+        tests/test_prng.c
+        tests/test_sysioctl.c)
 
 set(TRANSFER_TEST_SOURCES
         tests/transfer_test.c)

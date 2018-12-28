@@ -5,10 +5,12 @@
 extern "C" {
 int prng_test(int argc, char **argv);
 int list_test(int argc, char **argv);
+int sysioctl_test(int argc, char **argv);
 }
 
 int fsAPI_test(int argc, char **argv);
 int tokparse_test(int argc, char **argv);
+
 
 static struct test_cases {
     std::string name;
@@ -18,6 +20,7 @@ static struct test_cases {
     {"prng_test", prng_test},
     {"fsapi_test", fsAPI_test},
     {"tokparse_test", tokparse_test},
+    {"sysioctl_test", sysioctl_test},
 };
 
 int main(int argc, char **argv)
