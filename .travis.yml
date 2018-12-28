@@ -8,12 +8,14 @@ before_install:
   - ./configure
   - make
   - sudo make install
+  - sudo ldconfig
   - git clone https://github.com/protobuf-c/protobuf-c.git
   - cd protobuf-c
   - ./autogen.sh
   - ./configure
   - make
   - sudo make install
+  - sudo ldconfig
 
 script:
   - bash build.sh run_gcc_tests clang
