@@ -35,6 +35,7 @@ make_release() {
 
     mkdir release/
 
+    # unstripped bin and lib
     cp -r build/libEdgeOS.a release/
     cp -r build/EdgeOSLogger release/
 }

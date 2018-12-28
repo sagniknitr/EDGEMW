@@ -58,7 +58,7 @@ int edge_os_create_udp_unix_client(const char *addr)
     int ret;
 
     if (!addr) {
-        edge_os_log("net: invalid addr %p @ %s %u\n",
+        edge_os_error("net: invalid addr %p @ %s %u\n",
                                     addr, __func__, __LINE__);
         return -1;
     }

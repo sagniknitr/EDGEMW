@@ -11,7 +11,11 @@ struct edge_os_list_base {
     struct edge_os_list *tail;
 };
 
+#define EDGEOS_LIST_FOR_EACH(__base, __t) \
+    for (__t = __base->head; __t; __t = __t->next)
 
+
+#define EDGEOS_LIST_GET_DATAPTR(__t) (__t->data)
 /**
  * @brief - initialise an empty linked list
  *

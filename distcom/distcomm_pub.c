@@ -23,21 +23,21 @@ void* distcomm_init(char *master_addr, int master_port)
 
     priv = calloc(1, sizeof(struct distcomm_priv));
     if (!priv) {
-        edge_os_log("distcomm: failed to allocate @ %s %u\n",
+        edge_os_error("distcomm: failed to allocate @ %s %u\n",
                                     __func__, __LINE__);
         return NULL;
     }
 
     ret = edge_os_evtloop_init(&priv->base, priv);
     if (ret) {
-        edge_os_log("distcomm: failed to event loop init @ %s %u\n",
+        edge_os_error("distcomm: failed to event loop init @ %s %u\n",
                                     __func__, __LINE__);
         goto fail;
     }
 
     priv->prng = edge_os_prng_init(NULL);
     if (ret) {
-        edge_os_log("distcomm: failed to prng init @ %s %u\n",
+        edge_os_error("distcomm: failed to prng init @ %s %u\n",
                                     __func__, __LINE__);
         goto fail;
     }
@@ -72,13 +72,13 @@ void* distcom_create_pub(void *ctx, char *pubname)
 
     pub_node = calloc(1, sizeof(struct distcomm_pub_node));
     if (!pub_node) {
-        edge_os_log("distcomm: failed to allocate @ %s %u\n",
+        edge_os_error("distcomm: failed to allocate @ %s %u\n",
                                 __func__, __LINE__);
         return NULL;
     }
 
     if (edge_os_prng_get_bytes(priv->prng, (uint8_t *)&port, 2)) {
-        edge_os_log("distcomm: failed to get prng bytes @ %s %u\n",
+        edge_os_error("distcomm: failed to get prng bytes @ %s %u\n",
                                 __func__, __LINE__);
         return NULL;
     }
@@ -87,7 +87,7 @@ void* distcom_create_pub(void *ctx, char *pubname)
 
     sock = edge_os_create_udp_mcast_client(NULL, port, "224.0.0.1", "192.168.1.1");
     if (sock < 0) {
-        edge_os_log("distcomm: failed to create udp multi_cast client @ %s %u\n",
+        edge_os_error("distcomm: failed to create udp multi_cast client @ %s %u\n",
                                 __func__, __LINE__);
         return NULL;
     }
@@ -105,7 +105,7 @@ void* distcom_create_pub(void *ctx, char *pubname)
 
     ret = dist_sdp_msg_reg_name(sock, &reg, priv->master_addr, priv->master_port);
     if (ret < 0) {
-        edge_os_log("distcomm: failed to register sdp name @ %s %u\n",
+        edge_os_error("distcomm: failed to register sdp name @ %s %u\n",
                                 __func__, __LINE__);
         return NULL;
     }
@@ -114,13 +114,13 @@ void* distcom_create_pub(void *ctx, char *pubname)
 
     ret = dist_sdp_msg_reg_name_resp(sock, &resp);
     if (ret < 0) {
-        edge_os_log("distcomm: failed to receive register sdp response @ %s %u\n",
+        edge_os_error("distcomm: failed to receive register sdp response @ %s %u\n",
                                 __func__, __LINE__);
         return NULL;
     }
 
     if (resp.resp != DIST_SDP_REG_NAME_RES_OK) {
-        edge_os_log("distcomm: resp.resp %d is not ok @ %s %u\n",
+        edge_os_error("distcomm: resp.resp %d is not ok @ %s %u\n",
                         resp.resp, __func__, __LINE__);
         return NULL;
     }
@@ -172,7 +172,7 @@ void* distcom_create_sub(void *ctx, char *subname, void (sub_callback)(void *pri
 
     sub_node = calloc(1, sizeof(struct distcomm_sub_node));
     if (!sub_node) {
-        edge_os_log("dist: failed to allocate sub_node @ %s %u\n",
+        edge_os_error("dist: failed to allocate sub_node @ %s %u\n",
                                 __func__, __LINE__);
         return NULL;
     }

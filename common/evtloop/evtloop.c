@@ -9,6 +9,7 @@
  */
 
 #include <stdio.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -44,7 +45,7 @@ int __edge_os_evtloop_register_timer(void *handle, void *app_priv, int sec, int 
 
     timer = calloc(1, sizeof(struct edge_os_evtloop_timer));
     if (!timer) {
-        edge_os_log("evtloop: failed to allocate @ %s %u\n",
+        edge_os_error("evtloop: failed to allocate @ %s %u\n",
                                     __func__, __LINE__);
         return -1;
     }
@@ -56,7 +57,7 @@ int __edge_os_evtloop_register_timer(void *handle, void *app_priv, int sec, int 
 
     timer->fd = timerfd_create(CLOCK_MONOTONIC, 0);
     if (timer->fd < 0) {
-        edge_os_log("evt: failed to timerfd_create @ %s %u\n", __func__, __LINE__);
+        edge_os_error("evt: failed to timerfd_create @ %s %u\n", __func__, __LINE__);
         return -1;
     }
 
@@ -74,7 +75,7 @@ int __edge_os_evtloop_register_timer(void *handle, void *app_priv, int sec, int 
 
     ret = timerfd_settime(timer->fd, 0, &its, NULL);
     if (ret < 0) {
-        edge_os_log("evt: failed to timerfd_settime sec [%d] usec [%d] @ %s %u\n",
+        edge_os_error("evt: failed to timerfd_settime sec [%d] usec [%d] @ %s %u\n",
                                         sec, usec, __func__, __LINE__);
         return -1;
     }
@@ -116,8 +117,11 @@ int edge_os_evtloop_unregister_socket(void *handle, int sock)
     struct edge_os_evtloop_socket *data;
 
     data = edge_os_list_find_elem(&base->socket_base, _socklist_find, &sock);
-    if (!data)
+    if (!data) {
+        edge_os_error("evtloop: could not find socket [%d] @ %s %u\n",
+                            sock, __func__, __LINE__);
         return -1;
+    }
 
     edge_os_list_delete(&base->socket_base, data, _socklist_free_item);
 
@@ -130,11 +134,16 @@ int edge_os_evtloop_register_socket(void *handle, void *app_priv, int sock,
     struct edge_os_evtloop_base *base = handle;
     struct edge_os_evtloop_socket *sock_;
 
-    if (sock < 0)
+    if (sock < 0) {
+        edge_os_error("evtloop: invalid socket [%d] @ %s %u\n",
+                            sock, __func__, __LINE__);
         return -1;
+    }
 
     sock_ = calloc(1, sizeof(struct edge_os_evtloop_socket));
     if (!sock_) {
+        edge_os_error("evtloop: failed to allocate @ %s %u\n",
+                            __func__, __LINE__);
         return -1;
     }
 
@@ -160,6 +169,8 @@ int edge_os_evtloop_register_signal(void *handle, void *app_priv, int sig,
 
     sig_ = calloc(1, sizeof(struct edge_os_evtloop_signal));
     if (!sig_) {
+        edge_os_error("evtloop: failed to allocate @ %s %u\n",
+                            __func__, __LINE__);
         return -1;
     }
 
@@ -206,6 +217,8 @@ static int _edge_os_evtloop_caller(struct edge_os_evtloop_base *base, fd_set *fd
 
         ret = read(base->sig_fd, &si, sizeof(si));
         if (ret < 0) {
+            edge_os_log_with_error(errno, "evtloop: failed to read signalfd_siginfo @ %s %u ",
+                                            __func__, __LINE__);
             return -1;
         }
 
@@ -287,7 +300,7 @@ void edge_os_evtloop_run(void *handle)
 
     base->sig_fd = edge_os_evtloop_setup_term_signals();
     if (base->sig_fd < 0) {
-        edge_os_log("evtloop: failed to signalfd @ %s %u\n", 
+        edge_os_error("evtloop: failed to signalfd @ %s %u\n", 
                                     __func__, __LINE__);
         return;
     }
@@ -309,7 +322,7 @@ void edge_os_evtloop_run(void *handle)
 
             res = _edge_os_evtloop_caller(base, &allset);
             if (res < 0) {
-                edge_os_log("evtloop: exception @ %s %u\n",
+                edge_os_error("evtloop: exception @ %s %u\n",
                                     __func__, __LINE__);
                 break;
             }

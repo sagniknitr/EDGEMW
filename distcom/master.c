@@ -63,7 +63,7 @@ static void dist_master_rxmsg(int sock, void *callback_ptr)
 
     ret = edge_os_udp_recvfrom(priv->sock, msg, sizeof(msg), ip, &port);
     if (ret < 0) {
-        edge_os_log("master: failed to udp recv from @ %s %u\n", __func__, __LINE__);
+        edge_os_error("master: failed to udp recv from @ %s %u\n", __func__, __LINE__);
         return;
     }
 

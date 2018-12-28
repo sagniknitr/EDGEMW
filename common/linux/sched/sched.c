@@ -5,13 +5,16 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-int edge_os_set_process_cpu(int cpu_number)
+int edge_os_set_process_cpu(int *cpu_number, int size)
 {
     cpu_set_t set;
+    int j;
     int ret;
 
     CPU_ZERO(&set);
-    CPU_SET(cpu_number, &set);
+
+    for (j = 0; j < size; j ++)
+        CPU_SET(cpu_number[j], &set);
 
     ret = sched_setaffinity(getpid(), sizeof(set), &set);
     if (ret < 0) {

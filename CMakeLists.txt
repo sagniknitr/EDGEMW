@@ -18,11 +18,15 @@ else()
     set(CMAKE_C_COMPILER "gcc")
 
     if (CONFIG_RELEASE)
+
         set(CMAKE_C_FLAGS "-O3 -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow -fPIE -fPIC -D_FORTIFY_SOURCE=2 ${OS_FLAGS}")
         set(CMAKE_CXX_FLAGS "-O3 -Wall -Wextra -Werror -Wno-unused-parameter -Wshadow -fPIC -fPIE -std=c++11 ${OS_FLAGS}")
+
     else()
+
         set(CMAKE_C_FLAGS "-O0 -ggdb -g -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow -fPIE -fPIC -fprofile-arcs -ftest-coverage -D_FORTIFY_SOURCE=2 -pg -DCONFIG_UNIT_TESTS ${OS_FLAGS}")
         set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -Wno-unused-parameter -Wshadow -fPIC -fPIE -std=c++11 -pg -fprofile-arcs -ftest-coverage -pg -std=c++11 -DCONFIG_UNIT_TESTS ${OS_FLAGS}")
+
     endif()
 
     set(CMAKE_CXX_COMPILER "g++")
@@ -48,7 +52,9 @@ set(SOURCES
         common/util/TokParse.cpp
         common/linux/net/TcpServer.cpp
         common/linux/net/ClientMgr.cpp
-        common/linux/sched/sched.c)
+        common/linux/sched/sched.c
+        common/linux/net/sysioctl.c
+        common/linux/pthreads/pthreads.c)
 
 set(LIB_TEST_SOURCES
         tests/test_socket.c)
@@ -77,6 +83,9 @@ set(TEST_CASES_SOURCES
 
 set(TRANSFER_TEST_SOURCES
         tests/transfer_test.c)
+
+set(THREAD_SOURCES
+        tests/test_pthread.c)
         
 include_directories(
     common/evtloop/
@@ -95,6 +104,7 @@ include_directories(
     common/util/
     common/linux/file_system/
     common/linux/sched/
+    common/linux/pthreads/
 )
 
 add_library(EdgeOS ${SOURCES})
@@ -130,5 +140,7 @@ target_link_libraries(TestExecutor pthread EdgeOS gcov)
 add_executable(TransferTest ${TRANSFER_TEST_SOURCES})
 target_link_libraries(TransferTest pthread EdgeOS gcov)
 
+add_executable(ThreadTest ${THREAD_SOURCES})
+target_link_libraries(ThreadTest pthread EdgeOS gcov)
 
 
