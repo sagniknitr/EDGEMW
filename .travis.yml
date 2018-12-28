@@ -2,10 +2,18 @@ language: c
 compiler: gcc clang
 before_install:
   - pip install --user cpp-coveralls
-  - mkdir -p $HOME/protobuf && pushd $HOME/protobuf
-        && curl -LO 'https://github.com/google/protobuf/releases/download/v3.4.0/protoc-3.4.0-linux-x86_64.zip'
-        && unzip protoc-3.4.0-linux-x86_64.zip
-        && popd
+  - git clone https://github.com/protocolbuffers/protobuf.git
+  - cd protobuf
+  - ./autogen.sh
+  - ./configure
+  - make
+  - sudo make install
+  - git clone https://github.com/protobuf-c/protobuf-c.git
+  - cd protobuf-c
+  - ./autogen.sh
+  - ./configure
+  - make
+  - sudo make install
 
 script:
   - bash build.sh run_gcc_tests clang
