@@ -9,4 +9,4 @@ script:
 
 after_success:
   - pip install --user cpp-coveralls
-  - coveralls --exclude tests/ --gcov-options '\-lp'
+  - coveralls --exclude build/ --exclude tests/ --gcov-options '\-lp'
