@@ -9,4 +9,4 @@ script:
 
 after_success:
   - pip install --user cpp-coveralls
-  - coveralls --exclude build/ --exclude tests/ --gcov-options '\-lp'
+  - coveralls --exclude gpslib/src/tests/ --exclude logsrv/tests/  --exclude tests/ --gcov-options '\-lp'
