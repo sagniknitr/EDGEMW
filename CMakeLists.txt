@@ -54,7 +54,8 @@ set(SOURCES
         common/linux/net/ClientMgr.cpp
         common/linux/sched/sched.c
         common/linux/net/sysioctl.c
-        common/linux/pthreads/pthreads.c)
+        common/linux/pthreads/pthreads.c
+        common/linux/net/ds/generated/dist_sdp.pb-c.c)
 
 set(LIB_TEST_SOURCES
         tests/test_socket.c)
@@ -86,6 +87,12 @@ set(TRANSFER_TEST_SOURCES
 
 set(THREAD_SOURCES
         tests/test_pthread.c)
+
+set(DS_SOURCES
+        common/linux/net/ds/controller.c)
+
+SET(DS_SAMPLE_SOURCES
+        common/linux/net/ds/sample.c)
         
 include_directories(
     common/evtloop/
@@ -105,10 +112,12 @@ include_directories(
     common/linux/file_system/
     common/linux/sched/
     common/linux/pthreads/
+    common/linux/net/ds/
+    common/linux/net/ds/generated/
 )
 
 add_library(EdgeOS ${SOURCES})
-target_link_libraries(EdgeOS pthread rt gcov)
+target_link_libraries(EdgeOS pthread rt gcov protobuf-c)
 
 add_executable(EdgeOSLogger logsrv/edgeos_logsrv.cpp)
 target_link_libraries(EdgeOSLogger pthread EdgeOS gcov rt)
@@ -143,4 +152,9 @@ target_link_libraries(TransferTest pthread EdgeOS gcov)
 add_executable(ThreadTest ${THREAD_SOURCES})
 target_link_libraries(ThreadTest pthread EdgeOS gcov)
 
+add_executable(DsController ${DS_SOURCES})
+target_link_libraries(DsController pthread EdgeOS gcov protobuf-c)
+
+add_executable(DsSample ${DS_SAMPLE_SOURCES})
+target_link_libraries(DsSample pthread EdgeOS gcov protobuf-c)
 

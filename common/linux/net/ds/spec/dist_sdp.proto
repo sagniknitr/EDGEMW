@@ -1,0 +1,66 @@
+
+// from sub to the master controller
+message dc_discovery_req {
+    required string topic_name = 1; // discover this particular pub
+};
+
+// from master controller to sub
+message dc_discovery_resp {
+    required bool is_topic_available = 1; // if pub avilable .. then directly register a data connection
+    required string topic_name = 2; // topic same name returnde from master controller to the sub
+    required string ipaddr = 3; // ipaddr of the pub
+    required uint32 port = 4; // port of the pub
+};
+
+// master controller notification to the pub and sub
+message dc_master_controller_notifications {
+    enum notification {
+        pub_availabile = 0; // if pub available, sub can create a data connection
+        pub_lost = 1; // if pub lost connection.. sub can do some actions if master controller notifies
+        sub_available = 2; // if sub is available, pub can create a data connection
+        sub_lost = 3; // if sub lost and is the only sub, then pub can stop sending any more data
+    };
+    required notification notify = 1;
+    required string topic_name = 2; // which pub / sub available or lost exactly
+    required string ipaddr = 3; // ip addr of the pub / sub
+    required uint32 port = 4; // port of the pub / sub
+};
+
+// from pub to master controller
+message dc_request_create_topic {
+    // name of the topic it is interested to create
+    required string topic_name = 1;
+
+    // is the topic needed to be local or over net ?
+    required bool is_local = 2;
+};
+
+// from master controller to pub node
+message dc_response_create_topic {
+    // topic name to be created
+    required string topic_name = 1;
+    // from master controller this is the assigned ip addr
+    required string ipaddr = 2;
+    // from master controller this is the assigned port
+    required uint32 port = 3;
+    // set to 1 if the topic is available.. if not set to false so pub can register a new topic again
+    required bool is_valid_topic = 4;
+};
+
+message dc_controller_msgs {
+    enum message_info {
+        discovery_req = 0;
+        discovery_resp = 1;
+        notifications = 2;
+        create_topic_req = 3;
+        create_topic_resp = 4;
+    };
+
+    required message_info mi = 1;
+    optional dc_discovery_req dreq = 2;
+    optional dc_discovery_resp dresp = 3;
+    optional dc_master_controller_notifications ns = 4;
+    optional dc_request_create_topic ctreq = 5;
+    optional dc_response_create_topic ctresp = 6;
+};
+
