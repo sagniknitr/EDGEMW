@@ -10,10 +10,13 @@ void thread_func(void *data)
         (*ptr) ++;
 
         fprintf(stderr, "val: %d\n", *ptr);
+        if (*ptr == 414214140) {
+            break;
+        }
     }
 }
 
-int main(int argc, char **argv)
+int pthread_test(int argc, char **argv)
 {
     int val = 0;
     void *p;
@@ -33,9 +36,6 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    while (1) {
-        sleep(10);
-    }
-
+    sleep(4);
 }
 

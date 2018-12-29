@@ -80,13 +80,11 @@ set(TEST_CASES_SOURCES
         tests/test_tokparse.cpp
         tests/test_list.c
         tests/test_prng.c
-        tests/test_sysioctl.c)
+        tests/test_sysioctl.c
+        tests/test_pthread.c)
 
 set(TRANSFER_TEST_SOURCES
         tests/transfer_test.c)
-
-set(THREAD_SOURCES
-        tests/test_pthread.c)
 
 set(DS_SOURCES
         common/linux/net/ds/controller.c)
@@ -148,9 +146,6 @@ target_link_libraries(TestExecutor pthread EdgeOS gcov)
 
 add_executable(TransferTest ${TRANSFER_TEST_SOURCES})
 target_link_libraries(TransferTest pthread EdgeOS gcov)
-
-add_executable(ThreadTest ${THREAD_SOURCES})
-target_link_libraries(ThreadTest pthread EdgeOS gcov)
 
 add_executable(DsController ${DS_SOURCES})
 target_link_libraries(DsController pthread EdgeOS gcov protobuf-c)
