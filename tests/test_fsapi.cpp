@@ -38,6 +38,10 @@ class fsAPITests {
                 if (ret <= 0)
                     break;
 
+                ret = edgeos_read_file__safe(fd, data, sizeof(data) - 1);
+                if (ret <= 0)
+                    break;
+
                 //edgeos_write_file(2, data, ret);
             }
 
@@ -56,6 +60,7 @@ class fsAPITests {
 
             for (i = 0; i < 10000; i ++) {
                 edgeos_write_file(fd, data, strlen(data));
+                edgeos_write_file__safe(fd, data, strlen(data));
             }
 
             edgeos_close_file(fd);
@@ -79,12 +84,13 @@ class fsAPITests {
             int fd;
 
             fd = edgeos_create_file_truncated(NULL, 1);
-            if (fd > 0)
-                return;
 
             fd = edgeos_create_file_truncated(file, 1024 * 1024 * 2);
             if (fd < 0)
                 return;
+
+            ret = edgeos_get_filesize(NULL, &size);
+            ret = edgeos_get_filesize("./string_xyz", &size);
 
             ret = edgeos_get_filesize(file, &size);
             if (ret < 0)
@@ -93,13 +99,25 @@ class fsAPITests {
             std::cerr << "file size : " << size << std::endl;
         }
 
-        void testReadDirectory(const char *dir)
+        void testReadDirectory(const char *dir, const char *file)
         {
             edgeos_read_directory(NULL, dir, callback_);
 
             edgeos_read_directory(NULL, NULL, callback_);
 
             edgeos_read_directory(NULL, NULL, NULL);
+
+            edgeos_read_directory(NULL, "pwd", callback_);
+
+            edgeos_file_in_directory(dir, file);
+
+            edgeos_file_in_directory(NULL, NULL);
+
+            edgeos_file_in_directory("pwd", file);
+
+            edgeos_file_in_directory(dir, "pwd..file");
+
+            edgeos_create_directory("pwd", 1, 1, 0);
         }
 
     public:
@@ -113,7 +131,7 @@ class fsAPITests {
             testFileRead("./t");
             testFileDelete("./t");
             testFileSize("./t");
-            testReadDirectory("./");
+            testReadDirectory("./", "EOSTest");
         }
 };
 

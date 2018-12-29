@@ -25,5 +25,10 @@ int edgeos_get_filesize(const char *filename, size_t *file_size);
 
 int edgeos_read_directory(void *priv, const char *dir,
                         void (*read_callback)(void *priv, const char *filename));
+
+int edgeos_file_in_directory(const char *dir, const char *filename);
+
+int edgeos_create_directory(const char *dir, int owner, int group, int other);
+
 #endif
 

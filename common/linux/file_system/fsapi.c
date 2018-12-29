@@ -120,7 +120,8 @@ int edgeos_read_file(int fd, void *msg, int msg_len)
 
 int edgeos_write_file__safe(int fd, void *msg, int msg_len)
 {
-    if (!msg || (msg_len <= 0))
+    // over head checks
+    if ((fd < 0) || !msg || (msg_len <= 0))
         return -1;
 
     return write(fd, msg, msg_len);
@@ -128,7 +129,8 @@ int edgeos_write_file__safe(int fd, void *msg, int msg_len)
 
 int edgeos_read_file__safe(int fd, void *msg, int msg_len)
 {
-    if (!msg || (msg_len <= 0))
+    // over head checks..
+    if ((fd < 0) || !msg || (msg_len <= 0))
         return -1;
 
     return read(fd, msg, msg_len);
