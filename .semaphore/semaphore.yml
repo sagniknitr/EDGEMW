@@ -12,4 +12,6 @@ blocks:
       - name: Docker build
         commands:
           - sudo apt-get --assume-yes install libprotobuf-c0-dev protobuf-c-compiler protobuf-compiler libprotobuf-dev libprotoc-dev libprotoc-dev libprotobuf-c-dev
+          - git clone https://github.com/devnaga/EDGEMW/
+          - cd EDGEMW
           - bash build.sh run_gcc_tests clang
