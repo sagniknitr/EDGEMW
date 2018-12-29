@@ -1,5 +1,8 @@
 # EDGE OS - Lightweight Middleware distribution
 
+[semaphore ci status](https://devnaga.semaphoreci.com/dashboards/my-work)
+
+[![codecov](https://codecov.io/gh/DevNaga/EDGEMW/branch/master/graph/badge.svg)](https://codecov.io/gh/DevNaga/EDGEMW)
 
 For planned features see [roadmap](roadmap.md)
 
