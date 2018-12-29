@@ -11,9 +11,10 @@ blocks:
       jobs:
       - name: Docker build
         commands:
+          - pip install --user cpp-coveralls
           - sudo apt-get --assume-yes install libprotobuf-c0-dev protobuf-c-compiler protobuf-compiler libprotobuf-dev libprotoc-dev libprotoc-dev libprotobuf-c-dev
           - git clone https://github.com/devnaga/EDGEMW/
           - cd EDGEMW
           - bash build.sh run_gcc_tests clang
-          - pip install --user cpp-coveralls
           - coveralls --exclude gpslib/src/tests/ --exclude logsrv/tests/  --exclude tests/ --gcov-options '\-lp'
+          - echo "build complete"
