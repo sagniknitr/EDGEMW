@@ -34,6 +34,7 @@ run_gcc_tests() {
     sudo python ./testing/test_socket.py
     sudo python ./testing/test_logger.py
     ./build/TestExecutor
+    exit 0
 }
 
 make_release() {
