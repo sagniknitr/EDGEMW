@@ -11,5 +11,5 @@ blocks:
       jobs:
       - name: Docker build
         commands:
-          - sudo apt-get install libprotobuf-c0-dev protobuf-c-compiler protobuf-compiler libprotobuf-dev libprotoc-dev libprotoc-dev libprotobuf-c-dev
+          - sudo apt-get --assume-yes install libprotobuf-c0-dev protobuf-c-compiler protobuf-compiler libprotobuf-dev libprotoc-dev libprotoc-dev libprotobuf-c-dev
           - bash build.sh run_gcc_tests clang
