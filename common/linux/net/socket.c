@@ -380,6 +380,43 @@ int edge_os_socket_ioctl_reuse_addr(int fd)
     return setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &set, sizeof(set));
 }
 
+int edge_os_socket_ioctl_reset_reuse_addr(int fd)
+{
+    int set = 0;
+
+    return setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &set, sizeof(set));
+}
+
+int edge_os_net_setmaxconn(int conns)
+{
+#define SOMAX_CONN_FILE "/proc/sys/net/core/somaxconn"
+    int fd;
+    char buf[10];
+    int ret;
+
+    ret = snprintf(buf, sizeof(buf), "%d\n", conns);
+
+    fd = open(SOMAX_CONN_FILE, O_WRONLY);
+    if (fd < 0) {
+        edge_os_log_with_error(errno, "failed to open %s @ %s %u ",
+                                    SOMAX_CONN_FILE, __func__, __LINE__);
+        return -1;
+    }
+
+    ret = write(fd, buf, ret);
+    if (ret < 0) {
+        edge_os_log_with_error(errno, "failed to write to %s @ %s %u ",
+                                    SOMAX_CONN_FILE, __func__, __LINE__);
+        close(fd);
+        return -1;
+    }
+
+    close(fd);
+
+    return 0;
+#undef SOMAX_CONN_FILE
+}
+
 int edge_os_udp_unix_sendto(int fd, void *msg, int msglen, char *dest)
 {
     struct sockaddr_un d;

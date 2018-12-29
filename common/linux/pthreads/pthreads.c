@@ -169,9 +169,9 @@ void edge_os_threadpool_schedule_work(void *tr_priv, void (*work)(void *data));
 
 void edge_os_thread_stop(void *tr_priv)
 {
-    struct edgeos_thread_priv *tpriv = tr_priv;
+//   struct edgeos_thread_priv *tpriv = tr_priv;
 
-    pthread_kill(tpriv->tid, SIGINT);
+//    pthread_kill(tpriv->tid, SIGINT);
 }
 
 

@@ -101,5 +101,7 @@ void* edge_os_create_server_managed(void *evtloop_base,
                                     void (*default_accept)(int fd, char *ip, int port),
                                     int (*default_recv)(int fd, void *data, int datalen));
 
+int edge_os_net_setmaxconn(int conns);
+
 #endif
 

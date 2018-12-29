@@ -111,6 +111,9 @@ int main(int argc, char **argv)
         TcpServer s(std::pair<std::string, int>("127.0.0.1", 1244));
     } else if (!strcmp(argv[1], "client")) {
         TcpClient c(std::pair<std::string, int>("127.0.0.1", 1244));
+    } else {
+        fprintf(stderr, "<%s> server/client\n", argv[0]);
+        return -1;
     }
 
     edge_os_evtloop_run(&base);

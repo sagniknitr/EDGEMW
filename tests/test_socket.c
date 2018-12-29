@@ -58,8 +58,9 @@ int executor()
 int main(int argc, char **argv)
 {
     int ret;
+    int maxconn = -1;
 
-    while ((ret = getopt(argc, argv, "i:p:tuUcsC:eP")) != -1) {
+    while ((ret = getopt(argc, argv, "i:p:tuUcsC:ePM:")) != -1) {
         switch (ret) {
             case 'i':
                 ip = optarg;
@@ -91,7 +92,14 @@ int main(int argc, char **argv)
             case 'P':
                 managed = 1;
             break;
+            case 'M':
+                maxconn = atoi(optarg);
+            break;
         }
+    }
+
+    if (maxconn > 0) {
+        edge_os_net_setmaxconn(maxconn);
     }
 
     if (server) {

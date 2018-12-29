@@ -11,7 +11,6 @@ void thread_func(void *data)
 
         if ((*ptr) == 0x1ead)
             break;
-        fprintf(stderr, "val: 0x%x\n", *ptr);
     }
     printf("thread exits..\n");
 }
