@@ -50,7 +50,7 @@ class fsAPITests {
             int fd;
             int i;
 
-            fd = edgeos_create_file(file);
+            fd = edgeos_open_file(file, "w");
             if (fd < 0)
                 return;
 
@@ -76,6 +76,15 @@ class fsAPITests {
         {
             int ret;
             size_t size;
+            int fd;
+
+            fd = edgeos_create_file_truncated(NULL, 1);
+            if (fd > 0)
+                return;
+
+            fd = edgeos_create_file_truncated(file, 1024 * 1024 * 2);
+            if (fd < 0)
+                return;
 
             ret = edgeos_get_filesize(file, &size);
             if (ret < 0)
