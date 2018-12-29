@@ -42,7 +42,6 @@ set(SOURCES
         common/logger/logger.c
         distcom/distcomm_pub.c
         common/linux/crypto/prng.c
-        common/util/errormsg.c
         distcom/dist_sdp.c
         gpslib/src/nmea/nmea_parser.cpp
         common/util/csvclass.cpp
