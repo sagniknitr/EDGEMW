@@ -37,5 +37,7 @@ int pthread_test(int argc, char **argv)
     }
 
     sleep(4);
+
+    return 0;
 }
 
