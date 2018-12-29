@@ -13,5 +13,8 @@ void * edge_os_threadpool_create(int n_threads);
 
 void edge_os_threadpool_schedule_work(void *tr_priv, void (*work)(void *data));
 
+void edge_os_thread_join(void *tr_priv);
+void edge_os_thread_stop(void *tr_priv);
+
 #endif
 

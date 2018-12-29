@@ -9,11 +9,11 @@ void thread_func(void *data)
     while (1) {
         (*ptr) ++;
 
-        fprintf(stderr, "val: %d\n", *ptr);
-        if (*ptr == 414214140) {
+        if ((*ptr) == 0x1ead)
             break;
-        }
+        fprintf(stderr, "val: 0x%x\n", *ptr);
     }
+    printf("thread exits..\n");
 }
 
 int pthread_test(int argc, char **argv)
@@ -37,6 +37,7 @@ int pthread_test(int argc, char **argv)
     }
 
     sleep(4);
+    edge_os_thread_stop(p);
 
     return 0;
 }

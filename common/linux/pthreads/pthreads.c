@@ -1,5 +1,6 @@
 #define _GNU_SOURCE
 #include <stdio.h>
+#include <signal.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -164,5 +165,13 @@ int edgeos_threads_set_cpu(void *tr_priv, int *cpulist, int cpulist_len);
 void * edge_os_threadpool_create(int n_threads);
 
 void edge_os_threadpool_schedule_work(void *tr_priv, void (*work)(void *data));
+
+
+void edge_os_thread_stop(void *tr_priv)
+{
+    struct edgeos_thread_priv *tpriv = tr_priv;
+
+    pthread_kill(tpriv->tid, SIGINT);
+}
 
 
