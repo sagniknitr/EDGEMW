@@ -31,9 +31,9 @@ run_gcc_tests() {
     make -j12
     cd ..
 
-    ./build/TestExecutor
     sudo python ./testing/test_socket.py
     sudo python ./testing/test_logger.py
+    ./build/TestExecutor
 }
 
 make_release() {
