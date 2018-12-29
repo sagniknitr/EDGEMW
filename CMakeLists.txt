@@ -24,8 +24,8 @@ else()
 
     else()
 
-        set(CMAKE_C_FLAGS "-O0 -ggdb -g -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow -fPIE -fPIC -fprofile-arcs -ftest-coverage -D_FORTIFY_SOURCE=2 -pg -DCONFIG_UNIT_TESTS ${OS_FLAGS}")
-        set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -Wno-unused-parameter -Wshadow -fPIC -fPIE -std=c++11 -pg -fprofile-arcs -ftest-coverage -pg -std=c++11 -DCONFIG_UNIT_TESTS ${OS_FLAGS}")
+        set(CMAKE_C_FLAGS "-O0 -ggdb -g -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow -fPIE -fPIC -fprofile-arcs -ftest-coverage -D_FORTIFY_SOURCE=2 -pg ${OS_FLAGS}")
+        set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -Wno-unused-parameter -Wshadow -fPIC -fPIE -std=c++11 -pg -fprofile-arcs -ftest-coverage -pg -std=c++11 ${OS_FLAGS}")
 
     endif()
 
