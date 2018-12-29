@@ -1,0 +1,15 @@
+version: v1.0
+name: EDGEMW
+agent:
+  machine:
+    type: e1-standard-2
+    os_image: ubuntu1804
+
+blocks:
+  - name: "Build"
+    task:
+      jobs:
+      - name: Docker build
+        commands:
+          - sudo apt-get install libprotobuf-c0-dev protobuf-c-compiler protobuf-compiler libprotobuf-dev libprotoc-dev libprotoc-dev libprotobuf-c-dev
+          - bash build.sh run_gcc_tests clang
