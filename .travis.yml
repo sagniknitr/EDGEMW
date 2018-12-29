@@ -6,11 +6,11 @@ before_install:
   - cd protobuf
   - ./autogen.sh
   - ./configure
-  - make
+  - make -j12
   - sudo make install
   - sudo ldconfig
   - git clone https://github.com/protobuf-c/protobuf-c.git
-  - cd protobuf-c
+  - cd protobuf-c && git checkout v1.3.1
   - ./autogen.sh
   - ./configure
   - make
