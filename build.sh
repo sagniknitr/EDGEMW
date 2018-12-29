@@ -1,6 +1,24 @@
 #!/bin/bash
 
 run_gcc_tests() {
+    cd external/protobuf/
+    ./autogen.sh
+    ./configure
+    make -j12
+    sudo make install
+    sudo ldconfig
+
+    cd ../../
+
+    cd external/protobuf-c/
+    ./autogen.sh
+    ./configure
+    make -j12
+    sudo make install
+    sudo ldconfig
+
+    cd ../../
+
     rm -rf build/
     mkdir -p build/
     cd build/
