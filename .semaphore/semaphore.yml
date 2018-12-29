@@ -15,3 +15,5 @@ blocks:
           - git clone https://github.com/devnaga/EDGEMW/
           - cd EDGEMW
           - bash build.sh run_gcc_tests clang
+          - pip install --user cpp-coveralls
+          - coveralls --exclude gpslib/src/tests/ --exclude logsrv/tests/  --exclude tests/ --gcov-options '\-lp'
