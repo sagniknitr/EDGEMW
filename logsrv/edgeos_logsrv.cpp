@@ -181,9 +181,6 @@ LogSrv::LogSrv(int argc, char **argv): logFd_(-1), logSrv_(-1)
             case 'S':
                 args_.fileSize_ = std::stoi(std::string(optarg));
             break;
-            case 'l':
-                args_.fileName_ = std::string(optarg);
-            break;
             default:
                 displayHelp(argv[0]);
                 return;
