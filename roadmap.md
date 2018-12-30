@@ -23,7 +23,7 @@ Right now testing is only done with in Travis with Linux, X86 architecture (most
     2. diagnosis for each service
 
 4. Util:
-    1. safe string to integer, double and other type conversion API and reverse
+    1. safe string to integer, double and other type conversion API and reverse - done
 
 5. Config parser:
     1. Variable = Value type configuration parsing
