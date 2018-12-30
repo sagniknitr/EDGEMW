@@ -422,6 +422,13 @@ int edge_os_socket_ioctl_reset_reuse_addr(int fd)
     return setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &set, sizeof(set));
 }
 
+int edge_os_socket_ioctl_set_broadcast(int fd)
+{
+    int set = 1;
+
+    return setsockopt(fd, SOL_SOCKET, SO_BROADCAST, &set, sizeof(set));
+}
+
 int edge_os_socket_ioctl_keepalive(int fd)
 {
     int set = 1;

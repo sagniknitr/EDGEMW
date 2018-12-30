@@ -37,12 +37,15 @@ Below are some of the features. More to come soon.
 
 ### how to compile
 
-1. `sudo apt install libprotobuf-c0-dev protobuf-c-compiler protobuf-compiler libprotobuf-dev libprotoc-dev libprotobuf-c-dev cmake make gcc g++ clang clang++`
-2. `bash build.sh make_release` # for gcc g++ builds
+```bash
+1. sudo apt install libprotobuf-c0-dev protobuf-c-compiler protobuf-compiler libprotobuf-dev libprotoc-dev libprotobuf-c-dev cmake make gcc g++ clang clang++
+2. bash build.sh make_release # for gcc g++ builds
 
 or 
 
-2. `bash build.sh make_release clang` # for clang or clang ++ builds
+2. bash build.sh make_release clang # for clang or clang ++ builds
+
+```
 
 the above will create a release folder in the `$(pwd)/EDGEMW/`. check the `release` folder for the release.
 
