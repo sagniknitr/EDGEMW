@@ -34,39 +34,39 @@ else()
 endif()
 
 set(SOURCES
-        common/evtloop/evtloop.c
-        common/algorithms/list.c
-        common/linux/net/socket.c
-        common/logger/edgeos_logger.c
-        common/linux/shmem/shmem.c
-        common/logger/logger.c
-        distcom/distcomm_pub.c
-        common/linux/crypto/prng.c
-        distcom/dist_sdp.c
-        gpslib/src/nmea/nmea_parser.cpp
-        common/util/csvclass.cpp
-        common/init.c
-        common/linux/file_system/fsapi.c
-        common/util/tokenparse.c
-        common/util/TokParse.cpp
-        common/linux/net/TcpServer.cpp
-        common/linux/net/ClientMgr.cpp
-        common/linux/sched/sched.c
-        common/linux/net/sysioctl.c
-        common/linux/pthreads/pthreads.c
-        common/linux/net/ds/generated/dist_sdp.pb-c.c)
+        lib/evtloop/evtloop.c
+        lib/algorithms/list.c
+        lib/linux/net/socket.c
+        lib/logger/edgeos_logger.c
+        lib/linux/shmem/shmem.c
+        lib/logger/logger.c
+        services/distcom/distcomm_pub.c
+        lib/linux/crypto/prng.c
+        services/distcom/dist_sdp.c
+        lib/gpslib/src/nmea/nmea_parser.cpp
+        lib/util/csvclass.cpp
+        lib/init.c
+        lib/linux/file_system/fsapi.c
+        lib/util/tokenparse.c
+        lib/util/TokParse.cpp
+        lib/linux/net/TcpServer.cpp
+        lib/linux/net/ClientMgr.cpp
+        lib/linux/sched/sched.c
+        lib/linux/net/sysioctl.c
+        lib/linux/pthreads/pthreads.c
+        lib/linux/net/ds/generated/dist_sdp.pb-c.c)
 
 set(LIB_TEST_SOURCES
         tests/test_socket.c)
 
 set(DISTCOMM_SOURCES
-        distcom/master.c)
+        services/distcom/master.c)
 
 set(DIST_TEST_SOURCES
         tests/test_distcom.c)
 
 set(NMEA_TEST_SOURCES
-        gpslib/src/tests/unit_tests/unit_core.cpp)
+        lib/gpslib/src/tests/unit_tests/unit_core.cpp)
 
 set(EVTLOOP_TEST_SOURCES
         tests/test_evtloop.cpp)
@@ -87,40 +87,48 @@ set(TRANSFER_TEST_SOURCES
         tests/transfer_test.c)
 
 set(DS_SOURCES
-        common/linux/net/ds/controller.c)
+        lib/linux/net/ds/controller.c)
 
 SET(DS_SAMPLE_SOURCES
-        common/linux/net/ds/sample.c)
+        lib/linux/net/ds/sample.c)
         
 include_directories(
-    common/evtloop/
-    common/linux/net/
+    lib/evtloop/
+    lib/linux/net/
     remoteLog/
-    common/algorithms/
-    common/logger/
-    common/linux/net/
-    common/linux/shmem/
-    common/linux/transport/
-    common/linux/crypto/
-    common/incl/
-    distcom/
-    common/
-    gpslib/src/nmea/
-    common/util/
-    common/linux/file_system/
-    common/linux/sched/
-    common/linux/pthreads/
-    common/linux/net/ds/
-    common/linux/net/ds/generated/
+    lib/algorithms/
+    lib/logger/
+    lib/linux/net/
+    lib/linux/shmem/
+    lib/linux/transport/
+    lib/linux/crypto/
+    lib/incl/
+    services/distcom/
+    lib/
+    lib/gpslib/src/nmea/
+    lib/util/
+    lib/linux/file_system/
+    lib/linux/sched/
+    lib/linux/pthreads/
+    lib/linux/net/ds/
+    lib/linux/net/ds/generated/
+    services/supervisor/
+    services/ota/
 )
+
+SET(SUPERVISOR_SOURCES
+        services/supervisor/supervisor.c)
+
+SET(OTA_SOURCES
+        services/ota/ota.c)
 
 add_library(EdgeOS ${SOURCES})
 target_link_libraries(EdgeOS pthread rt gcov protobuf-c)
 
-add_executable(EdgeOSLogger logsrv/edgeos_logsrv.cpp)
+add_executable(EdgeOSLogger services/logsrv/edgeos_logsrv.cpp)
 target_link_libraries(EdgeOSLogger pthread EdgeOS gcov rt)
 
-add_executable(loggerTest logsrv/tests/logsrv_test.c)
+add_executable(loggerTest services/logsrv/tests/logsrv_test.c)
 target_link_libraries(loggerTest pthread EdgeOS gcov)
 
 add_executable(distCommMaster ${DISTCOMM_SOURCES})
@@ -152,4 +160,10 @@ target_link_libraries(DsController pthread EdgeOS gcov protobuf-c)
 
 add_executable(DsSample ${DS_SAMPLE_SOURCES})
 target_link_libraries(DsSample pthread EdgeOS gcov protobuf-c)
+
+add_executable(EdgeOSSupervisor ${SUPERVISOR_SOURCES})
+target_link_libraries(EdgeOSSupervisor pthread EdgeOS gcov protobuf-c)
+
+add_executable(EdgeOSOTA ${OTA_SOURCES})
+target_link_libraries(EdgeOSOTA pthread EdgeOS gcov protobuf-c)
 
