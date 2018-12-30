@@ -217,6 +217,8 @@ int edge_os_accept_conn(int sock, char *ip, int *port)
 
     cli_conn = accept(sock, (struct sockaddr *)&serv, &len);
     if (cli_conn < 0) {
+        edge_os_log_with_error(errno, "net: failed to accept connection @ %s %u ",
+                                    __func__, __LINE__);
         return -1;
     }
 
@@ -314,15 +316,18 @@ int edge_os_create_udp_mcast_server(char *ip, int port, char *mcast_ip)
 
     ret = edge_os_socket_ioctl_set_mcast_if(sock, ip);
     if (ret < 0) {
-        return -1;
+        goto bad;
     }
 
     ret = edge_os_socket_ioctl_set_mcast_add_member(sock, ip, mcast_ip);
     if (ret < 0) {
-        return -1;
+        goto bad;
     }
 
     return sock;
+
+bad:
+    return -1;
 }
 
 int edge_os_create_udp_mcast_client(char *ip, int port, char *mcast_group, char *ipaddr)
@@ -332,11 +337,16 @@ int edge_os_create_udp_mcast_client(char *ip, int port, char *mcast_group, char 
 
     sock = edge_os_create_udp_client();
     if (sock < 0) {
+        edge_os_log_with_error(errno, "net: failed to create udp client @ %s %u ",
+                                    __func__, __LINE__);
         return -1;
     }
 
     ret = edge_os_socket_ioctl_set_mcast_if(sock, ipaddr);
     if (ret < 0) {
+        edge_os_log_with_error(errno, "net: failed to set multicast on socket @ %s %u ",
+                                    __func__, __LINE__);
+        close(sock);
         return -1;
     }
 
@@ -367,6 +377,8 @@ int edge_os_socket_ioctl_set_mcast_add_member(int fd, char *ipaddr, char *group)
                       IP_ADD_MEMBERSHIP, &mcast_add,
                       sizeof(mcast_add));
     if (ret < 0) {
+        edge_os_log_with_error(errno, "net: failed to setsockopt @ %s %u ",
+                                        __func__, __LINE__);
         return -1;
     }
 
@@ -378,8 +390,11 @@ int edge_os_socket_ioctl_set_nonblock(int fd)
     int flags = 0;
 
     flags = fcntl(fd, F_GETFL, 0);
-    if (flags == -1)
+    if (flags == -1) {
+        edge_os_log_with_error(errno, "net: failed to F_GETFL @ %s %u ",
+                                        __func__, __LINE__);
         return -1;
+    }
 
     flags |= O_NONBLOCK;
 
@@ -474,6 +489,10 @@ int edge_os_udp_sendto(int fd, void *msg, int msglen, char *dest, int dest_port)
     int ret;
 
     ret = sendto(fd, msg, msglen, 0, (struct sockaddr *)&d, sizeof(d));
+    if (ret < 0) {
+        edge_os_log_with_error(errno, "failed to sendto @ %s %u ",
+                                         __func__, __LINE__);
+    }
     return ret;
 }
 
@@ -485,6 +504,8 @@ int edge_os_udp_recvfrom(int fd, void *msg, int msglen, char *dest, int *dest_po
 
     ret = recvfrom(fd, msg, msglen, 0, (struct sockaddr *)&r, &r_l);
     if (ret < 0) {
+        edge_os_log_with_error(errno, "failed to recvfrom @ %s %u ",
+                                            __func__, __LINE__);
         return -1;
     }
 
@@ -569,6 +590,7 @@ static void __edge_os_default_rfrm(int sock, void *priv)
     struct edge_os_managed_server_config *config = priv;
     int rxsize;
 
+    // error message dump already done at os_udp_recvfrom
     rxsize = edge_os_udp_recvfrom(sock, config->buf, config->bufsize, NULL, NULL);
     if (rxsize <= 0) {
         edge_os_evtloop_unregister_socket(config->evtloop_base, sock);
@@ -587,9 +609,12 @@ static void edge_os_default_acceptor(int sock, void *priv)
 
     cl = calloc(1, sizeof(struct edge_os_client_list));
     if (!cl) {
+        edge_os_error("socket: failed to allocate @ %s %u\n",
+                                __func__, __LINE__);
         return;
     }
 
+    // error mesg is handled in os_accept_conn
     cl->fd = edge_os_accept_conn(config->fd, cl->ip, &cl->port);
     if (cl->fd < 0)
         goto bad;
@@ -598,8 +623,11 @@ static void edge_os_default_acceptor(int sock, void *priv)
         config->default_acceptor(cl->fd, cl->ip, cl->port);
 
     ret = edge_os_client_list_add(&config->client_list, cl);
-    if (ret == 0)
+    if (ret == 0) {
+        edge_os_error("socket: error, client exists ! @ %s %u\n",
+                                __func__, __LINE__);
         goto bad;
+    }
 
     if ((config->type == EDGEOS_SERVER_TCP) ||
             (config->type == EDGEOS_SERVER_TCP_UNIX))
@@ -633,8 +661,11 @@ void* edge_os_create_server_managed(void *evtloop_base,
     }
 
     config->buf = calloc(1, expect_bufsize);
-    if (!config->buf)
+    if (!config->buf) {
+        edge_os_error("socket: failed to allocate @ %s %u\n",
+                                __func__, __LINE__);
         goto bad;
+    }
 
     config->bufsize = expect_bufsize;
 
@@ -654,6 +685,8 @@ void* edge_os_create_server_managed(void *evtloop_base,
             config->fd = edge_os_create_udp_unix_server(ip);
         break;
         default:
+            edge_os_error("socket: invalid type %d @ %s %u\n",
+                                type, __func__, __LINE__);
             return NULL;
     }
 

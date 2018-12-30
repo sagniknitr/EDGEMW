@@ -174,14 +174,25 @@ int edgeos_read_directory(void *priv, const char *dir,
     struct dirent *e;
     DIR *d;
 
-    if (!read_callback || !dir)
+    if (!read_callback || !dir) {
+        edge_os_error("fsapi: invalid read_callback or dir @ %s %u\n",
+                                    __func__, __LINE__);
         return -1;
+    }
 
     d = opendir(dir);
-    if (!d)
+    if (!d) {
+        edge_os_log_with_error(errno, "fsapi: failed to opendir @ %s %u ",
+                                    __func__, __LINE__);
         return -1;
+    }
 
     while ((e = readdir(d)) != NULL) {
+        if (!strcmp(e->d_name, ".") ||
+            !strcmp(e->d_name, "..")) {
+            continue;
+        }
+
         read_callback(priv, e->d_name);
     }
 
@@ -196,14 +207,24 @@ int edgeos_file_in_directory(const char *dir, const char *filename)
     int file_present = 0;
     DIR *d;
 
-    if (!dir || !filename)
+    if (!dir || !filename) {
+        edge_os_error("fsapi: invalid dir or filename @ %s %u\n",
+                                __func__, __LINE__);
         return -1;
+    }
 
     d = opendir(dir);
-    if (!d)
+    if (!d) {
+        edge_os_log_with_error(errno, "fsapi: failed to opendir @ %s %u ",
+                                    __func__, __LINE__);
         return -1;
+    }
 
     while ((e = readdir(d)) != NULL) {
+        if (!strcmp(e->d_name, ".") ||
+            !strcmp(e->d_name, ".."))
+            continue;
+
         if (!strcmp(filename, e->d_name)) {
             file_present = 1;
             break;
@@ -229,5 +250,12 @@ int edgeos_create_directory(const char *dir, int owner, int group, int other)
         mode |= S_IROTH | S_IWOTH;
 
     return mkdir(dir, mode);
+}
+
+int edge_os_file_create_mmap(const char *file, const char *mode)
+{
+    edge_os_error("fsapi: this function %s is not supported\n",
+                                __func__);
+    return -1;
 }
 
