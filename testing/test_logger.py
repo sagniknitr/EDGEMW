@@ -33,14 +33,14 @@ os.system('./build/DistTest -s&')
 
 time.sleep(10);
 
-os.system("./build/nmeaTest ./gpslib/src/tests/nmea_data/nmea_12_12_2018.txt")
+os.system("./build/nmeaTest ./lib/gpslib/src/tests/nmea_data/nmea_12_12_2018.txt")
 
-os.system("./build/nmeaTest gpslib/src/tests/nmea_data/nmea12_12_2018_2.txt")
+os.system("./build/nmeaTest ./lib/gpslib/src/tests/nmea_data/nmea12_12_2018_2.txt")
 
-os.system("./build/nmeaTest gpslib/src/tests/nmea_data/nmea12_12_2018_2.txt")
+os.system("./build/nmeaTest ./lib/gpslib/src/tests/nmea_data/nmea12_12_2018_2.txt")
 
-os.system("./build/nmeaTest gpslib/src/tests/nmea_data/nmea_12_12_2018_3.txt")
+os.system("./build/nmeaTest ./lib/gpslib/src/tests/nmea_data/nmea_12_12_2018_3.txt")
 
-os.system("./build/nmeaTest gpslib/src/tests/nmea_data/nmea_12_12_2018_4.txt")
+os.system("./build/nmeaTest ./lib/gpslib/src/tests/nmea_data/nmea_12_12_2018_4.txt")
 
 exit(0)
