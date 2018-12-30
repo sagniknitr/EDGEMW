@@ -54,7 +54,8 @@ set(SOURCES
         lib/linux/sched/sched.c
         lib/linux/net/sysioctl.c
         lib/linux/pthreads/pthreads.c
-        lib/linux/net/ds/generated/dist_sdp.pb-c.c)
+        lib/linux/net/ds/generated/dist_sdp.pb-c.c
+        lib/util/conv.c)
 
 set(LIB_TEST_SOURCES
         tests/test_socket.c)
