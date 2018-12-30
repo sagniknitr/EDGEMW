@@ -62,8 +62,10 @@ void recv_callback(int sock, void *app_priv)
     int ret;
 
     ret = edge_os_tcp_recv(s->getClientFd(), msg, sizeof(msg));
-    if (ret < 0)
-        return;
+    if (ret <= 0) {
+        edge_os_evtloop_unregister_socket(&base, s->getClientFd());
+        exit(0);
+    }
 
     std::cerr << msg << std::endl;
 }
@@ -93,9 +95,14 @@ void repeated_timer(void *priv)
 {
     TcpClient *c = reinterpret_cast<TcpClient *>(priv);
     char msg[] = "Hello\n";
+    static int counter =  10;
 
+    if (counter <= 0) {
+        exit(0);
+    }
     std::cerr << "send msg" << std::endl;
     edge_os_tcp_send(c->getFd(), msg, strlen(msg));
+    counter --;
 }
 
 int main(int argc, char **argv)

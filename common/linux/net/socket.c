@@ -13,6 +13,26 @@
 #include <stdlib.h>
 #include <edgeos_logger.h>
 
+// managed server client configuration data
+struct edge_os_client_list {
+    int fd;
+    char ip[40];
+    int port;
+};
+
+// managed server configuration data
+struct edge_os_managed_server_config {
+    struct edge_os_list_base client_list;
+    void *evtloop_base;
+    uint8_t *buf;
+    void *app_ctx;
+    edge_os_server_type_t type;
+    int bufsize;
+    int fd;
+    void (*default_acceptor)(int fd, char *ip, int port);
+    int (*default_recv)(int fd, void *data, int datalen);
+};
+
 static int __socket(int family, int protocol)
 {
     return socket(family, protocol, 0);
@@ -387,6 +407,13 @@ int edge_os_socket_ioctl_reset_reuse_addr(int fd)
     return setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &set, sizeof(set));
 }
 
+int edge_os_socket_ioctl_keepalive(int fd)
+{
+    int set = 1;
+
+    return setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &set, sizeof(set));
+}
+
 int edge_os_net_setmaxconn(int conns)
 {
 #define SOMAX_CONN_FILE "/proc/sys/net/core/somaxconn"
@@ -477,25 +504,7 @@ int edge_os_udp_recvfrom(int fd, void *msg, int msglen, char *dest, int *dest_po
     return ret;
 }
 
-struct edge_os_client_list {
-    int fd;
-    char ip[40];
-    int port;
-};
-
-struct edge_os_managed_server_config {
-    struct edge_os_list_base client_list;
-    void *evtloop_base;
-    uint8_t *buf;
-    void *app_ctx;
-    edge_os_server_type_t type;
-    int bufsize;
-    int fd;
-    void (*default_acceptor)(int fd, char *ip, int port);
-    int (*default_recv)(int fd, void *data, int datalen);
-};
-
-int edge_os_client_list_for_each(void *data, void *priv)
+static int edge_os_client_list_for_each(void *data, void *priv)
 {
     struct edge_os_client_list *cl = data;
     struct edge_os_client_list *cl_given = priv;
