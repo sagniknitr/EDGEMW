@@ -28,6 +28,7 @@ Right now testing is only done with in Travis with Linux, X86 architecture (most
 5. Config parser:
     1. Variable = Value type configuration parsing
     2. XML configuration parsing
+    3. ini configuraiton parsing
 
 6. Algorithms:
     1. Data structures:
