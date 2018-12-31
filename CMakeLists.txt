@@ -55,7 +55,9 @@ set(SOURCES
         lib/linux/net/sysioctl.c
         lib/linux/pthreads/pthreads.c
         lib/linux/net/ds/generated/dist_sdp.pb-c.c
-        lib/util/conv.c)
+        lib/util/conv.c
+        lib/crypto/keygen.c
+        lib/crypto/aes.c)
 
 set(LIB_TEST_SOURCES
         tests/test_socket.c)
@@ -115,6 +117,7 @@ include_directories(
     lib/linux/net/ds/generated/
     services/supervisor/
     services/ota/
+    lib/crypto/
 )
 
 SET(SUPERVISOR_SOURCES
@@ -124,7 +127,7 @@ SET(OTA_SOURCES
         services/ota/ota.c)
 
 add_library(EdgeOS ${SOURCES})
-target_link_libraries(EdgeOS pthread rt gcov protobuf-c)
+target_link_libraries(EdgeOS pthread rt gcov protobuf-c wolfssl)
 
 add_executable(EdgeOSLogger services/logsrv/edgeos_logsrv.cpp)
 target_link_libraries(EdgeOSLogger pthread EdgeOS gcov rt)
