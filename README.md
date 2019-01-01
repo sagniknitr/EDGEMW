@@ -23,10 +23,19 @@ Below are some of the features. More to come soon.
 3. socket library API -
     1. UNIX and IPv4  TCP and UDP server and clients
     2. C++ abstraction to the TCP server and client with Socket library and the Eventloop
-4. GPS parser library - for NMEA messages: GPGGA, GPGSA, GPGSV, GPRMB, GPRMC, GPGGLL
+4. GPS parser library:
+    1. for NMEA messages:
+        GPGGA, GPGSA, GPGSV, GPRMB, GPRMC, GPGGLL
 5. Utilities -
     1. CSV File reader / writer / parser
     2. Token parser
+6. cryptography APIs - wrappers for most popular libraries (openssl, wolfssl, tomcrypt) - currently openssl
+    1. hashing :
+        MD5, SHA, SHA1, SHA224, SHA256, SHA384, SHA512
+    2. encryption :
+        AES-CBC-128
+    3. utilities :
+        key and iv generation
 
 
 ### Services
@@ -36,6 +45,11 @@ Below are some of the features. More to come soon.
 
 
 ### how to compile
+
+1. What the project uses (from source code):
+    - protobuf-c - serialisation in C
+    - openssl - for crypto interface
+
 
 ```bash
 1. sudo apt install libprotobuf-c0-dev protobuf-c-compiler protobuf-compiler libprotobuf-dev libprotoc-dev libprotobuf-c-dev cmake make gcc g++ clang clang++
