@@ -19,13 +19,13 @@ else()
 
     if (CONFIG_RELEASE)
 
-        set(CMAKE_C_FLAGS "-O3 -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow -fPIE -fPIC -D_FORTIFY_SOURCE=2 -DWC_NO_HARDEN ${OS_FLAGS}")
-        set(CMAKE_CXX_FLAGS "-O3 -Wall -Wextra -Werror -Wno-unused-parameter -Wshadow -fPIC -fPIE -std=c++11 -DWC_NO_HARDEN ${OS_FLAGS}")
+        set(CMAKE_C_FLAGS "-O3 -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow -fPIE -fPIC -D_FORTIFY_SOURCE=2 -DWC_NO_HARDEN -DCONFIG_CRYPTO_LIB_OPENSSL ${OS_FLAGS}")
+        set(CMAKE_CXX_FLAGS "-O3 -Wall -Wextra -Werror -Wno-unused-parameter -Wshadow -fPIC -fPIE -std=c++11 -DWC_NO_HARDEN -DCONFIG_CRYPTO_LIB_OPENSSL ${OS_FLAGS}")
 
     else()
 
-        set(CMAKE_C_FLAGS "-O0 -ggdb -g -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow -fPIE -fPIC -fprofile-arcs -ftest-coverage -D_FORTIFY_SOURCE=2 -DWC_NO_HARDEN -pg ${OS_FLAGS}")
-        set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -Wno-unused-parameter -Wshadow -fPIC -fPIE -std=c++11 -pg -fprofile-arcs -ftest-coverage -pg -std=c++11 -DWC_NO_HARDEN ${OS_FLAGS}")
+        set(CMAKE_C_FLAGS "-O0 -ggdb -g -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow -fPIE -fPIC -fprofile-arcs -ftest-coverage -D_FORTIFY_SOURCE=2 -DWC_NO_HARDEN -DCONFIG_CRYPTO_LIB_OPENSSL -pg ${OS_FLAGS}")
+        set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -Wno-unused-parameter -Wshadow -fPIC -fPIE -std=c++11 -pg -fprofile-arcs -ftest-coverage -pg -std=c++11 -DWC_NO_HARDEN -DCONFIG_CRYPTO_LIB_OPENSSL ${OS_FLAGS}")
 
     endif()
 
@@ -56,8 +56,7 @@ set(SOURCES
         lib/linux/pthreads/pthreads.c
         lib/linux/net/ds/generated/dist_sdp.pb-c.c
         lib/util/conv.c
-        lib/crypto/keygen.c
-        lib/crypto/aes.c)
+        lib/crypto/crypto.c)
 
 set(LIB_TEST_SOURCES
         tests/test_socket.c)
@@ -127,7 +126,7 @@ SET(OTA_SOURCES
         services/ota/ota.c)
 
 add_library(EdgeOS ${SOURCES})
-target_link_libraries(EdgeOS pthread rt gcov protobuf-c wolfssl)
+target_link_libraries(EdgeOS pthread rt gcov protobuf-c crypto)
 
 add_executable(EdgeOSLogger services/logsrv/edgeos_logsrv.cpp)
 target_link_libraries(EdgeOSLogger pthread EdgeOS gcov rt)
