@@ -30,5 +30,7 @@ int edgeos_file_in_directory(const char *dir, const char *filename);
 
 int edgeos_create_directory(const char *dir, int owner, int group, int other);
 
+int edge_os_write_file2(const char *file, void *msg, int msg_len);
+
 #endif
 

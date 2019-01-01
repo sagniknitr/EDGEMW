@@ -12,7 +12,7 @@ blocks:
       - name: Docker build
         commands:
           - pip install --user cpp-coveralls
-          - sudo apt-get --assume-yes install libprotobuf-c0-dev protobuf-c-compiler protobuf-compiler libprotobuf-dev libprotoc-dev libprotoc-dev libprotobuf-c-dev libwolfssl-dev
+          - sudo apt-get --assume-yes install libprotobuf-c0-dev protobuf-c-compiler protobuf-compiler libprotobuf-dev libprotoc-dev libprotoc-dev libprotobuf-c-dev libwolfssl-dev libssl-dev
           - git clone https://github.com/devnaga/EDGEMW/
           - cd EDGEMW
             # test with clang (++)

@@ -61,7 +61,7 @@ int edgeos_open_file(const char *filename, const char *mode)
     if (!strcmp(mode, "r")) {
         opts = O_RDONLY;
     } else if (!strcmp(mode, "w")) {
-        opts = O_WRONLY;
+        opts = O_CREAT | O_WRONLY | O_TRUNC;
         creat_opts = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP;
     } else if (!strcmp(mode, "rw")) {
         opts = O_RDWR;
@@ -139,6 +139,22 @@ int edgeos_read_file__safe(int fd, void *msg, int msg_len)
 int edgeos_close_file(int fd)
 {
     return close(fd);
+}
+
+int edge_os_write_file2(const char *file, void *msg, int msg_len)
+{
+    int fd;
+
+    // error handling done at open_file
+    fd = edgeos_open_file(file, "w");
+    if (fd < 0)
+        return -1;
+
+    edgeos_write_file(fd, msg, msg_len);
+
+    close(fd);
+
+    return 0;
 }
 
 int edgeos_delete_file(const char *filename)
