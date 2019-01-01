@@ -81,6 +81,83 @@ bad:
     return -1;
 }
 
+int __edge_os_crypto_digest_file(const char *file, edge_os_crypto_digest_t digest, uint8_t *digest_final)
+{
+    EVP_MD_CTX *ctx;
+    const EVP_MD *md = NULL;
+    int digest_len;
+    int fd = -1;
+    int ret;
+
+    ctx = EVP_MD_CTX_create();
+    if (!ctx)
+        return -1;
+
+    switch (digest) {
+        case EDGE_OS_CRYPTO_MD5:
+            md = EVP_md5();
+        break;
+        case EDGE_OS_CRYPTO_SHA:
+            md = EVP_sha();
+        break;
+        case EDGE_OS_CRYPTO_SHA1:
+            md = EVP_sha1();
+        break;
+        case EDGE_OS_CRYPTO_SHA224:
+            md = EVP_sha224();
+        break;
+        case EDGE_OS_CRYPTO_SHA256:
+            md = EVP_sha256();
+        break;
+        case EDGE_OS_CRYPTO_SHA384:
+            md = EVP_sha384();
+        break;
+        case EDGE_OS_CRYPTO_SHA512:
+            md = EVP_sha512();
+        break;
+        default:
+            return -1;
+    }
+
+    ret = EVP_DigestInit(ctx, md);
+    if (ret != 1)
+        goto bad;
+
+    fd = edgeos_open_file(file, "r");
+    if (fd < 0)
+        goto bad;
+
+    uint8_t input[1024];
+
+    while (1) {
+        ret = edgeos_read_file(fd, input, sizeof(input));
+        if (ret <= 0)
+            break;
+
+        ret = EVP_DigestUpdate(ctx, input, ret);
+        if (ret != 1)
+            goto bad;
+    }
+
+    edgeos_close_file(fd);
+
+    ret = EVP_DigestFinal_ex(ctx, digest_final, (unsigned int *)&digest_len);
+    if (ret != 1)
+        goto bad;
+
+    EVP_MD_CTX_destroy(ctx);
+
+    return digest_len;
+
+bad:
+    EVP_MD_CTX_destroy(ctx);
+    if (fd > 0)
+        edgeos_close_file(fd);
+
+    return -1;
+}
+
+
 int edge_os_crypto_md5sum(const unsigned char *data, int datalen, uint8_t *md5sum)
 {
     return __edge_os_crypto_digest_msg(data, EDGE_OS_CRYPTO_MD5, datalen, md5sum);
@@ -88,7 +165,7 @@ int edge_os_crypto_md5sum(const unsigned char *data, int datalen, uint8_t *md5su
 
 int edge_os_crypto_md5sum_file(const char *file, uint8_t *md5sum)
 {
-    return -1;
+    return __edge_os_crypto_digest_file(file, EDGE_OS_CRYPTO_MD5, md5sum);
 }
 
 int edge_os_crypto_sha1sum(const unsigned char *data, int datalen, uint8_t *sha1sum)
@@ -96,9 +173,19 @@ int edge_os_crypto_sha1sum(const unsigned char *data, int datalen, uint8_t *sha1
     return __edge_os_crypto_digest_msg(data, EDGE_OS_CRYPTO_SHA1, datalen, sha1sum);
 }
 
+int edge_os_crypto_sha1sum_file(const char *file, uint8_t *sha1sum)
+{
+    return __edge_os_crypto_digest_file(file, EDGE_OS_CRYPTO_SHA1, sha1sum);
+}
+
 int edge_os_crypto_shasum(const unsigned char *data, int datalen, uint8_t *shasum)
 {
     return __edge_os_crypto_digest_msg(data, EDGE_OS_CRYPTO_SHA, datalen, shasum);
+}
+
+int edge_os_crypto_shasum_file(const char *file, uint8_t *shasum)
+{
+    return __edge_os_crypto_digest_file(file, EDGE_OS_CRYPTO_SHA, shasum);
 }
 
 int edge_os_crypto_sha224(const unsigned char *data, int datalen, uint8_t *sha224)
@@ -106,9 +193,19 @@ int edge_os_crypto_sha224(const unsigned char *data, int datalen, uint8_t *sha22
     return __edge_os_crypto_digest_msg(data, EDGE_OS_CRYPTO_SHA224, datalen, sha224);
 }
 
+int edge_os_crypto_sha224_file(const char *file, uint8_t *sha224)
+{
+    return __edge_os_crypto_digest_file(file, EDGE_OS_CRYPTO_SHA224, sha224);
+}
+
 int edge_os_crypto_sha256(const unsigned char *data, int datalen, uint8_t *sha256)
 {
     return __edge_os_crypto_digest_msg(data, EDGE_OS_CRYPTO_SHA256, datalen, sha256);
+}
+
+int EDGE_OS_CRYPTO_SHA256_file(const char *file, uint8_t *sha256)
+{
+    return __edge_os_crypto_digest_file(file, EDGE_OS_CRYPTO_SHA256, sha256);
 }
 
 int edge_os_crypto_sha384(const unsigned char *data, int datalen, uint8_t *sha384)
@@ -116,9 +213,19 @@ int edge_os_crypto_sha384(const unsigned char *data, int datalen, uint8_t *sha38
     return __edge_os_crypto_digest_msg(data, EDGE_OS_CRYPTO_SHA384, datalen, sha384);
 }
 
+int edge_os_crypto_sha384_file(const char *file, uint8_t *sha384)
+{
+    return __edge_os_crypto_digest_file(file, EDGE_OS_CRYPTO_SHA384, sha384);
+}
+
 int edge_os_crypto_sha512(const unsigned char *data, int datalen, uint8_t *sha512)
 {
     return __edge_os_crypto_digest_msg(data, EDGE_OS_CRYPTO_SHA512, datalen, sha512);
+}
+
+int edge_os_crypto_sha512_file(const char *file, uint8_t *sha512)
+{
+    return __edge_os_crypto_digest_file(file, EDGE_OS_CRYPTO_SHA512, sha512);
 }
 
 int edge_os_crypto_gen_keyiv(uint8_t *key, int keysize, uint8_t *iv, int ivsize)
@@ -467,6 +574,9 @@ int main()
         fprintf(stderr, "failed to decrypt file\n");
         return -1;
     }
+
+    ret = edge_os_crypto_md5sum_file(input_file, md5sum);
+    edge_os_hexdump("md5sum", md5sum, 16);
 
     return 0;
 }

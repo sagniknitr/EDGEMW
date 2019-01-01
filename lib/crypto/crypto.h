@@ -3,17 +3,31 @@
 
 int edge_os_crypto_md5sum(const unsigned char *data, int datalen, uint8_t *md5sum);
 
+int edge_os_crypto_md5sum_file(const unsigned char *file, uint8_t *md5sum);
+
 int edge_os_crypto_sha1sum(const unsigned char *data, int datalen, uint8_t *sha1sum);
+
+int edge_os_crypto_sha1sum_file(const char *file, uint8_t *sha1sum);
 
 int edge_os_crypto_shasum(const unsigned char *data, int datalen, uint8_t *shasum);
 
+int edge_os_crypto_shasum_file(const char *file, uint8_t *shasum);
+
 int edge_os_crypto_sha224(const unsigned char *data, int datalen, uint8_t *sha224);
+
+int edge_os_crypto_sha224_file(const char *file, uint8_t *sha224);
 
 int edge_os_crypto_sha256(const unsigned char *data, int datalen, uint8_t *sha256);
 
+int edge_os_crypto_sha256_file(const char *file, uint8_t *sha256);
+
 int edge_os_crypto_sha384(const unsigned char *data, int datalen, uint8_t *sha384);
 
+int edge_os_crypto_sha384_file(const char *file, uint8_t *sha384);
+
 int edge_os_crypto_sha512(const unsigned char *data, int datalen, uint8_t *sha512);
+
+int edge_os_crypto_sha512_file(const char *file, uint8_t *sha512);
 
 int edge_os_crypto_gen_keyiv(uint8_t *key, int keysize, uint8_t *iv, int ivsize);
 
