@@ -281,10 +281,11 @@ bad:
 
 enum {
     EDGEOS_CIPHER_AES_128_CBC,
+    EDGEOS_CIPHER_AES_192_CBC,
     EDGEOS_CIPHER_AES_256_CBC,
 };
 
-int __edge_os_crypto_encrypt(void *plain, int plainlen, int cipher_type, void *cipher, uint8_t *key, uint8_t *iv)
+static int __edge_os_crypto_encrypt(void *plain, int plainlen, int cipher_type, void *cipher, uint8_t *key, uint8_t *iv)
 {
     EVP_CIPHER_CTX *ctx;
     int len;
@@ -299,6 +300,9 @@ int __edge_os_crypto_encrypt(void *plain, int plainlen, int cipher_type, void *c
     switch (cipher_type) {
         case EDGEOS_CIPHER_AES_128_CBC:
             crypto_cipher = EVP_aes_128_cbc();
+        break;
+        case EDGEOS_CIPHER_AES_192_CBC:
+            crypto_cipher = EVP_aes_192_cbc();
         break;
         case EDGEOS_CIPHER_AES_256_CBC:
             crypto_cipher = EVP_aes_256_cbc();
@@ -334,6 +338,16 @@ int edge_os_crypto_aes_128_cbc_encrypt(void *plain, int plainlen, void *cipher, 
     return __edge_os_crypto_encrypt(plain, plainlen, EDGEOS_CIPHER_AES_128_CBC, cipher, key, iv);
 }
 
+int edge_os_crypto_aes_192_cbc_encrypt(void *plain, int plainlen, void *cipher, uint8_t *key, uint8_t *iv)
+{
+    return __edge_os_crypto_encrypt(plain, plainlen, EDGEOS_CIPHER_AES_192_CBC, cipher, key, iv);
+}
+
+int edge_os_crypto_aes_256_cbc_encrypt(void *plain, int plainlen, void *cipher, uint8_t *key, uint8_t *iv)
+{
+    return __edge_os_crypto_encrypt(plain, plainlen, EDGEOS_CIPHER_AES_256_CBC, cipher, key, iv);
+}
+
 // small files - keys
 static int edge_os_parse_binary_file(const char *file, uint8_t *buf, int bufsize)
 {
@@ -356,7 +370,7 @@ static int edge_os_parse_binary_file(const char *file, uint8_t *buf, int bufsize
     return ret;
 }
 
-int __edge_os_crypto_encrypt_file(const char *input_file, const char *output_file, int cipher_type,
+static int __edge_os_crypto_encrypt_file(const char *input_file, const char *output_file, int cipher_type,
                                  const char *keyfile, const char *ivfile)
 {
     uint8_t key[16];
@@ -423,7 +437,19 @@ int edge_os_crypto_aes_128_cbc_encrypt_file(const char *input_file, const char *
     return __edge_os_crypto_encrypt_file(input_file, output_file, EDGEOS_CIPHER_AES_128_CBC, keyfile, ivfile);
 }
 
-int __edge_os_crypto_decrypt(void *cipher, int cipherlen, int cipher_type, void *plain, uint8_t *key, uint8_t *iv)
+int edge_os_crypto_aes_192_cbc_encrypt_file(const char *input_file, const char *output_file,
+                                 const char *keyfile, const char *ivfile)
+{
+    return __edge_os_crypto_encrypt_file(input_file, output_file, EDGEOS_CIPHER_AES_192_CBC, keyfile, ivfile);
+}
+
+int edge_os_crypto_aes_256_cbc_encrypt_file(const char *input_file, const char *output_file,
+                                 const char *keyfile, const char *ivfile)
+{
+    return __edge_os_crypto_encrypt_file(input_file, output_file, EDGEOS_CIPHER_AES_256_CBC, keyfile, ivfile);
+}
+
+static int __edge_os_crypto_decrypt(void *cipher, int cipherlen, int cipher_type, void *plain, uint8_t *key, uint8_t *iv)
 {
     EVP_CIPHER_CTX *ctx;
     const EVP_CIPHER *crypto_cipher;
@@ -481,7 +507,17 @@ int edge_os_crypto_aes_128_cbc_decrypt(void *cipher, int cipherlen, void *plain,
     return __edge_os_crypto_decrypt(cipher, cipherlen, EDGEOS_CIPHER_AES_128_CBC, plain, key, iv);
 }
 
-int __edge_os_crypto_decrypt_file(const char *cypher_file, const char *output_file, int cipher_type,
+int edge_os_crypto_aes_192_cbc_decrypt(void *cipher, int cipherlen, void *plain, uint8_t *key, uint8_t *iv)
+{
+    return __edge_os_crypto_decrypt(cipher, cipherlen, EDGEOS_CIPHER_AES_192_CBC, plain, key, iv);
+}
+
+int edge_os_crypto_aes_256_cbc_decrypt(void *cipher, int cipherlen, void *plain, uint8_t *key, uint8_t *iv)
+{
+    return __edge_os_crypto_decrypt(cipher, cipherlen, EDGEOS_CIPHER_AES_256_CBC, plain, key, iv);
+}
+
+static int __edge_os_crypto_decrypt_file(const char *cypher_file, const char *output_file, int cipher_type,
                                      const char *keyfile, const char *ivfile)
 {
     uint8_t key[16];
@@ -549,7 +585,17 @@ int edge_os_crypto_aes_128_cbc_decrypt_file(const char *cypher_file, const char 
     return __edge_os_crypto_decrypt_file(cypher_file, output_file, EDGEOS_CIPHER_AES_128_CBC, keyfile, ivfile);
 }
 
+int edge_os_crypto_aes_192_cbc_decrypt_file(const char *cypher_file, const char *output_file,
+                                     const char *keyfile, const char *ivfile)
+{
+    return __edge_os_crypto_decrypt_file(cypher_file, output_file, EDGEOS_CIPHER_AES_192_CBC, keyfile, ivfile);
+}
 
+int edge_os_crypto_aes_256_cbc_decrypt_file(const char *cypher_file, const char *output_file,
+                                     const char *keyfile, const char *ivfile)
+{
+    return __edge_os_crypto_decrypt_file(cypher_file, output_file, EDGEOS_CIPHER_AES_256_CBC, keyfile, ivfile);
+}
 
 #else
 int edge_os_md5sum(const char *data, int datalen, uint8_t *md5sum)
