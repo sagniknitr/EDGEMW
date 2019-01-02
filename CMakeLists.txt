@@ -56,7 +56,8 @@ set(SOURCES
         lib/linux/pthreads/pthreads.c
         lib/linux/net/ds/generated/dist_sdp.pb-c.c
         lib/util/conv.c
-        lib/crypto/crypto.c)
+        lib/crypto/crypto.c
+        lib/util/hex.c)
 
 set(LIB_TEST_SOURCES
         tests/test_socket.c)
@@ -83,7 +84,8 @@ set(TEST_CASES_SOURCES
         tests/test_list.c
         tests/test_prng.c
         tests/test_sysioctl.c
-        tests/test_pthread.c)
+        tests/test_pthread.c
+        tests/test_crypto.c)
 
 set(TRANSFER_TEST_SOURCES
         tests/transfer_test.c)

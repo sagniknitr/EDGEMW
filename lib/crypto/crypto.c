@@ -279,16 +279,6 @@ bad:
     return -1;
 }
 
-void edge_os_hexdump(const char *str, uint8_t *buf, int buflen)
-{
-    int i;
-
-    fprintf(stderr, "%s: ", str);
-    for (i = 0; i < buflen; i ++)
-        fprintf(stderr, "%02x", buf[i] & 0xff);
-    fprintf(stderr, "\n");
-}
-
 enum {
     EDGEOS_CIPHER_AES_128_CBC,
     EDGEOS_CIPHER_AES_256_CBC,

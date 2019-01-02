@@ -3,7 +3,7 @@
 
 int edge_os_crypto_md5sum(const unsigned char *data, int datalen, uint8_t *md5sum);
 
-int edge_os_crypto_md5sum_file(const unsigned char *file, uint8_t *md5sum);
+int edge_os_crypto_md5sum_file(const char *file, uint8_t *md5sum);
 
 int edge_os_crypto_sha1sum(const unsigned char *data, int datalen, uint8_t *sha1sum);
 

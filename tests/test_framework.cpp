@@ -7,6 +7,7 @@ int prng_test(int argc, char **argv);
 int list_test(int argc, char **argv);
 int sysioctl_test(int argc, char **argv);
 int pthread_test(int argc, char **argv);
+int crypto_test(int argc, char **argv);
 }
 
 int fsAPI_test(int argc, char **argv);
@@ -23,6 +24,7 @@ static struct test_cases {
     {"tokparse_test", tokparse_test},
     {"sysioctl_test", sysioctl_test},
     {"pthread_test", pthread_test},
+    {"crypto_test", crypto_test},
 };
 
 int main(int argc, char **argv)
