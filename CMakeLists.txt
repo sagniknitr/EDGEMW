@@ -128,7 +128,7 @@ SET(OTA_SOURCES
         services/ota/ota.c)
 
 add_library(EdgeOS ${SOURCES})
-target_link_libraries(EdgeOS pthread rt gcov protobuf-c crypto)
+target_link_libraries(EdgeOS pthread rt gcov protobuf-c crypto ssl)
 
 add_executable(EdgeOSLogger services/logsrv/edgeos_logsrv.cpp)
 target_link_libraries(EdgeOSLogger pthread EdgeOS gcov rt)
@@ -155,7 +155,7 @@ add_executable(TcpServerTest ${TCPSERVER_TEST_SOURCES})
 target_link_libraries(TcpServerTest pthread EdgeOS gcov)
 
 add_executable(TestExecutor ${TEST_CASES_SOURCES})
-target_link_libraries(TestExecutor pthread EdgeOS gcov)
+target_link_libraries(TestExecutor pthread EdgeOS gcov crypto ssl)
 
 add_executable(TransferTest ${TRANSFER_TEST_SOURCES})
 target_link_libraries(TransferTest pthread EdgeOS gcov)

@@ -16,6 +16,8 @@ int crypto_test(int argc, char **argv)
     char *input_file = "./libEdgeOS.a";
     char *output_file = "./libEdgeOS.a.enc";
     char *dec_file = "./libEdgeOS.a.dec";
+    char *pubkey = "./secp256k1_pub.key";
+    char *privkey = "./secp256k1_priv.key";
 
     memset(md5sum, 0, sizeof(md5sum));
 
@@ -64,6 +66,36 @@ int crypto_test(int argc, char **argv)
 
     ret = edge_os_crypto_md5sum_file((const char *)input_file, md5sum);
     edge_os_hexdump("md5sum", md5sum, 16);
+
+    ret = edge_os_crypto_generate_keypair(pubkey, EDGE_OS_SECP256K1, privkey);
+    if (ret < 0) {
+        fprintf(stderr, "failed to generate keypair\n");
+        return -1;
+    }
+
+    const char message[] = "message";
+    struct edge_os_ecc_signature *signature;
+
+    signature = edge_os_crypto_ecc_sign_message_sha256((const unsigned char *)message, strlen(message), privkey);
+    if (!signature) {
+        fprintf(stderr, "failed to sign messge\n");
+        return -1;
+    }
+
+    edge_os_hexdump("signature", signature->signature, signature->signature_len);
+
+    ret = edge_os_crypto_ecc_verify_message_sha256((const unsigned char *)message, strlen(message),
+                                signature->signature,
+                                signature->signature_len,
+                                pubkey);
+    if (ret < 0) {
+        fprintf(stderr, "failed to verify message\n");
+        return -1;
+    }
+
+    printf("verify status %d\n", ret);
+
+    edge_os_crypto_ecc_free_signature(signature);
 
     return 0;
 }

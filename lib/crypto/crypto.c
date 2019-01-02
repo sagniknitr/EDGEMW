@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <crypto.h>
 #include <fsapi.h>
 
 #ifdef CONFIG_CRYPTO_LIB_OPENSSL
@@ -12,6 +13,10 @@
 #include <openssl/evp.h>
 #include <openssl/err.h>
 #include <openssl/md5.h>
+#include <openssl/ecdsa.h>
+#include <openssl/ec.h>
+#include <openssl/bio.h>
+#include <openssl/pem.h>
 #include <openssl/rand.h>
 
 typedef enum {
@@ -595,6 +600,311 @@ int edge_os_crypto_aes_256_cbc_decrypt_file(const char *cypher_file, const char 
                                      const char *keyfile, const char *ivfile)
 {
     return __edge_os_crypto_decrypt_file(cypher_file, output_file, EDGEOS_CIPHER_AES_256_CBC, keyfile, ivfile);
+}
+
+int edge_os_crypto_load_pem_ec(const char *pkeyfile, const char *pubkeyfile)
+{
+    EC_KEY *pkey = NULL;
+    EC_KEY *pubkey = NULL;
+    FILE *fp;
+
+    fp = fopen(pkeyfile, "r");
+    pkey = PEM_read_ECPrivateKey(fp, NULL, NULL, NULL);
+    if (!pkey) {
+        fprintf(stderr, "failed to read pkey\n");
+        return -1;
+    }
+
+    fclose(fp);
+
+    fp = fopen(pubkeyfile, "r");
+    pubkey = PEM_read_EC_PUBKEY(fp, NULL, NULL, NULL);
+    if (!pubkey) {
+        fprintf(stderr, "failed to read pubkey\n");
+        return -1;
+    }
+
+    fclose(fp);
+
+    EC_KEY_print_fp(stderr, pkey, 0);
+    EC_KEY_print_fp(stderr, pubkey, 0);
+
+    return 0;
+}
+
+int edge_os_crypto_generate_keypair(const char *pubkey, edge_os_ecc_key_algorithms_t algorithm, const char *privkey)
+{
+    EC_KEY *key;
+    int ret;
+    int nid = -1;
+
+    if (!pubkey || !privkey)
+        return -1;
+
+    switch (algorithm) {
+        case EDGE_OS_SECP256K1:
+            nid = NID_secp256k1;
+        break;
+        case EDGE_OS_SECP128r1:
+            nid = NID_secp128r1;
+        break;
+        case EDGE_OS_SECP128r2:
+            nid = NID_secp128r2;
+        break;
+        case EDGE_OS_SECP224r1:
+            nid = NID_secp224r1;
+        break;
+        case EDGE_OS_BRAINPOOLP224r1:
+            nid = NID_brainpoolP224r1;
+        break;
+        case EDGE_OS_BRAINPOOLP256r1:
+            nid = NID_brainpoolP256r1;
+        break;
+        default:
+            return -1;
+    }
+
+    if (nid == -1)
+        return -1;
+
+    key = EC_KEY_new_by_curve_name(nid);
+    if (!key) {
+        return -1;
+    }
+
+    ret = EC_KEY_generate_key(key);
+    if (ret != 1) {
+        return -1;
+    }
+
+    ret = EC_KEY_check_key(key);
+    if (ret != 1) {
+        return -1;
+    }
+
+    FILE *fp;
+
+    fp = fopen(pubkey, "w");
+    if (!fp) {
+        return -1;
+    }
+
+    PEM_write_EC_PUBKEY(fp, key);
+
+    fclose(fp);
+
+    fp = fopen(privkey, "w");
+    if (!fp) {
+        return -1;
+    }
+
+    PEM_write_ECPrivateKey(fp, key, NULL, NULL, 0, NULL, NULL);
+
+    fclose(fp);
+
+    EC_KEY_free(key);
+
+    return 0;
+}
+
+static struct edge_os_ecc_signature*
+__sign_message_evp_variant(const unsigned char *buf, int bufsize, const char *cert_path, edge_os_crypto_digest_t digest)
+{
+    FILE *f;
+    int ret;
+    struct edge_os_ecc_signature *sign;
+    const EVP_MD *md = NULL;
+    EC_KEY *privkey;
+
+    if (!buf || !cert_path || (bufsize < 0)) {
+        return NULL;
+    }
+
+    OpenSSL_add_all_algorithms();
+
+    switch (digest) {
+        case EDGE_OS_CRYPTO_MD5:
+            md = EVP_md5();
+        break;
+        case EDGE_OS_CRYPTO_SHA256:
+            md = EVP_sha256();
+        break;
+        case EDGE_OS_CRYPTO_SHA:
+            md = EVP_sha();
+        break;
+        case EDGE_OS_CRYPTO_SHA1:
+            md = EVP_sha1();
+        break;
+        case EDGE_OS_CRYPTO_SHA224:
+            md = EVP_sha224();
+        break;
+        case EDGE_OS_CRYPTO_SHA384:
+            md = EVP_sha384();
+        break;
+        case EDGE_OS_CRYPTO_SHA512:
+            md = EVP_sha512();
+        break;
+        default:
+            return NULL;
+    }
+
+    if (!md) {
+        return NULL;
+    }
+
+    sign = calloc(1, sizeof(struct edge_os_ecc_signature));
+    if (!sign) {
+        return NULL;
+    }
+
+    // EVP_KEY = EC_KEY
+    //
+    f = fopen(cert_path, "r");
+    if (!f)
+        return NULL;
+
+    privkey = PEM_read_ECPrivateKey(f, NULL, NULL, NULL);
+    if (!privkey)
+        return NULL;
+
+    ret = EC_KEY_check_key(privkey);
+    if (ret != 1)
+        return NULL;
+
+    EVP_PKEY *evp_key = EVP_PKEY_new();
+    ret = EVP_PKEY_assign_EC_KEY(evp_key, privkey);
+    if (ret != 1)
+        return NULL;
+
+
+    // Create new EVP_PKEY context
+    //
+    EVP_PKEY_CTX *evp_key_ctx = EVP_PKEY_CTX_new(evp_key, NULL);
+
+    ret = EVP_PKEY_sign_init(evp_key_ctx);
+    if (ret != 1)
+        return NULL;
+
+    // set hash algorithm
+    ret = EVP_PKEY_CTX_set_signature_md(evp_key_ctx, md);
+    if (ret != 1)
+        return NULL;
+
+    // compute signature length and so the signature can be alloced
+    ret = EVP_PKEY_sign(evp_key_ctx, NULL, (long unsigned int *)&sign->signature_len, buf, bufsize);
+    if (ret != 1)
+        return NULL;
+
+    // allcoate sign
+    sign->signature = calloc(1, sign->signature_len);
+
+    // sign the message
+    ret = EVP_PKEY_sign(evp_key_ctx, sign->signature, (long unsigned int *)&sign->signature_len, buf, bufsize);
+    if (ret != 1)
+        return NULL;
+
+    EVP_PKEY_CTX_free(evp_key_ctx);
+    EVP_PKEY_free(evp_key);
+    fclose(f);
+
+    EVP_cleanup();
+
+    return sign;
+}
+
+struct edge_os_ecc_signature *
+edge_os_crypto_ecc_sign_message_sha256(const unsigned char *data, int datalen,
+                                       char *cert_path)
+{
+    return __sign_message_evp_variant(data, datalen, cert_path, EDGE_OS_CRYPTO_SHA256);
+}
+
+void edge_os_crypto_ecc_free_signature(struct edge_os_ecc_signature *sig)
+{
+    if (sig) {
+        if (sig->signature)
+            free(sig->signature);
+        free(sig);
+    }
+}
+
+static int __verify_message_evp_variant(const uint8_t *buf, size_t bufsize, const uint8_t *signature, int signature_len, const char *pubkey, edge_os_crypto_digest_t digest)
+{
+    FILE *f;
+    EC_KEY *key;
+    EVP_PKEY *evp_key;
+    EVP_PKEY_CTX *evp_key_ctx;
+    const EVP_MD *md;
+    int ret;
+
+    OpenSSL_add_all_algorithms();
+
+    switch (digest) {
+        case EDGE_OS_CRYPTO_MD5:
+            md = EVP_md5();
+        break;
+        case EDGE_OS_CRYPTO_SHA:
+            md = EVP_sha();
+        break;
+        case EDGE_OS_CRYPTO_SHA1:
+            md = EVP_sha1();
+        break;
+        case EDGE_OS_CRYPTO_SHA224:
+            md = EVP_sha224();
+        break;
+        case EDGE_OS_CRYPTO_SHA256:
+            md = EVP_sha256();
+        break;
+        case EDGE_OS_CRYPTO_SHA384:
+            md = EVP_sha384();
+        break;
+        case EDGE_OS_CRYPTO_SHA512:
+            md = EVP_sha512();
+        break;
+        default:
+            return -1;
+    }
+
+    // EVP_KEY = EC_KEY
+    //
+    f = fopen(pubkey, "r");
+    if (!f)
+        return -1;
+
+    key = PEM_read_EC_PUBKEY(f, NULL, NULL, NULL);
+
+
+    // initialise the verify context EVP_KEY_CTX
+    evp_key = EVP_PKEY_new();
+    ret = EVP_PKEY_assign_EC_KEY(evp_key, key);
+    if (ret != 1)
+        return -1;
+
+    evp_key_ctx = EVP_PKEY_CTX_new(evp_key, NULL);
+
+    ret = EVP_PKEY_verify_init(evp_key_ctx);
+    if (ret != 1)
+        return -1;
+
+    ret = EVP_PKEY_CTX_set_signature_md(evp_key_ctx, md);
+    if (ret != 1)
+        return -1;
+
+    ret = EVP_PKEY_verify(evp_key_ctx, signature, signature_len, buf, bufsize);
+    if (ret != 1)
+        return -1;
+
+    EVP_PKEY_CTX_free(evp_key_ctx);
+    EVP_PKEY_free(evp_key);
+
+    EVP_cleanup();
+
+    return 0;
+}
+
+int edge_os_crypto_ecc_verify_message_sha256(const uint8_t *buf, size_t bufsize, const uint8_t *signature, int signature_len, const char *pubkey)
+{
+    return __verify_message_evp_variant(buf, bufsize, signature, signature_len, pubkey, EDGE_OS_CRYPTO_SHA256);
 }
 
 #else
