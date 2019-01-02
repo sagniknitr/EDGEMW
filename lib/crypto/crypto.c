@@ -289,18 +289,35 @@ void edge_os_hexdump(const char *str, uint8_t *buf, int buflen)
     fprintf(stderr, "\n");
 }
 
-int edge_os_crypto_aes_128_cbc_encrypt(void *plain, int plainlen, void *cipher, uint8_t *key, uint8_t *iv)
+enum {
+    EDGEOS_CIPHER_AES_128_CBC,
+    EDGEOS_CIPHER_AES_256_CBC,
+};
+
+int __edge_os_crypto_encrypt(void *plain, int plainlen, int cipher_type, void *cipher, uint8_t *key, uint8_t *iv)
 {
     EVP_CIPHER_CTX *ctx;
     int len;
     int cipher_len;
     int ret;
+    const EVP_CIPHER *crypto_cipher;
 
     ctx = EVP_CIPHER_CTX_new();
     if (!ctx)
         return -1;
 
-    ret = EVP_EncryptInit_ex(ctx, EVP_aes_128_cbc(), NULL, key, iv);
+    switch (cipher_type) {
+        case EDGEOS_CIPHER_AES_128_CBC:
+            crypto_cipher = EVP_aes_128_cbc();
+        break;
+        case EDGEOS_CIPHER_AES_256_CBC:
+            crypto_cipher = EVP_aes_256_cbc();
+        break;
+        default:
+            return -1;
+    }
+
+    ret = EVP_EncryptInit_ex(ctx, crypto_cipher, NULL, key, iv);
     if (ret != 1)
         return -1;
 
@@ -319,6 +336,12 @@ int edge_os_crypto_aes_128_cbc_encrypt(void *plain, int plainlen, void *cipher, 
     EVP_CIPHER_CTX_free(ctx);
 
     return cipher_len;
+}
+
+
+int edge_os_crypto_aes_128_cbc_encrypt(void *plain, int plainlen, void *cipher, uint8_t *key, uint8_t *iv)
+{
+    return __edge_os_crypto_encrypt(plain, plainlen, EDGEOS_CIPHER_AES_128_CBC, cipher, key, iv);
 }
 
 // small files - keys
@@ -343,7 +366,7 @@ static int edge_os_parse_binary_file(const char *file, uint8_t *buf, int bufsize
     return ret;
 }
 
-int edge_os_crypto_aes_128_cbc_encrypt_file(const char *input_file, const char *output_file,
+int __edge_os_crypto_encrypt_file(const char *input_file, const char *output_file, int cipher_type,
                                  const char *keyfile, const char *ivfile)
 {
     uint8_t key[16];
@@ -381,7 +404,7 @@ int edge_os_crypto_aes_128_cbc_encrypt_file(const char *input_file, const char *
         if (len <= 0)
             break;
 
-        cipher_len = edge_os_crypto_aes_128_cbc_encrypt(plain, len, cipher, key, iv);
+        cipher_len = __edge_os_crypto_encrypt(plain, len, cipher_type, cipher, key, iv);
         if (cipher_len < 0)
             goto bad;
 
@@ -403,9 +426,17 @@ bad:
     return -1;
 }
 
-int edge_os_crypto_aes_128_cbc_decrypt(void *cipher, int cipherlen, void *plain, uint8_t *key, uint8_t *iv)
+
+int edge_os_crypto_aes_128_cbc_encrypt_file(const char *input_file, const char *output_file,
+                                 const char *keyfile, const char *ivfile)
+{
+    return __edge_os_crypto_encrypt_file(input_file, output_file, EDGEOS_CIPHER_AES_128_CBC, keyfile, ivfile);
+}
+
+int __edge_os_crypto_decrypt(void *cipher, int cipherlen, int cipher_type, void *plain, uint8_t *key, uint8_t *iv)
 {
     EVP_CIPHER_CTX *ctx;
+    const EVP_CIPHER *crypto_cipher;
     int len;
     int plain_len;
     int ret;
@@ -416,7 +447,18 @@ int edge_os_crypto_aes_128_cbc_decrypt(void *cipher, int cipherlen, void *plain,
         return -1;
     }
 
-    ret = EVP_DecryptInit_ex(ctx, EVP_aes_128_cbc(), NULL, key, iv);
+    switch (cipher_type) {
+        case EDGEOS_CIPHER_AES_128_CBC:
+            crypto_cipher = EVP_aes_128_cbc();
+        break;
+        case EDGEOS_CIPHER_AES_256_CBC:
+            crypto_cipher = EVP_aes_256_cbc();
+        break;
+        default:
+            return -1;
+    }
+
+    ret = EVP_DecryptInit_ex(ctx, crypto_cipher, NULL, key, iv);
     if (ret != 1) {
         ERR_print_errors_fp(stderr);
         return -1;
@@ -443,7 +485,13 @@ int edge_os_crypto_aes_128_cbc_decrypt(void *cipher, int cipherlen, void *plain,
     return plain_len;
 }
 
-int edge_os_crypto_aes_128_cbc_decrypt_file(const char *cypher_file, const char *output_file,
+
+int edge_os_crypto_aes_128_cbc_decrypt(void *cipher, int cipherlen, void *plain, uint8_t *key, uint8_t *iv)
+{
+    return __edge_os_crypto_decrypt(cipher, cipherlen, EDGEOS_CIPHER_AES_128_CBC, plain, key, iv);
+}
+
+int __edge_os_crypto_decrypt_file(const char *cypher_file, const char *output_file, int cipher_type,
                                      const char *keyfile, const char *ivfile)
 {
     uint8_t key[16];
@@ -481,7 +529,7 @@ int edge_os_crypto_aes_128_cbc_decrypt_file(const char *cypher_file, const char 
         if (len <= 0)
             break;
 
-        plain_len = edge_os_crypto_aes_128_cbc_decrypt(cipher, len, plain, key, iv);
+        plain_len = __edge_os_crypto_decrypt(cipher, len, cipher_type, plain, key, iv);
         if (plain_len < 0)
             goto bad;
 
@@ -502,6 +550,13 @@ bad:
 
     return -1;
 
+}
+
+
+int edge_os_crypto_aes_128_cbc_decrypt_file(const char *cypher_file, const char *output_file,
+                                     const char *keyfile, const char *ivfile)
+{
+    return __edge_os_crypto_decrypt_file(cypher_file, output_file, EDGEOS_CIPHER_AES_128_CBC, keyfile, ivfile);
 }
 
 

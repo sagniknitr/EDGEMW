@@ -50,7 +50,6 @@ Right now testing is only done with in Travis with Linux, X86 architecture (most
 9. Networking
     1. raw socket API - with ether_header, iphdr, udphdr, tcphdr
 
-
 ## minor features
 
 1. extend network layer for all purposes - v6 support, raw socket and splices for large payload transmit and receive
