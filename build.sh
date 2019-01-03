@@ -33,7 +33,13 @@ run_gcc_tests() {
 
     sudo python ./testing/test_socket.py
     sudo python ./testing/test_logger.py
-    ./build/TestExecutor
+    ./build/TestExecutor list_test
+    ./build/TestExecutor prng_test
+    ./build/TestExecutor fsapi_test
+    ./build/TestExecutor tokparse_test
+    ./build/TestExecutor sysioctl_test
+    ./build/TestExecutor pthread_test
+    ./build/TestExecutor crypto_test
     exit 0
 }
 

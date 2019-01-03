@@ -32,11 +32,18 @@ int main(int argc, char **argv)
     uint32_t i;
 
     for (i = 0; i < sizeof(test_case) / sizeof(test_case[0]); i ++) {
+        std::string exec_name =  std::string(argv[1]);
+
+        if (exec_name == test_case[i].name) {
+            test_case[i].executor(argc - 1, &argv[1]);
+        }
+#if 0
         if (test_case[i].executor(argc, argv)) {
             std::cerr << "test " << test_case[i].name << " failed" << std::endl;
         } else {
             std::cerr << "test " << test_case[i].name << " passed" << std::endl;
         }
+#endif
     }
 
     return 0;

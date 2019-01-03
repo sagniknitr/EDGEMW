@@ -66,12 +66,22 @@ struct edge_os_ecc_signature {
 int edge_os_crypto_generate_keypair(const char *pubkey, edge_os_ecc_key_algorithms_t algorithm, const char *privkey);
 
 struct edge_os_ecc_signature *
+edge_os_crypto_ecc_sign_message_sha1(const unsigned char *data, int datalen,
+                                     char *cert_path);
+
+struct edge_os_ecc_signature *
 edge_os_crypto_ecc_sign_message_sha256(const unsigned char *data, int datalen,
                                 char *cert_path);
 
 void edge_os_crypto_ecc_free_signature(struct edge_os_ecc_signature *sig);
 
 int edge_os_crypto_ecc_verify_message_sha256(const uint8_t *buf, size_t bufsize, const uint8_t *signature, int signature_len, const char *pubkey);
+
+int edge_os_crypto_ecc_verify_message_sha1(const uint8_t *buf, size_t bufsize, const uint8_t *signature, int signature_len, const char *pubkey);
+
+void edge_os_crypto_init(void);
+
+void edge_os_crypto_deinit(void);
 
 #endif
 

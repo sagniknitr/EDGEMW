@@ -45,5 +45,7 @@ void edge_os_evtloop_run(void *handle);
 
 int edge_os_evtloop_unregister_socket(void *handle, int sock);
 
+void edge_os_evtloop_deinit(void *handle);
+
 #endif
 

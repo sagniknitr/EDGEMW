@@ -21,7 +21,9 @@ void autoReceiveData(int sock, void *priv)
     int ret;
     
     ret = edge_os_tcp_recv(sock, buf, sizeof(buf));
-    if (ret < 0) {
+    if (ret <= 0) {
+        edge_os_evtloop_unregister_socket(s->m_->getMasterLoopBase(), sock);
+        s->cMgr_->delFd(sock);
         edge_os_del_tcp_socket(sock);
     }
 
@@ -81,3 +83,4 @@ void TcpServer::registerNotifiers(receiveNotifier r, newConnNotifier n)
     r_ = r;
     n_ = n;
 }
+

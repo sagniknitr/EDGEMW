@@ -20,5 +20,9 @@ int main()
     s.registerNotifiers(&(rxData), nullptr);
 
     m.run();
+
+    m.cleanup();
+
+    return 0;
 }
 

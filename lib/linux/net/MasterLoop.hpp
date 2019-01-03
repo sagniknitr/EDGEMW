@@ -22,6 +22,11 @@ class MasterLoop {
             edge_os_evtloop_run(&base_);
         }
 
+        void cleanup()
+        {
+            edge_os_evtloop_deinit(&base_);
+        }
+
     private:
         struct edge_os_evtloop_base base_;
 };

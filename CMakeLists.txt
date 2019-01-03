@@ -2,8 +2,10 @@ cmake_minimum_required(VERSION 2.8)
 
 project(EDGEMW)
 
+# command line
 option(CONFIG_USE_CLANG "test with clang / clang++" off)
 option(CONFIG_RELEASE off)
+option(CONFIG_SHAREDLIB off)
 
 set(OS_FLAGS "-DOS_LINUX")
 
@@ -127,7 +129,13 @@ SET(SUPERVISOR_SOURCES
 SET(OTA_SOURCES
         services/ota/ota.c)
 
-add_library(EdgeOS ${SOURCES})
+add_library(EdgeOS STATIC ${SOURCES})
+
+if (CONFIG_SHAREDLIB)
+    add_library(EdgeOSShared SHARED ${SOURCES})
+    target_link_libraries(EdgeOSShared pthread rt gcov protobuf-c crypto ssl)
+endif()
+
 target_link_libraries(EdgeOS pthread rt gcov protobuf-c crypto ssl)
 
 add_executable(EdgeOSLogger services/logsrv/edgeos_logsrv.cpp)

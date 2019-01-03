@@ -13,13 +13,17 @@ int crypto_test(int argc, char **argv)
     uint8_t iv[16];
     char *keyfile = "./aes_128.key";
     char *ivfile = "./aes_128.iv";
-    char *input_file = "./libEdgeOS.a";
-    char *output_file = "./libEdgeOS.a.enc";
-    char *dec_file = "./libEdgeOS.a.dec";
+    char *input_file = "./build/libEdgeOS.a";
+    char *output_file = "./build/libEdgeOS.a.enc";
+    char *dec_file = "./build/libEdgeOS.a.dec";
     char *pubkey = "./secp256k1_pub.key";
     char *privkey = "./secp256k1_priv.key";
+    uint8_t chacha20_key[32];
+    uint8_t chacha20_iv[12];
 
     memset(md5sum, 0, sizeof(md5sum));
+
+    edge_os_crypto_init();
 
     edge_os_crypto_md5sum((const unsigned char *)msg, strlen(msg), md5sum);
     edge_os_hexdump("md5sum", md5sum, 16);
@@ -96,6 +100,13 @@ int crypto_test(int argc, char **argv)
     printf("verify status %d\n", ret);
 
     edge_os_crypto_ecc_free_signature(signature);
+
+    edge_os_crypto_gen_keyiv(chacha20_key, sizeof(chacha20_key), chacha20_iv, sizeof(chacha20_iv));
+
+    edge_os_hexdump("chacha20_key", chacha20_key, sizeof(chacha20_key));
+    edge_os_hexdump("chacha20_iv", chacha20_iv, sizeof(chacha20_iv));
+
+    edge_os_crypto_deinit();
 
     return 0;
 }
