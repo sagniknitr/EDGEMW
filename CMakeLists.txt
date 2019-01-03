@@ -35,31 +35,51 @@ else()
 
 endif()
 
-set(SOURCES
-        lib/evtloop/evtloop.c
-        lib/algorithms/list.c
+SET(ALG_SOURCES
+        lib/algorithms/list.c)
+
+SET(LINUX_SPEC_SOURCES
         lib/linux/net/socket.c
-        lib/logger/edgeos_logger.c
         lib/linux/shmem/shmem.c
-        lib/logger/logger.c
-        services/distcom/distcomm_pub.c
         lib/linux/crypto/prng.c
-        services/distcom/dist_sdp.c
-        lib/gpslib/src/nmea/nmea_parser.cpp
-        lib/util/csvclass.cpp
-        lib/init.c
         lib/linux/file_system/fsapi.c
-        lib/util/tokenparse.c
-        lib/util/TokParse.cpp
         lib/linux/net/TcpServer.cpp
         lib/linux/net/ClientMgr.cpp
         lib/linux/sched/sched.c
         lib/linux/net/sysioctl.c
         lib/linux/pthreads/pthreads.c
-        lib/linux/net/ds/generated/dist_sdp.pb-c.c
+        lib/linux/net/ds/generated/dist_sdp.pb-c.c)
+
+SET(UTIL_SOURCES
+        lib/util/csvclass.cpp
+        lib/util/tokenparse.c
+        lib/util/TokParse.cpp
         lib/util/conv.c
-        lib/crypto/crypto.c
         lib/util/hex.c)
+
+SET(CRYPTO_SOURCES
+        lib/crypto/crypto.c)
+
+SET(GPSLIB_SOURCES
+        lib/gpslib/src/nmea/nmea_parser.cpp)
+
+SET(CONFIG_PARSER_SOURCES
+        lib/config/config_parser.c
+        lib/config/config_parser.cpp)
+
+set(SOURCES
+        lib/evtloop/evtloop.c
+        ${ALG_SOURCES}
+        lib/logger/edgeos_logger.c
+        ${LINUX_SPEC_SOURCES}
+        ${UTIL_SOURCES}
+        lib/logger/logger.c
+        services/distcom/distcomm_pub.c
+        services/distcom/dist_sdp.c
+        ${GPSLIB_SOURCES}
+        ${CRYPTO_SOURCES}
+        lib/init.c
+        ${CONFIG_PARSER_SOURCES})
 
 set(LIB_TEST_SOURCES
         tests/test_socket.c)
@@ -121,6 +141,7 @@ include_directories(
     services/supervisor/
     services/ota/
     lib/crypto/
+    lib/config/
 )
 
 SET(SUPERVISOR_SOURCES
