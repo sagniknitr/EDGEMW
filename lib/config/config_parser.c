@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <config_parser.h>
 
-static struct config_parse_set *
+static struct edge_os_config_parse_set *
 __edge_os_parse_config_line(char *config_line, int line_len, int *ret)
 {
     int i;
@@ -26,9 +26,9 @@ __edge_os_parse_config_line(char *config_line, int line_len, int *ret)
     if (i >= line_len)
         return NULL;
 
-    struct config_parse_set *new_set;
+    struct edge_os_config_parse_set *new_set;
 
-    new_set = (struct config_parse_set *)calloc(1, sizeof(struct config_parse_set));
+    new_set = (struct edge_os_config_parse_set *)calloc(1, sizeof(struct edge_os_config_parse_set));
     if (!new_set) {
         *ret = -1;
         return NULL;
@@ -80,10 +80,10 @@ __edge_os_parse_config_line(char *config_line, int line_len, int *ret)
     return new_set;
 }
 
-void edge_os_config_free(struct config_parse_set *set)
+void edge_os_config_free(struct edge_os_config_parse_set *set)
 {
-    struct config_parse_set *t;
-    struct config_parse_set *told;
+    struct edge_os_config_parse_set *t;
+    struct edge_os_config_parse_set *told;
 
     t = told = set;
     while (t) {
@@ -93,14 +93,14 @@ void edge_os_config_free(struct config_parse_set *set)
     }
 }
 
-struct config_parse_set *edge_os_config_parse(const char *filename)
+struct edge_os_config_parse_set *edge_os_config_parse(const char *filename)
 {
     int ret;
     int parse_count = 0;
     int line_len;
     FILE *fp;
-    struct config_parse_set *head = NULL;
-    struct config_parse_set *tail = NULL;
+    struct edge_os_config_parse_set *head = NULL;
+    struct edge_os_config_parse_set *tail = NULL;
 
     fp = fopen(filename, "r");
     if (!fp)
@@ -109,7 +109,7 @@ struct config_parse_set *edge_os_config_parse(const char *filename)
     char config_line[1024];
 
     while (fgets(config_line, sizeof(config_line), fp)) {
-        struct config_parse_set *t;
+        struct edge_os_config_parse_set *t;
 
         // remove that \n
         line_len = strlen(config_line) - 1;
@@ -140,9 +140,9 @@ struct config_parse_set *edge_os_config_parse(const char *filename)
     return head;
 }
 
-void edge_os_config_parser_print(struct config_parse_set *set)
+void edge_os_config_parser_print(struct edge_os_config_parse_set *set)
 {
-    struct config_parse_set *t;
+    struct edge_os_config_parse_set *t;
 
     for (t = set; t != NULL; t = t->next) {
         printf("var %s val %s\n", t->var, t->val);

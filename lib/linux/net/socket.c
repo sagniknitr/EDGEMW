@@ -30,7 +30,7 @@ struct edge_os_managed_server_config {
     int bufsize;
     int fd;
     void (*default_acceptor)(int fd, char *ip, int port);
-    int (*default_recv)(int fd, void *data, int datalen);
+    int (*default_recv)(int fd, void *data, int datalen, char *ip, int port);
 };
 
 static int __socket(int family, int protocol)
@@ -589,23 +589,25 @@ static void __edge_os_default_recv(int sock, void *priv)
     }
 
     if (config->default_recv)
-        config->default_recv(sock, config->buf, rxsize);
+        config->default_recv(sock, config->buf, rxsize, NULL, -1);
 }
 
 static void __edge_os_default_rfrm(int sock, void *priv)
 {
     struct edge_os_managed_server_config *config = priv;
     int rxsize;
+    char dest[40];
+    int dest_port;
 
     // error message dump already done at os_udp_recvfrom
-    rxsize = edge_os_udp_recvfrom(sock, config->buf, config->bufsize, NULL, NULL);
+    rxsize = edge_os_udp_recvfrom(sock, config->buf, config->bufsize, dest, &dest_port);
     if (rxsize <= 0) {
         edge_os_evtloop_unregister_socket(config->evtloop_base, sock);
         return;
     }
 
     if (config->default_recv)
-        config->default_recv(sock, config->buf, rxsize);
+        config->default_recv(sock, config->buf, rxsize, dest, dest_port);
 }
 
 static void edge_os_default_acceptor(int sock, void *priv)
@@ -658,7 +660,7 @@ void* edge_os_create_server_managed(void *evtloop_base,
                                     int n_conns,
                                     int expect_bufsize,
                                     void (*default_accept)(int fd, char *ip, int port),
-                                    int (*default_recv)(int fd, void *data, int datalen))
+                                    int (*default_recv)(int fd, void *data, int datalen, char *ip, int port))
 {
     struct edge_os_managed_server_config *config;
 
@@ -677,6 +679,8 @@ void* edge_os_create_server_managed(void *evtloop_base,
     config->bufsize = expect_bufsize;
 
     edge_os_list_init(&config->client_list);
+
+    config->app_ctx = app_ctx;
 
     switch (type) {
         case EDGEOS_SERVER_TCP:

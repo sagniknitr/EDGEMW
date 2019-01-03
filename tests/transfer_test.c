@@ -19,7 +19,7 @@ void accept_cb(int fd, char *ip1, int port1)
     printf("conn [%d] from ip %s port %d\n", fd, ip1, port1);
 }
 
-int rx_cb(int fd, void *data, int datalen)
+int rx_cb(int fd, void *data, int datalen, char *ip, int port)
 {
     static uint64_t bytelen = 0;
     static uint64_t transfer_count = 0;

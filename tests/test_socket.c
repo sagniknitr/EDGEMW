@@ -23,7 +23,7 @@ void accept_cb(int fd, char *ip1, int port1)
     printf("conn [%d] from ip %s port %d]\n", fd, ip1, port1);
 }
 
-int rx_cb(int fd, void *data, int datalen)
+int rx_cb(int fd, void *data, int datalen, char *dest, int destport)
 {
     printf("data from client %s\n", (char *)data);
 

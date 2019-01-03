@@ -8,9 +8,15 @@
 #include <fsapi.h>
 #include <edgeos_sched.h>
 #include <prng.h>
-#include <error_codes.h>
-#include <errormsg.h>
 #include <edgeos_logger.h>
+#include <config_parser.h>
+#include <conv.h>
+#include <tokenparse.h>
+
+#ifdef OS_LINUX
+// QNX declares getopt() in unistd.h
+#include <getopt.h>
+#endif
 
 #endif
 

@@ -10,7 +10,7 @@ namespace ConfigBase {
 
 std::vector<std::pair<std::string, std::string> > ConfigParser::parseConfig(std::string fileName)
 {
-    struct config_parse_set *set;
+    struct edge_os_config_parse_set *set;
     std::vector<std::pair<std::string, std::string> > parseData;
 
     parseData.empty();
@@ -20,7 +20,7 @@ std::vector<std::pair<std::string, std::string> > ConfigParser::parseConfig(std:
         return parseData;
     }
 
-    struct config_parse_set *set_it;
+    struct edge_os_config_parse_set *set_it;
 
     for (set_it = set; set_it != NULL; set_it = set_it->next) {
         std::pair<std::string, std::string> item;
