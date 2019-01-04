@@ -23,7 +23,8 @@ blocks:
           - export CODECOV_TOKEN="a5c741b4-be92-45f4-897e-267a2ca1d4c0"
           - bash <(curl -s https://codecov.io/bash)
           - echo "build complete"
-      -name: stable build
+      - name: stable build
+        commands:
           - pip install --user cpp-coveralls
           - sudo apt-get --assume-yes install libprotobuf-c0-dev protobuf-c-compiler protobuf-compiler libprotobuf-dev libprotoc-dev libprotoc-dev libprotobuf-c-dev
           - git clone https://github.com/devnaga/EDGEMW/
