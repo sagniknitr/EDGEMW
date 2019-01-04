@@ -25,6 +25,7 @@ void autoReceiveData(int sock, void *priv)
         edge_os_evtloop_unregister_socket(s->m_->getMasterLoopBase(), sock);
         s->cMgr_->delFd(sock);
         edge_os_del_tcp_socket(sock);
+        return;
     }
 
     if (s->r_) {
