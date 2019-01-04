@@ -70,12 +70,16 @@ int edge_os_list_delete(struct edge_os_list_base *base,
         return 1;
     }
 
+    t = t_old = base->head;
+
     while (t) {
         if (t->data == item) {
             t_old->next = t->next;
 
-            if (t_old->next == NULL)
+            if (t_old->next == NULL) {
                 base->tail = t_old;
+                base->tail->next = NULL;
+            }
 
             if (free_callback)
                 free_callback(t->data);

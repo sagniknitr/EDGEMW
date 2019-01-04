@@ -21,7 +21,7 @@ else()
 
     if (CONFIG_RELEASE)
 
-        set(CMAKE_C_FLAGS "-O3 -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow -fPIE -fPIC -D_FORTIFY_SOURCE=2 -DWC_NO_HARDEN -DCONFIG_CRYPTO_LIB_OPENSSL ${OS_FLAGS}")
+        set(CMAKE_C_FLAGS "-O3 -Wall -g -ggdb -Werror -Wextra -Wno-unused-parameter -Wshadow -fPIE -fPIC -D_FORTIFY_SOURCE=2 -DWC_NO_HARDEN -DCONFIG_CRYPTO_LIB_OPENSSL ${OS_FLAGS}")
         set(CMAKE_CXX_FLAGS "-O3 -Wall -Wextra -Werror -Wno-unused-parameter -Wshadow -fPIC -fPIE -std=c++11 -DWC_NO_HARDEN -DCONFIG_CRYPTO_LIB_OPENSSL ${OS_FLAGS}")
 
     else()
@@ -147,6 +147,9 @@ include_directories(
 SET(SUPERVISOR_SOURCES
         services/supervisor/supervisor.c)
 
+SET(TEST_SUPERVISOR_SOURCES
+        services/supervisor/test_supervisor.c)
+
 SET(OTA_SOURCES
         services/ota/ota.c)
 
@@ -197,6 +200,9 @@ target_link_libraries(DsSample pthread EdgeOS gcov protobuf-c)
 
 add_executable(EdgeOSSupervisor ${SUPERVISOR_SOURCES})
 target_link_libraries(EdgeOSSupervisor pthread EdgeOS gcov protobuf-c)
+
+add_executable(SupervisorTest ${TEST_SUPERVISOR_SOURCES})
+target_link_libraries(SupervisorTest pthread EdgeOS gcov protobuf-c crypto)
 
 add_executable(EdgeOSOTA ${OTA_SOURCES})
 target_link_libraries(EdgeOSOTA pthread EdgeOS gcov protobuf-c)

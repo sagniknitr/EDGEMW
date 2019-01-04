@@ -2,10 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <errno.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <edge_os.h>
+#include <supervisor.h>
 
 struct supervisor_cmdline {
     char *config_file;
@@ -162,17 +164,13 @@ static int __supervisor_start_process(struct supervisor_monitor_list *item)
     if (item->process_id == 0) {
         close(item->process_fds[0]);
 
-        printf("create proess %s\n", fullpath);
         ret = execv(fullpath, item->process_args);
         if (ret < 0) {
             _exit(1);
         }
+        _exit(1);
     } else {
         close(item->process_fds[1]);
-        ret = waitpid(item->process_id, NULL, WNOHANG);
-        if (ret == item->process_id) {
-            return -1;
-        }
     }
 
     return 0;
@@ -183,8 +181,47 @@ struct __supervisor_process_parameters {
     struct supervisor_monitor_list *monitor;
 };
 
-static void __supervisor_restart_process(struct supervisor_monitor_list *monitor, struct supervisor_priv *priv)
+static int __supervisor_start_processes(struct supervisor_monitor_list *monitor, struct supervisor_priv *priv)
 {
+    int ret;
+
+    ret = pipe(monitor->process_fds);
+    if (ret < 0)
+        return -1;
+
+    ret = __supervisor_start_process(monitor);
+    if (ret < 0)
+        return -1;
+
+    struct __supervisor_process_parameters *params;
+
+    params = calloc(1, sizeof(struct __supervisor_process_parameters));
+    if (!params)
+        return -1;
+
+    params->priv = priv;
+    params->monitor = monitor;
+
+    edge_os_evtloop_register_socket(&priv->evtbase, params,
+                                        monitor->process_fds[0], __supervisor_monitor_process);
+
+    return 0;
+}
+
+static int __supervisor_restart_process(struct supervisor_monitor_list *monitor, struct supervisor_priv *priv)
+{
+    int ret;
+    int wait_out;
+
+    // cleanup ..
+    ret = waitpid(-1, &wait_out, WNOHANG);
+
+    close(monitor->process_fds[0]);
+    close(monitor->process_fds[1]);
+
+    ret = __supervisor_start_processes(monitor, priv);
+
+    return ret;
 }
 
 static void __supervisor_monitor_process(int sock, void *priv)
@@ -195,12 +232,15 @@ static void __supervisor_monitor_process(int sock, void *priv)
     int ret;
     int wait_out;
 
-    ret = waitpid(monitor->process_id, &wait_out, WNOHANG);
+    ret = waitpid(-1, &wait_out, WNOHANG);
+    printf("res %d pid %d error %s\n", ret, monitor->process_id, strerror(errno));
     if (ret == monitor->process_id) {
         edge_os_evtloop_unregister_socket(&spriv->evtbase, monitor->process_fds[0]);
         close(monitor->process_fds[0]);
         __supervisor_restart_process(monitor, spriv);
     }
+
+    free(params);
 }
 
 static int supervisor_start_processes(struct supervisor_priv *priv)
@@ -212,24 +252,9 @@ static int supervisor_start_processes(struct supervisor_priv *priv)
     for (item = priv->monitor_list.head; item; item = item->next) {
         monitor = item->data;
 
-        ret = pipe(monitor->process_fds);
-        if (ret < 0)
-            return -1;
-
-        if (__supervisor_start_process(monitor))
-            continue;
-
-        struct __supervisor_process_parameters *params;
-
-        params = calloc(1, sizeof(struct __supervisor_process_parameters));
-        if (!params)
-            return -1;
-
-        params->priv = priv;
-        params->monitor = monitor;
-
-        edge_os_evtloop_register_socket(&priv->evtbase, params,
-                                        monitor->process_fds[0], __supervisor_monitor_process);
+        ret = __supervisor_start_processes(monitor, priv);
+        if (ret < 0) {
+        }
     }
 
     return 0;
@@ -240,7 +265,6 @@ int main(int argc, char **argv)
     struct supervisor_priv *priv;
     int ret;
 
-    signal(SIGCHLD, SIG_IGN);
     priv = calloc(1, sizeof(struct supervisor_priv));
     if (!priv)
         return -1;

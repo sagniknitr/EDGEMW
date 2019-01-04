@@ -123,6 +123,7 @@ int edge_os_evtloop_unregister_socket(void *handle, int sock)
         return -1;
     }
 
+    FD_CLR(sock, &base->allfd_);
     edge_os_list_delete(&base->socket_base, data, _socklist_free_item);
 
     return 0;
