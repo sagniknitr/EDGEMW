@@ -50,6 +50,21 @@ int sysioctl_test(int argc, char **argv)
 
     ret = edge_os_get_hwaddr(NULL, NULL);
 
+    struct edge_os_iflist *ndev, *ndev_1;
+
+    ndev = edge_os_get_netdev_info();
+
+    for (ndev_1 = ndev; ndev_1; ndev_1 = ndev_1->next) {
+        printf("ifname: %s\n", ndev_1->ifname);
+
+        struct edge_os_ipaddr_set *i;
+
+        for (i = ndev_1->set; i; i = i->next) {
+            printf("\tipaddr: %s\n", i->ipaddr);
+        }
+    }
+    edge_os_free_netdev_info(ndev);
+
     return 0;
 }
 

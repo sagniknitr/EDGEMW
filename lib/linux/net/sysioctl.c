@@ -13,6 +13,159 @@
 #include <errno.h>
 #include <edgeos_logger.h>
 #include <linux/if.h>
+#include <ifaddrs.h>
+#include <sysioctl.h>
+
+static void __edge_os_get_netdev_info(struct edge_os_iflist *t,
+                                      struct ifaddrs *it)
+{
+    int valid_ip = 0;
+
+    strcpy(t->ifname, it->ifa_name);
+
+    if (it->ifa_flags & IFF_BROADCAST)
+        t->has_broadcast_set = 1;
+
+    if (it->ifa_flags & IFF_UP)
+        t->if_up = 1;
+
+    if (it->ifa_flags & IFF_MULTICAST)
+        t->has_mcast_set = 1;
+
+    if (it->ifa_flags & IFF_LOOPBACK)
+        t->is_loopback = 1;
+
+    struct edge_os_ipaddr_set *i = NULL;
+
+    if (it->ifa_addr) {
+        const char *ret;
+
+        i = calloc(1, sizeof(struct edge_os_ipaddr_set));
+        if (!t) {
+            return;
+        }
+
+        if (it->ifa_addr->sa_family == AF_INET) {
+            struct sockaddr_in *ip;
+
+            ip = (struct sockaddr_in *)(it->ifa_addr);
+
+            ret = inet_ntop(AF_INET, &(ip->sin_addr.s_addr),
+                                i->ipaddr, sizeof(i->ipaddr));
+            if (!ret) {
+                return;
+            }
+            valid_ip = 1;
+        } else if (it->ifa_addr->sa_family == AF_INET6) {
+            struct sockaddr_in6 *ip6;
+
+            ip6 = (struct sockaddr_in6 *)(it->ifa_addr);
+
+            ret = inet_ntop(AF_INET6, &ip6->sin6_addr.s6_addr,
+                                i->ipaddr, sizeof(i->ipaddr));
+            if (!ret) {
+                return;
+            }
+            valid_ip = 1;
+        } else {
+            return;
+        }
+    }
+
+    if (valid_ip) {
+        if (!t->set) {
+            t->set = i;
+        } else {
+            struct edge_os_ipaddr_set *j;
+
+            j = t->set;
+            while (j->next) {
+                j = j->next;
+            }
+            j->next = i;
+        }
+    }
+}
+
+struct edge_os_iflist *edge_os_get_netdev_info()
+{
+    struct ifaddrs *ifaddr;
+    struct ifaddrs *it;
+    int ret;
+
+    ret = getifaddrs(&ifaddr);
+    if (ret < 0) {
+        return NULL;
+    }
+
+    struct edge_os_iflist *s = NULL;
+    struct edge_os_iflist *tail = NULL;
+
+    for (it = ifaddr; it;  it = it->ifa_next) {
+        struct edge_os_iflist *t;
+        struct edge_os_iflist *f;
+
+        for (f = s; f; f = f->next) {
+            if (!strcmp(it->ifa_name, f->ifname)) {
+                break;
+            }
+        }
+
+        if (!f) {
+            t = calloc(1, sizeof(struct edge_os_iflist));
+            if (!t) {
+                goto bad;
+            }
+
+            t->set = NULL;
+
+            __edge_os_get_netdev_info(t, it);
+
+            if (!s) {
+                s = t;
+                tail = t;
+            } else {
+                tail->next = t;
+                tail = t;
+            }
+        } else {
+            __edge_os_get_netdev_info(f, it);
+        }
+    }
+
+    freeifaddrs(ifaddr);
+    return s;
+
+bad:
+    freeifaddrs(ifaddr);
+    return NULL;
+}
+
+void edge_os_free_netdev_info(struct edge_os_iflist *dev)
+{
+    struct edge_os_iflist *t;
+    struct edge_os_iflist *t1;
+
+    t = t1 = dev;
+
+    while (t) {
+        t1 = t;
+        t = t->next;
+
+        struct edge_os_ipaddr_set *i;
+        struct edge_os_ipaddr_set *i1;
+
+        i = i1 = t1->set;
+
+        while (i) {
+            i1 = i;
+            i = i->next;
+            free(i1);
+        }
+
+        free(t1);
+    }
+}
 
 int edgeos_get_net_ipaddr(const char *ifname, char *ip, int iplen)
 {
