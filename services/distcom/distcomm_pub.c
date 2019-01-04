@@ -4,7 +4,7 @@
 #include <string.h>
 #include <net_socket.h>
 #include <evtloop.h>
-#include <list.h>
+#include <edgeos_list.h>
 #include <prng.h>
 #include <dist_sdp.h>
 #include <edgeos_logger.h>

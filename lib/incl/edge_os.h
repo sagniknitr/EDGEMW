@@ -1,7 +1,7 @@
 #ifndef __EDGE_OS_H__
 #define __EDGE_OS_H__
 
-#include <list.h>
+#include <edgeos_list.h>
 #include <evtloop.h>
 #include <net_socket.h>
 #include <distcom.h>

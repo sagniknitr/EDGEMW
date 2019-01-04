@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <list.h>
+#include <edgeos_list.h>
 
 static int static_ptr_test()
 {

@@ -68,6 +68,8 @@ static void __edge_os_get_netdev_info(struct edge_os_iflist *t,
             }
             valid_ip = 1;
         } else {
+            valid_ip = 0;
+            free(i);
             return;
         }
     }

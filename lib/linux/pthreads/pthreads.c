@@ -10,7 +10,7 @@
 #include <time.h>
 #include <pthread.h>
 #include <edgeos_logger.h>
-#include <list.h>
+#include <edgeos_list.h>
 
 struct edgeos_threadpool_work_priv {
     void (*work)(void *data);

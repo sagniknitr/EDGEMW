@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <getopt.h>
-#include <list.h>
+#include <edgeos_list.h>
 #include <evtloop.h>
 #include <net_socket.h>
 #include <dist_sdp.pb-c.h>

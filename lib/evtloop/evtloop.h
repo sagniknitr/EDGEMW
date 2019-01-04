@@ -2,7 +2,7 @@
 #define __EDGE_EVTLOOP_H__
 
 #include <sys/select.h>
-#include <list.h>
+#include <edgeos_list.h>
 
 struct edge_os_evtloop_timer {
     int fd;

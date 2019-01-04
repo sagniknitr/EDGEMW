@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <net_socket.h>
 #include <shmem.h>
-#include <list.h>
+#include <edgeos_list.h>
 #include <stdlib.h>
 #include <string.h>
 #include <evtloop.h>
