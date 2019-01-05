@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
-#include <crypto.h>
-#include <utils.h>
+#include <edgeos_crypto.h>
+#include <edgeos_utils.h>
 
 int crypto_test(int argc, char **argv)
 {

@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <edgeos_netapi.h>
-#include <evtloop.h>
+#include <edgeos_evtloop.h>
 
 static int sock = -1;
 static int tcp = 0;

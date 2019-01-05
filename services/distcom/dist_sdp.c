@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <arpa/inet.h>
-#include <evtloop.h>
+#include <edgeos_evtloop.h>
 #include <edgeos_netapi.h>
 #include <dist_sdp.h>
 

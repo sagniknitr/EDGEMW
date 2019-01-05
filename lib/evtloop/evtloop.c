@@ -15,7 +15,7 @@
 #include <time.h>
 #include <signal.h>
 #include <sys/time.h>
-#include <evtloop.h>
+#include <edgeos_evtloop.h>
 #include <sys/timerfd.h>
 #include <sys/types.h>
 #include <sys/stat.h>

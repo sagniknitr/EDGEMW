@@ -8,7 +8,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
-#include <evtloop.h>
+#include <edgeos_evtloop.h>
 #include <edgeos_netapi.h>
 #include <dist_sdp.h>
 #include <edgeos_list.h>

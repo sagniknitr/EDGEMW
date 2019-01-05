@@ -5,7 +5,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <crypto.h>
+#include <edgeos_crypto.h>
 #include <fsapi.h>
 
 #ifdef CONFIG_CRYPTO_LIB_OPENSSL

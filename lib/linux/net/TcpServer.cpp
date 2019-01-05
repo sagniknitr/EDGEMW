@@ -4,7 +4,7 @@
 #include <stdint.h>
 extern "C" {
 #include <edgeos_netapi.h>
-#include <evtloop.h>
+#include <edgeos_evtloop.h>
 }
 #include <ClientMgr.hpp>
 #include <MasterLoop.hpp>

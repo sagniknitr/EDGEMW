@@ -10,7 +10,7 @@
 #include <edgeos_netapi.h>
 #include <sys/un.h>
 #include <fcntl.h>
-#include <evtloop.h>
+#include <edgeos_evtloop.h>
 #include <stdlib.h>
 #include <edgeos_logger.h>
 
