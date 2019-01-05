@@ -1,24 +1,32 @@
-#ifndef __NET_SOCKET_H__
-#define __NET_SOCKET_H__
+#ifndef __EDGEOS_NETAPI_H__
+#define __EDGEOS_NETAPI_H__
 
+// server types to choose for the managed server
 typedef enum {
+    // create tcp server
     EDGEOS_SERVER_TCP,
+
+    // create udp server
     EDGEOS_SERVER_UDP,
+
+    // create tcp unix server
     EDGEOS_SERVER_TCP_UNIX,
+
+    // create udp unix server
     EDGEOS_SERVER_UDP_UNIX
 } edge_os_server_type_t;
 
 /**
  * @brief - create new udp socket
  * 
- * @return returns socket address
+ * @return returns socket address on success and -1 on failure
  */
 int edge_os_new_udp_socket();
 
 /**
  * @brief - create new unix socket
  *
- * @return - returns socket address
+ * @return - returns socket address on success and -1 on failure
  */
 int edge_os_new_unix_socket();
 
@@ -36,6 +44,11 @@ int edge_os_new_tcp_socket();
  * @param ip - ip address of the server
  * @param port - port number
  * @param n_conns - number of connects to listen
+ *
+ * Description-
+ *
+ * creates a tcp server with given ip and port, (reuses the address automatically)
+ * and returns the server fd. The caller must perform os_accept_conn
  *
  * @return return socket address on success -1 on failure
  */
@@ -102,6 +115,10 @@ void* edge_os_create_server_managed(void *evtloop_base,
                                     int (*default_recv)(int fd, void *data, int datalen, char *ip, int port));
 
 int edge_os_net_setmaxconn(int conns);
+
+int edge_os_connect_address6(const char *addr, const char *service_name);
+
+int edge_os_connect_address4(const char *addr, const char *service_name);
 
 #endif
 

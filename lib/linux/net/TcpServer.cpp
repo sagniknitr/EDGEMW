@@ -3,7 +3,7 @@
 #include <vector>
 #include <stdint.h>
 extern "C" {
-#include <net_socket.h>
+#include <edgeos_netapi.h>
 #include <evtloop.h>
 }
 #include <ClientMgr.hpp>

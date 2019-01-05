@@ -5,7 +5,7 @@
 #include <getopt.h>
 #include <edgeos_list.h>
 #include <evtloop.h>
-#include <net_socket.h>
+#include <edgeos_netapi.h>
 #include <dist_sdp.pb-c.h>
 #include <sysioctl.h>
 

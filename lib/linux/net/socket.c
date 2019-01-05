@@ -4,9 +4,10 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <arpa/inet.h>
+#include <netdb.h>
 #include <netinet/in.h>
 #include <unistd.h>
-#include <net_socket.h>
+#include <edgeos_netapi.h>
 #include <sys/un.h>
 #include <fcntl.h>
 #include <evtloop.h>
@@ -107,6 +108,54 @@ err:
 int edge_os_create_udp_unix_server(const char *addr)
 {
     return edge_os_create_udp_unix_client(addr);
+}
+
+int __edge_os_connect_address(const char *addr, const char *service_name, int family)
+{
+    int fd;
+    int ret;
+    struct addrinfo hint;
+    struct addrinfo *s;
+
+    memset(&hint, 0, sizeof(hint));
+
+    hint.ai_family = family;
+    hint.ai_socktype = SOCK_STREAM;
+
+    ret = getaddrinfo(addr, service_name, &hint, &s);
+    if (ret != 0) {
+        edge_os_log_with_error(errno, "net: failed to getaddrinfo ");
+        return -1;
+    }
+
+    struct addrinfo *ai;
+
+    for (ai = s; ai != NULL; ai = ai->ai_next) {
+        fd = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
+        if (fd < 0) {
+            edge_os_log_with_error(errno, "net: failed to open socket ");
+            return -1;
+        }
+
+        ret = connect(fd, ai->ai_addr, ai->ai_addrlen);
+        if (ret < 0) {
+            edge_os_log_with_error(errno, "net: failed to connect ");
+            return -1;
+        }
+        break;
+    }
+
+    return fd;
+}
+
+int edge_os_connect_address6(const char *addr, const char *service_name)
+{
+    return __edge_os_connect_address(addr, service_name, AF_INET6);
+}
+
+int edge_os_connect_address4(const char *addr, const char *service_name)
+{
+    return __edge_os_connect_address(addr, service_name, AF_INET);
 }
 
 int edge_os_create_tcp_unix_client(const char *path)

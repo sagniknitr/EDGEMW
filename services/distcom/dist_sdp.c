@@ -4,7 +4,7 @@
 #include <string.h>
 #include <arpa/inet.h>
 #include <evtloop.h>
-#include <net_socket.h>
+#include <edgeos_netapi.h>
 #include <dist_sdp.h>
 
 int dist_sdp_msg_reg_name(int sock, struct dist_sdp_register_name *reg, char *ip, int port)

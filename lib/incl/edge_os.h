@@ -3,7 +3,7 @@
 
 #include <edgeos_list.h>
 #include <evtloop.h>
-#include <net_socket.h>
+#include <edgeos_netapi.h>
 #include <distcom.h>
 #include <fsapi.h>
 #include <edgeos_sched.h>

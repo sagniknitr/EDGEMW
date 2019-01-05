@@ -9,7 +9,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <evtloop.h>
-#include <net_socket.h>
+#include <edgeos_netapi.h>
 #include <dist_sdp.h>
 #include <edgeos_list.h>
 #include <edgeos_logger.h>
