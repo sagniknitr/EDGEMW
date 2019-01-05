@@ -8,6 +8,7 @@ int list_test(int argc, char **argv);
 int sysioctl_test(int argc, char **argv);
 int pthread_test(int argc, char **argv);
 int crypto_test(int argc, char **argv);
+int sched_test(int argc, char **argv);
 }
 
 int fsAPI_test(int argc, char **argv);
@@ -25,6 +26,7 @@ static struct test_cases {
     {"sysioctl_test", sysioctl_test},
     {"pthread_test", pthread_test},
     {"crypto_test", crypto_test},
+    {"sched_test", sched_test},
 };
 
 int main(int argc, char **argv)
@@ -36,6 +38,7 @@ int main(int argc, char **argv)
 
         if (exec_name == test_case[i].name) {
             test_case[i].executor(argc - 1, &argv[1]);
+            break;
         }
 #if 0
         if (test_case[i].executor(argc, argv)) {

@@ -3,5 +3,7 @@
 
 int edge_os_set_process_cpu(int cpu_number);
 
+int edge_os_get_num_cpu();
+
 #endif
 

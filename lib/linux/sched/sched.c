@@ -24,3 +24,8 @@ int edge_os_set_process_cpu(int *cpu_number, int size)
     return 0;
 }
 
+int edge_os_get_num_cpu()
+{
+    return sysconf(_SC_NPROCESSORS_ONLN);
+}
+

@@ -39,6 +39,7 @@ run_gcc_tests() {
     ./build/TestExecutor tokparse_test
     ./build/TestExecutor sysioctl_test
     ./build/TestExecutor pthread_test
+    ./build/TestExecutor sched_test
     ./build/TestExecutor crypto_test
     exit 0
 }
