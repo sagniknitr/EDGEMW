@@ -2,7 +2,7 @@
 #define __EDGEOS_MASTER_LOOP_HPP__
 
 extern "C" {
-#include <evtloop.h>
+#include <edgeos_evtloop.h>
 }
 
 class MasterLoop {

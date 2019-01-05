@@ -4,10 +4,10 @@
 #include <stdint.h>
 #include <getopt.h>
 #include <edgeos_list.h>
-#include <evtloop.h>
-#include <net_socket.h>
+#include <edgeos_evtloop.h>
+#include <edgeos_netapi.h>
 #include <dist_sdp.pb-c.h>
-#include <sysioctl.h>
+#include <edgeos_ioctl.h>
 
 char *ip;
 int port;

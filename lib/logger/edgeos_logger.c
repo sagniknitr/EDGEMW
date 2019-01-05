@@ -1,7 +1,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <net_socket.h>
+#include <edgeos_netapi.h>
 #include <unistd.h>
 #include <stdarg.h>
 #include <stdio.h>

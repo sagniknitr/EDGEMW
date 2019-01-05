@@ -3,8 +3,8 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
-#include <net_socket.h>
-#include <evtloop.h>
+#include <edgeos_netapi.h>
+#include <edgeos_evtloop.h>
 
 static int sock = -1;
 static int tcp = 0;
@@ -171,6 +171,12 @@ int main(int argc, char **argv)
         edge_os_evtloop_run(&evtloop_handle);
     }
 
+    sock = edge_os_connect_address4("www.google.com", "https");
+    if (sock < 0) {
+        return -1;
+    }
+
+    printf("sock for google %d\n", sock);
     return 0;
 }
 

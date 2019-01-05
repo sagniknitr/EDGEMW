@@ -1,8 +1,8 @@
 #include <iostream>
 #include <functional>
 extern "C" {
-#include <evtloop.h>
-#include <net_socket.h>
+#include <edgeos_evtloop.h>
+#include <edgeos_netapi.h>
 }
 #include <cstring>
 

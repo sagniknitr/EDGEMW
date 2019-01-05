@@ -1,5 +1,5 @@
-#ifndef __EDGE_EVTLOOP_H__
-#define __EDGE_EVTLOOP_H__
+#ifndef __EDGEOS_EVTLOOP_H__
+#define __EDGEOS_EVTLOOP_H__
 
 #include <sys/select.h>
 #include <edgeos_list.h>

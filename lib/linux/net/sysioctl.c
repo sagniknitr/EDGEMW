@@ -14,7 +14,7 @@
 #include <edgeos_logger.h>
 #include <linux/if.h>
 #include <ifaddrs.h>
-#include <sysioctl.h>
+#include <edgeos_ioctl.h>
 
 static void __edge_os_get_netdev_info(struct edge_os_iflist *t,
                                       struct ifaddrs *it)

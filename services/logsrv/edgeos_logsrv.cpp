@@ -10,7 +10,7 @@
 #include <syslog.h>
 extern "C" {
 #include <fsapi.h>
-#include <net_socket.h>
+#include <edgeos_netapi.h>
 }
 #include <csignal>
 

@@ -13,12 +13,18 @@ int edgeos_create_file(const char *filename)
 {
     int fd;
 
-    if (!filename)
+    if (!filename) {
+        edge_os_error("fsapi: invalid filename pointer @ %s %u\n",
+                                __func__, __LINE__);
         return -1;
+    }
 
     fd = open(filename, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
-    if (fd < 0)
+    if (fd < 0) {
+        edge_os_log_with_error(errno, "fsapi: failed to open file %s ",
+                                    filename);
         return -1;
+    }
 
     return fd;
 }
@@ -67,7 +73,12 @@ int edgeos_open_file(const char *filename, const char *mode)
         opts = O_RDWR;
     } else if (!strcmp(mode, "a")) {
         opts = O_RDWR | O_APPEND;
+    } else if (!strcmp(mode, "wx")) {
+        opts = O_CREAT | O_WRONLY | O_TRUNC | O_EXCL;
+        creat_opts = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP;
     } else {
+        edge_os_error("fsapi: unsupported mode %s @ %s %u\n",
+                                mode, __func__, __LINE__);
         return -1;
     }
 
@@ -77,8 +88,11 @@ int edgeos_open_file(const char *filename, const char *mode)
         fd = open(filename, opts);
     }
 
-    if (fd < 0)
+    if (fd < 0) {
+        edge_os_log_with_error(errno, "fsapi: failed to open file %s ",
+                                filename);
         return -1;
+    }
 
     return fd;
 }
@@ -89,21 +103,29 @@ int edgeos_read_file__cb(const void *priv, const char *filename, void (*read_cal
     int fd;
     int ret;
 
-    if (!read_callback)
+    if (!filename || !read_callback) {
+        edge_os_error("fsapi: invalid read_callback @ %s %u\n",
+                            __func__, __LINE__);
         return -1;
+    }
 
     fd = open(filename, O_RDONLY);
-    if (fd < 0)
+    if (fd < 0) {
+        edge_os_log_with_error(errno, "fsapi: failed to open file %s ",
+                            filename);
         return -1;
+    }
 
     while (1) {
         ret = read(fd, stream, sizeof(stream) - 1);
-        if (ret < 0) {
+        if (ret <= 0) {
             break;
         }
 
         read_callback(priv, stream, ret);
     }
+
+    close(fd);
 
     return 0;
 }
@@ -204,11 +226,14 @@ int edgeos_read_directory(void *priv, const char *dir,
     }
 
     while ((e = readdir(d)) != NULL) {
+
+        // skip the . and ..
         if (!strcmp(e->d_name, ".") ||
             !strcmp(e->d_name, "..")) {
             continue;
         }
 
+        // name can be a file or a directory again
         read_callback(priv, e->d_name);
     }
 
@@ -237,6 +262,7 @@ int edgeos_file_in_directory(const char *dir, const char *filename)
     }
 
     while ((e = readdir(d)) != NULL) {
+        // skip the . and ..
         if (!strcmp(e->d_name, ".") ||
             !strcmp(e->d_name, ".."))
             continue;
@@ -250,6 +276,15 @@ int edgeos_file_in_directory(const char *dir, const char *filename)
     closedir(d);
 
     return file_present;
+}
+
+int edgeos_scan_directory_recurse(const char *dir,
+                                  void *priv,
+                                  void (*scan_callback)(char *fullpath, int is_dir, void *priv))
+{
+    edge_os_error("fsapi: this function %s is not implemented\n",
+                        __func__);
+    return -1;
 }
 
 int edgeos_create_directory(const char *dir, int owner, int group, int other)
@@ -273,5 +308,58 @@ int edge_os_file_create_mmap(const char *file, const char *mode)
     edge_os_error("fsapi: this function %s is not supported\n",
                                 __func__);
     return -1;
+}
+
+int edge_os_file_accessible(const char *file, edge_os_access_mode_t mode)
+{
+    int ret;
+    int a_mode = 0;
+
+    if (mode & EDGE_OS_ACCESS_READ_OK) {
+        a_mode |= R_OK;
+    }
+
+    if (mode & EDGE_OS_ACCESS_WRITE_OK) {
+        a_mode |= W_OK;
+    }
+
+    if (mode & EDGE_OS_ACCESS_EXE_OK) {
+        a_mode |= X_OK;
+    }
+
+    if (!a_mode) {
+        edge_os_error("fsapi: invalid access mode %02x\n", mode);
+        return -1;
+    }
+
+    ret = access(file, a_mode);
+    if (ret < 0) {
+        edge_os_log_with_error(errno, "fsapi: failed to access() file %s ",
+                                        file);
+        return -1;
+    }
+
+    return 0;
+}
+
+int edge_os_create_directory_recurse(const char *dir, int owner, int group, int other)
+{
+    edge_os_error("fsapi: this function %s is not supported\n",
+                                __func__);
+    return -1;
+}
+
+int edge_os_remove_directory(const char *dir)
+{
+    int ret;
+
+    ret = rmdir(dir);
+    if (ret < 0) {
+        edge_os_log_with_error(errno, "fsapi: failed to rmdir %s ",
+                                        dir);
+        return -1;
+    }
+
+    return 0;
 }
 

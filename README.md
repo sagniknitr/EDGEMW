@@ -13,35 +13,50 @@ Below are some of the features. More to come soon.
 
 ### Library interface
 
-1. OS abstraction library for Linux
-    1. Distributed publisher and subscriber system based on topics instead of ip address  - preliminary code
-        1. topic based publish and subscription
-        2. aim to achieve machine to machine communication with topic only
-        3. topic collision and port assignments pending.
-        4. different multicast ip partitioning 
-2. Framework for timers, sockets and signals - event Loop library
-3. socket library API -
+1. Framework for timers, sockets and signals - event Loop library
+
+2. socket library API -
     1. UNIX and IPv4  TCP and UDP server and clients
-    2. C++ abstraction to the TCP server and client with Socket library and the Eventloop
-4. GPS parser library:
+    2. managed server abstraaction to reduce coding effort on user ende
+    3. C++ abstraction to the TCP server and client with Socket library and the Eventloop
+
+3. GPS parser library:
     1. for NMEA messages:
         GPGGA, GPGSA, GPGSV, GPRMB, GPRMC, GPGGLL
+
+4. cryptography APIs - wrappers for most popular libraries (openssl, wolfssl, tomcrypt) - currently openssl
+    1. hashing :
+        MD5, SHA, SHA1, SHA224, SHA256, SHA384, SHA512
+    2. encryption and decryption:
+        AES-CBC-128
+        AES-CBC-192
+        AES-CBC-256
+        key generation and iv generation
+    3. ECC sign and verify:
+        ECC-with-sha1
+        ECC-with-sha256
+        curve support:
+            SECP256k1,
+            SECP128r1,
+            SECP224r1,
+            brainpoolp224r1,
+            brainpoolp256r1,
+        ECC keygen
+
 5. Utilities -
     1. CSV File reader / writer / parser
     2. Token parser
-6. cryptography APIs - wrappers for most popular libraries (openssl, wolfssl, tomcrypt) - currently openssl
-    1. hashing :
-        MD5, SHA, SHA1, SHA224, SHA256, SHA384, SHA512
-    2. encryption :
-        AES-CBC-128
-    3. utilities :
-        key and iv generation
+
+6. algorithms -
+    1. basic data structures for C
+        linked list
 
 
 ### Services
 
 1. Logger service
     1. remote logging, local logging yet to be done over unix domain
+    2. log rotate - every 1 MB (configurable)
 
 
 ### how to compile

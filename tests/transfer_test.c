@@ -6,8 +6,8 @@
 #include <sys/time.h>
 #include <getopt.h>
 #include <edgeos_sched.h>
-#include <evtloop.h>
-#include <net_socket.h>
+#include <edgeos_evtloop.h>
+#include <edgeos_netapi.h>
 
 
 static struct timeval start_serv;

@@ -1,7 +1,7 @@
 #include <string>
 #include <vector>
 extern "C" {
-#include <tokenparse.h>
+#include <edgeos_tokparse.h>
 }
 #include <TokParse.hpp>
 
