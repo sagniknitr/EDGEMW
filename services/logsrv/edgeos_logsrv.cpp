@@ -9,7 +9,7 @@
 #include <unistd.h>
 #include <syslog.h>
 extern "C" {
-#include <fsapi.h>
+#include <edgeos_fsapi.h>
 #include <edgeos_netapi.h>
 }
 #include <csignal>

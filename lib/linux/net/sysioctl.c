@@ -318,11 +318,14 @@ static int __edge_os_validate_ifflags(const char *ifname, int validate_flag)
     int fd;
 
     if (!ifname) {
+        edge_os_error("sysioctl: invalid ifname ptr %p @ %s %u\n",
+                                ifname, __func__, __LINE__);
         return -1;
     }
 
     fd = socket(AF_INET, SOCK_DGRAM, 0);
     if (fd < 0) {
+        edge_os_log_with_error(errno, "sysioctl: failed to socket ");
         return -1;
     }
 
@@ -334,6 +337,7 @@ static int __edge_os_validate_ifflags(const char *ifname, int validate_flag)
 
     ret = ioctl(fd, SIOCGIFFLAGS, &ifr);
     if (ret < 0) {
+        edge_os_log_with_error(errno, "sysioctl: failed to ioctl ");
         goto bad;
     }
 
@@ -391,8 +395,15 @@ int __edge_os_set_ifflags(const char *ifname, int setflags)
     int fd;
     int ret;
 
+    if (!ifname) {
+        edge_os_error("sysioctl: invalid ifname ptr %p @ %s %u\n",
+                            ifname, __func__, __LINE__);
+        return -1;
+    }
+
     fd = socket(AF_INET, SOCK_DGRAM, 0);
     if (fd < 0) {
+        edge_os_log_with_error(errno, "sysioctl: failed to socket ");
         return -1;
     }
 
@@ -402,6 +413,7 @@ int __edge_os_set_ifflags(const char *ifname, int setflags)
 
     ret = ioctl(fd, SIOCGIFFLAGS, &req);
     if (ret < 0) {
+        edge_os_log_with_error(errno, "sysioctl: failed to ioctl ");
         goto bad;
     }
 
@@ -423,6 +435,7 @@ int __edge_os_set_ifflags(const char *ifname, int setflags)
 
     ret = ioctl(fd, SIOCSIFFLAGS, &req);
     if (ret < 0) {
+        edge_os_log_with_error(errno, "sysioctl: failed to ioctl ");
         goto bad;
     }
 
@@ -463,11 +476,14 @@ int edge_os_get_mtu(const char *ifname)
     int fd;
 
     if (!ifname) {
+        edge_os_error("sysioctl: invalid ifname ptr %p @ %s %u\n",
+                            ifname, __func__, __LINE__);
         return -1;
     }
 
     fd = socket(AF_INET, SOCK_DGRAM, 0);
     if (fd < 0) {
+        edge_os_log_with_error(errno, "sysioctl: failed to socket ");
         return -1;
     }
 
@@ -477,6 +493,7 @@ int edge_os_get_mtu(const char *ifname)
 
     ret = ioctl(fd, SIOCGIFMTU, &req);
     if (ret < 0) {
+        edge_os_log_with_error(errno, "sysioctl: failed to ioctl ");
         goto bad;
     }
 

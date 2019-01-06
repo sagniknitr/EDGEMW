@@ -123,7 +123,9 @@ int edge_os_evtloop_unregister_socket(void *handle, int sock)
     struct edge_os_evtloop_base *base = handle;
     struct edge_os_evtloop_socket *data;
 
-    if (!handle) {
+    if (!handle || (sock < 0)) {
+        edge_os_error("evtloop: invalid handle @p / sock %d @ %s %u\n",
+                                handle, sock, __func__, __LINE__);
         return -1;
     }
 
@@ -146,13 +148,9 @@ int edge_os_evtloop_register_socket(void *handle, void *app_priv, int sock,
     struct edge_os_evtloop_base *base = handle;
     struct edge_os_evtloop_socket *sock_;
 
-    if (!handle || !app_priv || !__socket_callback) {
-        return -1;
-    }
-
-    if (sock < 0) {
-        edge_os_error("evtloop: invalid socket [%d] @ %s %u\n",
-                            sock, __func__, __LINE__);
+    if (!handle || (sock < 0) || !__socket_callback) {
+        edge_os_error("evtloop: invalid handle %p / sock %d / __socket_callback %p @ %s %u\n",
+                                handle, sock, __socket_callback, __func__, __LINE__);
         return -1;
     }
 
@@ -183,7 +181,9 @@ int edge_os_evtloop_register_signal(void *handle, void *app_priv, int sig,
     struct edge_os_evtloop_base *base = handle;
     struct edge_os_evtloop_signal *sig_;
 
-    if (!handle || !app_priv || !__signal_callback) {
+    if (!handle || !__signal_callback) {
+        edge_os_error("evtloop: invalid handle %p / __signal_callback %p @ %s %u\n",
+                                handle, __signal_callback, __func__, __LINE__);
         return -1;
     }
 
@@ -252,9 +252,11 @@ static int _edge_os_evtloop_caller(struct edge_os_evtloop_base *base, fd_set *fd
         }
     }
 
+    // for each timer .. check if anything is set
     ret = edge_os_list_for_each(&base->timer_base,
                                     _edge_os_timer_for_each, fdmask);
 
+    // for each socket .. check if anything is set
     ret = edge_os_list_for_each(&base->socket_base,
                                     _edge_os_socket_for_each, fdmask);
 
@@ -326,6 +328,8 @@ void edge_os_evtloop_run(void *handle)
     fd_set allset;
 
     if (!handle) {
+        edge_os_error("evtloop: invalid handle %p @ %s %u\n",
+                                    handle, __func__, __LINE__);
         return;
     }
 

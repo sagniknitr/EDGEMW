@@ -49,7 +49,8 @@ SET(LINUX_SPEC_SOURCES
         lib/linux/net/sysioctl.c
         lib/linux/pthreads/pthreads.c
         lib/linux/net/ds/generated/dist_sdp.pb-c.c
-        lib/linux/date_time/date_time.c)
+        lib/linux/date_time/date_time.c
+        lib/linux/process/process.c)
 
 SET(UTIL_SOURCES
         lib/util/csvclass.cpp
@@ -145,7 +146,7 @@ include_directories(
     lib/crypto/
     lib/config/
     lib/linux/date_time/
-)
+    lib/linux/process/)
 
 SET(SUPERVISOR_SOURCES
         services/supervisor/supervisor.c)

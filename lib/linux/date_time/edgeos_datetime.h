@@ -19,5 +19,7 @@ int edge_os_settimeofday(struct edge_os_timeval *t);
 
 int edge_os_get_monotonic_clock(struct edge_os_timespec *t);
 
+int edge_os_nanosleep(long nsec);
+
 #endif
 

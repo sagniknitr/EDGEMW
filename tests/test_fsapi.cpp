@@ -1,7 +1,7 @@
 #include <iostream>
 #include <cstring>
 extern "C" {
-#include <fsapi.h>
+#include <edgeos_fsapi.h>
 }
 
 

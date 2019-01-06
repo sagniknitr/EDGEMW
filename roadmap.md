@@ -14,6 +14,7 @@ Right now testing is only done with in Travis with Linux, X86 architecture (most
     1. monitor and restart specific services with in the system
     2. dynamic monitoring register and unregister (protobuf)
     3. periodic update from each process via unix domain udp
+    4. client application for monitoring and stats
 
 2. CLI for EDGE OS services
     1. remote monitoring via a simple console
@@ -46,6 +47,9 @@ Right now testing is only done with in Travis with Linux, X86 architecture (most
 
 8. Networking
     1. raw socket API - with ether_header, iphdr, udphdr, tcphdr
+
+9. Databases
+    1. interface with SQL database
 
 ## minor features
 

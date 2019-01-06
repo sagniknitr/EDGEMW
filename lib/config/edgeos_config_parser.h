@@ -7,6 +7,12 @@ struct edge_os_config_parse_set {
     struct edge_os_config_parse_set *next;
 };
 
+/**
+ * @brief - free configuration data
+ *
+ * @param set - set of type edge_os_config_parse_set returned from edge_os_config_parse
+ *
+ */
 void edge_os_config_free(struct edge_os_config_parse_set *set);
 
 struct edge_os_config_parse_set *edge_os_config_parse(const char *filename);

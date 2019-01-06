@@ -10,3 +10,4 @@ modprobe slcan
 
 ip link add name vcan0 type vcan
 ifconfig vcan0 up
+

@@ -1,5 +1,5 @@
 #include <iostream>
-#include <config_parser.h>
+#include <edgeos_config_parser.h>
 #include <string>
 #include <vector>
 #include <config_parser.hpp>

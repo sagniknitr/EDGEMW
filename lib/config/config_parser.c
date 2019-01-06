@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <config_parser.h>
+#include <edgeos_logger.h>
+#include <edgeos_config_parser.h>
 
 static struct edge_os_config_parse_set *
 __edge_os_parse_config_line(char *config_line, int line_len, int *ret)
@@ -30,6 +31,8 @@ __edge_os_parse_config_line(char *config_line, int line_len, int *ret)
 
     new_set = (struct edge_os_config_parse_set *)calloc(1, sizeof(struct edge_os_config_parse_set));
     if (!new_set) {
+        edge_os_error("config_parser: failed to allocate @ %s %u\n",
+                                __func__, __LINE__);
         *ret = -1;
         return NULL;
     }
@@ -85,6 +88,11 @@ void edge_os_config_free(struct edge_os_config_parse_set *set)
     struct edge_os_config_parse_set *t;
     struct edge_os_config_parse_set *told;
 
+    // silently ignore a null value
+    if (!set) {
+        return;
+    }
+
     t = told = set;
     while (t) {
         told = t;
@@ -102,14 +110,26 @@ struct edge_os_config_parse_set *edge_os_config_parse(const char *filename)
     struct edge_os_config_parse_set *head = NULL;
     struct edge_os_config_parse_set *tail = NULL;
 
-    fp = fopen(filename, "r");
-    if (!fp)
+    if (!filename) {
+        edge_os_error("config_parser: invalid filename %p @ %s %u\n",
+                                    filename, __func__, __LINE__);
         return NULL;
+    }
+
+    fp = fopen(filename, "r");
+    if (!fp) {
+        edge_os_error("config_parser: failed to open file %s @ %s %u\n",
+                                    filename, __func__, __LINE__);
+        return NULL;
+    }
 
     char config_line[1024];
+    int line_count = 0;
 
     while (fgets(config_line, sizeof(config_line), fp)) {
         struct edge_os_config_parse_set *t;
+
+        line_count ++;
 
         // remove that \n
         line_len = strlen(config_line) - 1;
@@ -118,6 +138,9 @@ struct edge_os_config_parse_set *edge_os_config_parse(const char *filename)
 
         t = __edge_os_parse_config_line(config_line, line_len, &ret);
         if (ret < 0) {
+            edge_os_error("config_parser: failed to parse line %d @ %s %u\n",
+                                    line_count, __func__, __LINE__);
+            fclose(fp);
             return NULL;
         }
 
