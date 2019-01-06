@@ -16,6 +16,11 @@ typedef enum {
     EDGEOS_SERVER_UDP_UNIX
 } edge_os_server_type_t;
 
+typedef enum {
+    EDGEOS_RAW_SOCK_ETH = 1,
+    EDGEOS_RAW_SOCK_ICMP = 2,
+} edge_os_raw_sock_type_t;
+
 /**
  * @brief - create new udp socket
  * 

@@ -6,6 +6,10 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <netinet/in.h>
+#include <sys/ioctl.h>
+#include <netinet/ether.h>
+#include <linux/if_packet.h>
+#include <net/if.h>
 #include <unistd.h>
 #include <edgeos_netapi.h>
 #include <sys/un.h>
@@ -114,7 +118,7 @@ int edge_os_create_udp_unix_server(const char *addr)
 
 int __edge_os_connect_address(const char *addr, const char *service_name, int family)
 {
-    int fd;
+    int fd = -1;
     int ret;
     struct addrinfo hint;
     struct addrinfo *s;
@@ -788,5 +792,103 @@ void* edge_os_create_server_managed(void *evtloop_base,
 bad:
     free(config);
     return NULL;
+}
+
+struct edge_os_raw_sock_params {
+    int fd;
+    int ifidnex;
+    edge_os_raw_sock_type_t type;
+    struct ether_header eh;
+    struct ifreq ifr;
+    uint8_t srcmac[6];
+    uint8_t *txbuf;
+    int txbuflen;
+};
+
+void* edge_os_raw_socket_create(edge_os_raw_sock_type_t type, const char *ifname, int txbuf_len)
+{
+    int ret;
+    struct edge_os_raw_sock_params *raw_params;
+
+    raw_params = calloc(1, sizeof(struct edge_os_raw_sock_params));
+    if (!raw_params) {
+        return NULL;
+    }
+
+    raw_params->fd = socket(AF_PACKET, SOCK_RAW, ETH_P_ALL);
+    if (raw_params->fd < 0) {
+        return NULL;
+    }
+
+    if (type == EDGEOS_RAW_SOCK_ETH) {
+        raw_params->txbuf = calloc(1, txbuf_len + sizeof(struct ether_header));
+        if (!raw_params->txbuf) {
+            return NULL;
+        }
+
+        raw_params->txbuflen = txbuf_len + sizeof(struct ether_header);
+
+        strcpy(raw_params->ifr.ifr_name, ifname);
+        ret = ioctl(raw_params->fd, SIOCGIFINDEX, &raw_params->ifr);
+        if (ret < 0) {
+            return NULL;
+        }
+
+        raw_params->ifidnex = raw_params->ifr.ifr_ifindex;
+
+        memset(&raw_params->ifr, 0, sizeof(raw_params->ifr));
+        ret = ioctl(raw_params->fd, SIOCGIFHWADDR, &raw_params->ifr);
+        if (ret < 0) {
+            return NULL;
+        }
+
+        memcpy(raw_params->srcmac, (uint8_t *)(raw_params->ifr.ifr_hwaddr.sa_data), 6);
+        memcpy(raw_params->eh.ether_shost, raw_params->srcmac, 6);
+    } else {
+        return NULL;
+    }
+
+    return raw_params;
+}
+
+int edge_os_raw_socket_send_eth_frame(
+                    void *raw_handle,
+                    uint8_t *srcmac,
+                    uint8_t *dstmac,
+                    uint16_t ethertype,
+                    uint8_t *data,
+                    uint32_t datalen)
+{
+    struct edge_os_raw_sock_params *raw_params = raw_handle;
+    struct sockaddr_ll ll;
+    int ret;
+
+    ll.sll_ifindex = raw_params->ifidnex;
+
+    ll.sll_halen = ETH_ALEN;
+
+    ll.sll_addr[0] = dstmac[0];
+    ll.sll_addr[1] = dstmac[1];
+    ll.sll_addr[2] = dstmac[2];
+    ll.sll_addr[3] = dstmac[3];
+    ll.sll_addr[4] = dstmac[4];
+    ll.sll_addr[5] = dstmac[5];
+
+    memcpy(raw_params->eh.ether_shost, srcmac, 6);
+    memcpy(raw_params->eh.ether_dhost, dstmac, 6);
+    raw_params->eh.ether_type = ethertype;
+
+    memcpy(raw_params->txbuf, &raw_params->eh, sizeof(raw_params->eh));
+    memcpy(raw_params->txbuf + sizeof(raw_params->eh),
+                data, datalen);
+
+    ret = sendto(raw_params->fd, raw_params->txbuf,
+                 datalen + sizeof(raw_params->eh),
+                 0, (struct sockaddr *)&ll, sizeof(ll));
+    if (ret < 0) {
+        return -1;
+    }
+
+    return ret;
 }
 

@@ -29,7 +29,7 @@ typedef enum {
     EDGE_OS_CRYPTO_SHA512,
 } edge_os_crypto_digest_t;
 
-int __edge_os_crypto_digest_msg(const unsigned char *msg, edge_os_crypto_digest_t digest, size_t msglen, uint8_t *digest_final)
+static int __edge_os_crypto_digest_msg(const unsigned char *msg, edge_os_crypto_digest_t digest, size_t msglen, uint8_t *digest_final)
 {
     EVP_MD_CTX *ctx;
     const EVP_MD *md = NULL;
@@ -978,7 +978,7 @@ void edge_os_crypto_deinit()
 }
 
 #else
-int edge_os_crypto_md5sum(const char *data, int datalen, uint8_t *md5sum)
+int edge_os_crypto_md5sum(const unsigned char *data, int datalen, uint8_t *md5sum)
 {
     return -1;
 }
