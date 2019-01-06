@@ -75,7 +75,9 @@ int main(int argc, char **argv)
     edge_os_evtloop_init(&base, NULL);
 
     if (server) {
-        edge_os_set_process_cpu(0);
+        int cpunumber[1] = {0};
+
+        edge_os_set_process_cpu(cpunumber, 1);
         edge_os_create_server_managed(&base,
                                       NULL,
                                       EDGEOS_SERVER_TCP,
@@ -90,8 +92,9 @@ int main(int argc, char **argv)
 
     } else if (client) {
         int sock;
+        int cpunumber[1] = {7};
 
-        edge_os_set_process_cpu(7);
+        edge_os_set_process_cpu(cpunumber, 1);
         sock = edge_os_create_tcp_client("127.0.0.1", 2222);
         if (sock < 0) {
             return -1;

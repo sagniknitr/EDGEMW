@@ -1,7 +1,6 @@
 #ifndef __EDGEOS_EVTLOOP_H__
 #define __EDGEOS_EVTLOOP_H__
 
-#include <sys/select.h>
 #include <edgeos_list.h>
 
 struct edge_os_evtloop_timer {

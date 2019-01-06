@@ -3,5 +3,7 @@
 
 void edge_os_hexdump(const char *str, uint8_t *buf, int buflen);
 
+void edge_os_hexdump_pretty(const char *str, uint8_t *buf, int buflen);
+
 #endif
 

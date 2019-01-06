@@ -72,13 +72,13 @@ class LogSrv {
 
         int closeLogFile_()
         {
-            close(logFd_);
+            edgeos_close_file(logFd_);
             return 0;
         }
 
         int reopenLogFile_()
         {
-            close(logFd_);
+            edgeos_close_file(logFd_);
             return newLogFile_();
         }
 
