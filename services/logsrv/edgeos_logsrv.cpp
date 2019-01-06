@@ -9,7 +9,7 @@
 #include <unistd.h>
 #include <syslog.h>
 extern "C" {
-#include <fsapi.h>
+#include <edgeos_fsapi.h>
 #include <edgeos_netapi.h>
 }
 #include <csignal>
@@ -72,13 +72,13 @@ class LogSrv {
 
         int closeLogFile_()
         {
-            close(logFd_);
+            edgeos_close_file(logFd_);
             return 0;
         }
 
         int reopenLogFile_()
         {
-            close(logFd_);
+            edgeos_close_file(logFd_);
             return newLogFile_();
         }
 

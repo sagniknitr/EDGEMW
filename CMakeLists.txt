@@ -48,7 +48,9 @@ SET(LINUX_SPEC_SOURCES
         lib/linux/sched/sched.c
         lib/linux/net/sysioctl.c
         lib/linux/pthreads/pthreads.c
-        lib/linux/net/ds/generated/dist_sdp.pb-c.c)
+        lib/linux/net/ds/generated/dist_sdp.pb-c.c
+        lib/linux/date_time/date_time.c
+        lib/linux/process/process.c)
 
 SET(UTIL_SOURCES
         lib/util/csvclass.cpp
@@ -107,7 +109,8 @@ set(TEST_CASES_SOURCES
         tests/test_prng.c
         tests/test_sysioctl.c
         tests/test_pthread.c
-        tests/test_crypto.c)
+        tests/test_crypto.c
+        tests/test_sched.c)
 
 set(TRANSFER_TEST_SOURCES
         tests/transfer_test.c)
@@ -142,7 +145,8 @@ include_directories(
     services/ota/
     lib/crypto/
     lib/config/
-)
+    lib/linux/date_time/
+    lib/linux/process/)
 
 SET(SUPERVISOR_SOURCES
         services/supervisor/supervisor.c)

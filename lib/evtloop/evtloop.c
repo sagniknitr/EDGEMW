@@ -19,6 +19,7 @@
 #include <sys/timerfd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/select.h>
 #include <sys/signalfd.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -42,6 +43,12 @@ int __edge_os_evtloop_register_timer(void *handle, void *app_priv, int sec, int 
     struct edge_os_evtloop_base *base = handle;
     struct edge_os_evtloop_timer *timer;
     int ret;
+
+    if (!handle || !app_priv || !__timer_callback) {
+        edge_os_error("evtloop: invalid handle %p / app_priv %p / __timer_callback %p @ %s %u\n",
+                            handle, app_priv, __timer_callback, __func__, __LINE__);
+        return -1;
+    }
 
     timer = calloc(1, sizeof(struct edge_os_evtloop_timer));
     if (!timer) {
@@ -96,7 +103,7 @@ int edge_os_evtloop_register_timer(void *handle, void *app_priv, int sec, int us
                                                __timer_callback);
 }
 
-int _socklist_find(void *ptr, void *pass)
+static int _socklist_find(void *ptr, void *pass)
 {
     struct edge_os_evtloop_socket *socket_node = ptr;
     int *fd = pass;
@@ -104,7 +111,7 @@ int _socklist_find(void *ptr, void *pass)
     return (socket_node->fd == *fd);
 }
 
-void _socklist_free_item(void *ptr)
+static void _socklist_free_item(void *ptr)
 {
     struct edge_os_evtloop_socket *sock = ptr;
 
@@ -115,6 +122,12 @@ int edge_os_evtloop_unregister_socket(void *handle, int sock)
 {
     struct edge_os_evtloop_base *base = handle;
     struct edge_os_evtloop_socket *data;
+
+    if (!handle || (sock < 0)) {
+        edge_os_error("evtloop: invalid handle @p / sock %d @ %s %u\n",
+                                handle, sock, __func__, __LINE__);
+        return -1;
+    }
 
     data = edge_os_list_find_elem(&base->socket_base, _socklist_find, &sock);
     if (!data) {
@@ -135,9 +148,9 @@ int edge_os_evtloop_register_socket(void *handle, void *app_priv, int sock,
     struct edge_os_evtloop_base *base = handle;
     struct edge_os_evtloop_socket *sock_;
 
-    if (sock < 0) {
-        edge_os_error("evtloop: invalid socket [%d] @ %s %u\n",
-                            sock, __func__, __LINE__);
+    if (!handle || (sock < 0) || !__socket_callback) {
+        edge_os_error("evtloop: invalid handle %p / sock %d / __socket_callback %p @ %s %u\n",
+                                handle, sock, __socket_callback, __func__, __LINE__);
         return -1;
     }
 
@@ -167,6 +180,12 @@ int edge_os_evtloop_register_signal(void *handle, void *app_priv, int sig,
 {
     struct edge_os_evtloop_base *base = handle;
     struct edge_os_evtloop_signal *sig_;
+
+    if (!handle || !__signal_callback) {
+        edge_os_error("evtloop: invalid handle %p / __signal_callback %p @ %s %u\n",
+                                handle, __signal_callback, __func__, __LINE__);
+        return -1;
+    }
 
     sig_ = calloc(1, sizeof(struct edge_os_evtloop_signal));
     if (!sig_) {
@@ -233,9 +252,11 @@ static int _edge_os_evtloop_caller(struct edge_os_evtloop_base *base, fd_set *fd
         }
     }
 
+    // for each timer .. check if anything is set
     ret = edge_os_list_for_each(&base->timer_base,
                                     _edge_os_timer_for_each, fdmask);
 
+    // for each socket .. check if anything is set
     ret = edge_os_list_for_each(&base->socket_base,
                                     _edge_os_socket_for_each, fdmask);
 
@@ -288,6 +309,13 @@ static int edge_os_evtloop_setup_term_signals()
     sigaddset(&mask, SIGTERM);
     sigaddset(&mask, SIGINT);
 
+#if 0
+    sigdelset(&mask, SIGSEGV); //segfault
+    sigdelset(&mask, SIGILL); // illegal instr
+    sigdelset(&mask, SIGBUS); // illegal ops
+    sigdelset(&mask, SIGFPE); // floating point exception
+#endif
+
     sigprocmask(SIG_BLOCK, &mask, NULL);
 
     return signalfd(-1, &mask, 0);
@@ -298,6 +326,12 @@ void edge_os_evtloop_run(void *handle)
     int ret;
     struct edge_os_evtloop_base *base = handle;
     fd_set allset;
+
+    if (!handle) {
+        edge_os_error("evtloop: invalid handle %p @ %s %u\n",
+                                    handle, __func__, __LINE__);
+        return;
+    }
 
     base->sig_fd = edge_os_evtloop_setup_term_signals();
     if (base->sig_fd < 0) {

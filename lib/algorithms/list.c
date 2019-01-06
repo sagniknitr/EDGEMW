@@ -5,8 +5,11 @@
 
 void edge_os_list_init(struct edge_os_list_base *base)
 {
-    if (!base)
+    if (!base) {
+        edge_os_error("list: invalid base ptr %p @ %s %u\n",
+                            base, __func__, __LINE__);
         return;
+    }
 
     base->tail = NULL;
     base->head = NULL;
@@ -15,6 +18,12 @@ void edge_os_list_init(struct edge_os_list_base *base)
 int edge_os_list_add_tail(struct edge_os_list_base *base, void *data)
 {
     struct edge_os_list *new;
+
+    if (!base) {
+        edge_os_error("list: invalid base ptr %p @ %s %u\n",
+                            base, __func__, __LINE__);
+        return -1;
+    }
 
     new = calloc(1, sizeof(struct edge_os_list));
     if (!new) {
@@ -60,6 +69,12 @@ int edge_os_list_delete(struct edge_os_list_base *base,
 {
     struct edge_os_list *t;
     struct edge_os_list *t_old;
+
+    if (!base) {
+        edge_os_error("list: invalid base ptr %p @ %s %u\n",
+                                base, __func__, __LINE__);
+        return -1;
+    }
 
     t = t_old = base->head;
 
@@ -108,8 +123,11 @@ int edge_os_list_for_each(struct edge_os_list_base *base,
 {
     struct edge_os_list *t  = base->head;
 
-    if (!list_for_callback)
+    if (!base || !list_for_callback) {
+        edge_os_error("list: invalid base ptr %p / list_for_callback ptr %p @ %s %u\n",
+                            base, list_for_callback, __func__, __LINE__);
         return -1;
+    }
 
     while (t) {
         list_for_callback(t->data, priv);
@@ -125,8 +143,11 @@ void *edge_os_list_find_elem(struct edge_os_list_base *base,
 {
     struct edge_os_list *t = base->head;
 
-    if (!cmpare_cb)
+    if (!base || !cmpare_cb) {
+        edge_os_error("list: invalid base ptr %p / cmpare_cb ptr %p @ %s %u\n",
+                            base, cmpare_cb, __func__, __LINE__);
         return NULL;
+    }
 
     while (t) {
         if (cmpare_cb(t->data, given))

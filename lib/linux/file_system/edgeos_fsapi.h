@@ -1,5 +1,5 @@
-#ifndef __EOS_FSAPI_H__
-#define __EOS_FSAPI_H__
+#ifndef __EDGEOS_FSAPI_H__
+#define __EDGEOS_FSAPI_H__
 
 /**
  * file access mode permissions

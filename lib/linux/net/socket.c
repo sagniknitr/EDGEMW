@@ -86,6 +86,7 @@ int edge_os_create_udp_unix_client(const char *addr)
 
     sock = edge_os_new_unix_socket();
     if (sock < 0) {
+        edge_os_log_with_error(errno, "net: failed to create unix socket ");
         return -1;
     }
 
@@ -95,6 +96,7 @@ int edge_os_create_udp_unix_client(const char *addr)
 
     ret = bind(sock, (struct sockaddr *)&serv, sizeof(serv));
     if (ret < 0) {
+        edge_os_log_with_error(errno, "net: failed to bind unix socket ");
         goto err;
     }
 
@@ -164,8 +166,10 @@ int edge_os_create_tcp_unix_client(const char *path)
     int ret;
 
     sock = socket(AF_UNIX, SOCK_STREAM, 0);
-    if (sock < 0)
+    if (sock < 0) {
+        edge_os_log_with_error(errno, "net: failed to socket ");
         return -1;
+    }
 
     struct sockaddr_un serv;
 
@@ -173,8 +177,10 @@ int edge_os_create_tcp_unix_client(const char *path)
     serv.sun_family = AF_UNIX;
 
     ret = connect(sock, (struct sockaddr *)&serv, sizeof(serv));
-    if (ret < 0)
+    if (ret < 0) {
+        edge_os_log_with_error(errno, "net: failed to connect ");
         goto fail;
+    }
 
     return sock;
 
@@ -213,11 +219,13 @@ int edge_os_create_tcp_server(const char *ip, int port, int n_conns)
 
     ret = bind(sock, (struct sockaddr *)&serv, sizeof(serv));
     if (ret < 0) {
+        edge_os_log_with_error(errno, "net: failed to bind ");
         goto fail;
     }
 
     ret = listen(sock, n_conns);
     if (ret < 0) {
+        edge_os_log_with_error(errno, "net: failed to listen ");
         goto fail;
     }
     
@@ -235,8 +243,10 @@ int edge_os_create_tcp_client(const char *ip, int port)
     int sock;
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock < 0)
+    if (sock < 0) {
+        edge_os_log_with_error(errno, "net: failed to socket ");
         return -1;
+    }
 
     struct sockaddr_in serv;
 
@@ -286,8 +296,10 @@ int edge_os_create_tcp_unix_server(const char *path, const int n_conns)
     int ret;
 
     sock = socket(AF_UNIX, SOCK_STREAM, 0);
-    if (sock < 0)
+    if (sock < 0) {
+        edge_os_log_with_error(errno, "net: failed to socket ");
         return -1;
+    }
 
     unlink(path);
 
@@ -297,12 +309,16 @@ int edge_os_create_tcp_unix_server(const char *path, const int n_conns)
     serv.sun_family = AF_UNIX;
 
     ret = bind(sock, (struct sockaddr *)&serv, sizeof(serv));
-    if (ret < 0)
+    if (ret < 0) {
+        edge_os_log_with_error(errno, "net: failed to bind ");
         goto fail;
+    }
 
     ret = listen(sock, n_conns);
-    if (ret < 0)
+    if (ret < 0) {
+        edge_os_log_with_error(errno, "net: failed to listen ");
         goto fail;
+    }
 
     return sock;
 
@@ -341,6 +357,7 @@ int edge_os_create_udp_server(const char *ip, int port)
 
     ret = bind(sock, (struct sockaddr *)&serv, sizeof(serv));
     if (ret < 0) {
+        edge_os_log_with_error(errno, "socket: failed to bind " );
         goto fail;
     }
 
@@ -358,6 +375,7 @@ int edge_os_create_udp_mcast_server(char *ip, int port, char *mcast_ip)
     int sock;
     int ret;
 
+    // error handled in the edge_os_create_udp_server
     sock = edge_os_create_udp_server(NULL, port);
     if (sock < 0) {
         return -1;
@@ -365,11 +383,15 @@ int edge_os_create_udp_mcast_server(char *ip, int port, char *mcast_ip)
 
     ret = edge_os_socket_ioctl_set_mcast_if(sock, ip);
     if (ret < 0) {
+        edge_os_error("net: failed to set mcast if on sock %d ip %s @ %s %u\n",
+                                sock, ip, __func__, __LINE__);
         goto bad;
     }
 
     ret = edge_os_socket_ioctl_set_mcast_add_member(sock, ip, mcast_ip);
     if (ret < 0) {
+        edge_os_error("net: failed to set mcast add member on sock %d mcast_ip %s @ %s %u\n",
+                                sock, mcast_ip, __func__, __LINE__);
         goto bad;
     }
 
@@ -569,8 +591,11 @@ int edge_os_udp_recvfrom(int fd, void *msg, int msglen, char *dest, int *dest_po
         char *str;
 
         str = inet_ntoa(r.sin_addr);
-        if (!str)
+        if (!str) {
+            edge_os_error("net: failed to inet_ntoa @ %s %u\n",
+                                        __func__, __LINE__);
             return -1;
+        }
 
         strcpy(dest, str);
     }
@@ -715,6 +740,7 @@ void* edge_os_create_server_managed(void *evtloop_base,
 
     config = calloc(1, sizeof(struct edge_os_managed_server_config));
     if (!config) {
+        edge_os_error("net: failed to allocate @ %s %u\n", __func__, __LINE__);
         return NULL;
     }
 

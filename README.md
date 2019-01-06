@@ -22,25 +22,25 @@ Below are some of the features. More to come soon.
 
 3. GPS parser library:
     1. for NMEA messages:
-        GPGGA, GPGSA, GPGSV, GPRMB, GPRMC, GPGGLL
+        `GPGGA`, `GPGSA`, `GPGSV`, `GPRMB`, `GPRMC`, `GPGGLL`
 
 4. cryptography APIs - wrappers for most popular libraries (openssl, wolfssl, tomcrypt) - currently openssl
     1. hashing :
-        MD5, SHA, SHA1, SHA224, SHA256, SHA384, SHA512
+        `MD5`, `SHA`, `SHA1`, `SHA224`, `SHA256`, `SHA384`, `SHA512`
     2. encryption and decryption:
-        AES-CBC-128
-        AES-CBC-192
-        AES-CBC-256
+        `AES-CBC-128`
+        `AES-CBC-192`
+        `AES-CBC-256`
         key generation and iv generation
     3. ECC sign and verify:
-        ECC-with-sha1
-        ECC-with-sha256
+        `ECC-with-sha1`
+        `ECC-with-sha256`
         curve support:
-            SECP256k1,
-            SECP128r1,
-            SECP224r1,
-            brainpoolp224r1,
-            brainpoolp256r1,
+            `SECP256k1`,
+            `SECP128r1`,
+            `SECP224r1`,
+            `brainpoolp224r1`,
+            `brainpoolp256r1`,
         ECC keygen
 
 5. Utilities -

@@ -14,6 +14,7 @@ Right now testing is only done with in Travis with Linux, X86 architecture (most
     1. monitor and restart specific services with in the system
     2. dynamic monitoring register and unregister (protobuf)
     3. periodic update from each process via unix domain udp
+    4. client application for monitoring and stats
 
 2. CLI for EDGE OS services
     1. remote monitoring via a simple console
@@ -22,15 +23,12 @@ Right now testing is only done with in Travis with Linux, X86 architecture (most
     1. cpu usage, memory and resource limits expose over a network socket to backend managemnt over protobuf
     2. diagnosis for each service
 
-4. Util:
-    1. safe string to integer, double and other type conversion API and reverse - done
+4. Config parser:
+    1. XML configuration parsing
+    2. ini configuraiton parsing
+    3. json configuration parsing
 
-5. Config parser:
-    1. Variable = Value type configuration parsing
-    2. XML configuration parsing
-    3. ini configuraiton parsing
-
-6. Algorithms:
+5. Algorithms:
     1. Data structures:
         1. DLL
         2. HashTBL
@@ -38,17 +36,20 @@ Right now testing is only done with in Travis with Linux, X86 architecture (most
         4. Sliding Window
         5. timeout based Sliding window buffer manager, hash TBL and other ds
 
-7. File systems
+6. File systems
     1. use MMAP for larger file seeks, writes and reads
     2. support sync and async features when CPU in idling mode
     3. watching the files with inotify and notifying it to the corresponding registered callbak
     4. unix domain socket interface support for `LogSrv`
 
-8. Thread pools
+7. Thread pools
     1. worker threads independent of the evtloop - thread scheduling
 
-9. Networking
+8. Networking
     1. raw socket API - with ether_header, iphdr, udphdr, tcphdr
+
+9. Databases
+    1. interface with SQL database
 
 ## minor features
 

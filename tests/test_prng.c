@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
-#include <prng.h>
+#include <edgeos_prng.h>
 
 int prng_test(int argc, char **argv)
 {

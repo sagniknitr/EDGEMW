@@ -6,11 +6,11 @@
 #include <edgeos_crypto.h>
 #include <edgeos_netapi.h>
 #include <distcom.h>
-#include <fsapi.h>
+#include <edgeos_fsapi.h>
 #include <edgeos_sched.h>
-#include <prng.h>
+#include <edgeos_prng.h>
 #include <edgeos_logger.h>
-#include <config_parser.h>
+#include <edgeos_config_parser.h>
 #include <edgeos_conv.h>
 #include <edgeos_tokparse.h>
 

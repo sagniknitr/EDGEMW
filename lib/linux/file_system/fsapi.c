@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <dirent.h>
 #include <fcntl.h>
-#include <fsapi.h>
+#include <edgeos_fsapi.h>
 #include <edgeos_logger.h>
 
 int edgeos_create_file(const char *filename)
@@ -315,6 +315,12 @@ int edge_os_file_accessible(const char *file, edge_os_access_mode_t mode)
     int ret;
     int a_mode = 0;
 
+    if (!file) {
+        edge_os_error("fsapi: invalid file ptr %p @ %s %u\n",
+                            file, __func__, __LINE__);
+        return -1;
+    }
+    
     if (mode & EDGE_OS_ACCESS_READ_OK) {
         a_mode |= R_OK;
     }

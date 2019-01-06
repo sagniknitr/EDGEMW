@@ -5,7 +5,7 @@
 #include <edgeos_netapi.h>
 #include <edgeos_evtloop.h>
 #include <edgeos_list.h>
-#include <prng.h>
+#include <edgeos_prng.h>
 #include <dist_sdp.h>
 #include <edgeos_logger.h>
 
