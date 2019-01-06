@@ -288,6 +288,7 @@ enum {
     EDGEOS_CIPHER_AES_128_CBC,
     EDGEOS_CIPHER_AES_192_CBC,
     EDGEOS_CIPHER_AES_256_CBC,
+    EDGEOS_CIPHER_ARC4,
     EDGEOS_CIPHER_CHACHA20, // key 256 iv 96
 };
 
@@ -312,6 +313,9 @@ static int __edge_os_crypto_encrypt(void *plain, int plainlen, int cipher_type, 
         break;
         case EDGEOS_CIPHER_AES_256_CBC:
             crypto_cipher = EVP_aes_256_cbc();
+        break;
+        case EDGEOS_CIPHER_ARC4:
+            crypto_cipher = EVP_rc4();
         break;
         case EDGEOS_CIPHER_CHACHA20:
 #if 0 // chacha20 is not available in the openssl 1.0.2g March 2016 :( so fail the request
@@ -357,6 +361,11 @@ int edge_os_crypto_aes_192_cbc_encrypt(void *plain, int plainlen, void *cipher, 
 int edge_os_crypto_aes_256_cbc_encrypt(void *plain, int plainlen, void *cipher, uint8_t *key, uint8_t *iv)
 {
     return __edge_os_crypto_encrypt(plain, plainlen, EDGEOS_CIPHER_AES_256_CBC, cipher, key, iv);
+}
+
+int edge_os_crypto_arc4_encrypt(void *plain, int plainlen, void *cipher, uint8_t *key, uint8_t *iv)
+{
+    return __edge_os_crypto_encrypt(plain, plainlen, EDGEOS_CIPHER_ARC4, cipher, key, iv);
 }
 
 // small files - keys
@@ -478,8 +487,14 @@ static int __edge_os_crypto_decrypt(void *cipher, int cipherlen, int cipher_type
         case EDGEOS_CIPHER_AES_128_CBC:
             crypto_cipher = EVP_aes_128_cbc();
         break;
+        case EDGEOS_CIPHER_AES_192_CBC:
+            crypto_cipher = EVP_aes_192_cbc();
+        break;
         case EDGEOS_CIPHER_AES_256_CBC:
             crypto_cipher = EVP_aes_256_cbc();
+        break;
+        case EDGEOS_CIPHER_ARC4:
+            crypto_cipher = EVP_rc4();
         break;
         default:
             return -1;
@@ -526,6 +541,11 @@ int edge_os_crypto_aes_192_cbc_decrypt(void *cipher, int cipherlen, void *plain,
 int edge_os_crypto_aes_256_cbc_decrypt(void *cipher, int cipherlen, void *plain, uint8_t *key, uint8_t *iv)
 {
     return __edge_os_crypto_decrypt(cipher, cipherlen, EDGEOS_CIPHER_AES_256_CBC, plain, key, iv);
+}
+
+int edge_os_crypto_arc4_decrypt(void *cipher, int cipherlen, void *plain, uint8_t *key, uint8_t *iv)
+{
+    return __edge_os_crypto_decrypt(cipher, cipherlen, EDGEOS_CIPHER_ARC4, plain, key, iv);
 }
 
 static int __edge_os_crypto_decrypt_file(const char *cypher_file, const char *output_file, int cipher_type,
@@ -651,6 +671,15 @@ int edge_os_crypto_generate_keypair(const char *pubkey, edge_os_ecc_key_algorith
         case EDGE_OS_SECP256K1:
             nid = NID_secp256k1;
         break;
+        case EDGE_OS_SECP160k1:
+            nid = NID_secp160k1;
+        break;
+        case EDGE_OS_SECP160r1:
+            nid = NID_secp160r1;
+        break;
+        case EDGE_OS_SECP160r2:
+            nid = NID_secp160r2;
+        break;
         case EDGE_OS_SECP128r1:
             nid = NID_secp128r1;
         break;
@@ -659,6 +688,9 @@ int edge_os_crypto_generate_keypair(const char *pubkey, edge_os_ecc_key_algorith
         break;
         case EDGE_OS_SECP224r1:
             nid = NID_secp224r1;
+        break;
+        case EDGE_OS_SECP224k1:
+            nid = NID_secp224k1;
         break;
         case EDGE_OS_BRAINPOOLP224r1:
             nid = NID_brainpoolP224r1;

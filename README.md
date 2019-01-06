@@ -31,7 +31,7 @@ Below are some of the features. More to come soon.
         `AES-CBC-128`
         `AES-CBC-192`
         `AES-CBC-256`
-        key generation and iv generation
+        and key generation and iv generation
     3. ECC sign and verify:
         `ECC-with-sha1`
         `ECC-with-sha256`
@@ -41,7 +41,7 @@ Below are some of the features. More to come soon.
             `SECP224r1`,
             `brainpoolp224r1`,
             `brainpoolp256r1`,
-        ECC keygen
+        and ECC keygen
 
 5. Utilities -
     1. CSV File reader / writer / parser

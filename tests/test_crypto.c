@@ -106,6 +106,22 @@ int crypto_test(int argc, char **argv)
     edge_os_hexdump("chacha20_key", chacha20_key, sizeof(chacha20_key));
     edge_os_hexdump("chacha20_iv", chacha20_iv, sizeof(chacha20_iv));
 
+    ret = edge_os_crypto_arc4_encrypt(msg, sizeof(msg), cipher, key, iv);
+    if (ret < 0) {
+        fprintf(stderr, "failed to arc4 encrypt\n");
+    } else {
+        char arc4_dec[100];
+
+        edge_os_hexdump("arc4_enc", (uint8_t *)cipher, ret);
+
+        ret = edge_os_crypto_arc4_decrypt(cipher, ret, arc4_dec, key, iv);
+        if (ret < 0) {
+            fprintf(stderr, "failed to arc4 decrypt\n");
+        } else {
+            fprintf(stderr, "arc4_dec: %s", arc4_dec);
+        }
+    }
+
     edge_os_crypto_deinit();
 
     return 0;
