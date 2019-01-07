@@ -146,7 +146,9 @@ include_directories(
     lib/crypto/
     lib/config/
     lib/linux/date_time/
-    lib/linux/process/)
+    lib/linux/process/
+    services/cli/
+    services/cli/library/)
 
 SET(SUPERVISOR_SOURCES
         services/supervisor/supervisor.c)
@@ -161,7 +163,9 @@ SET(CLI_SERVICE_SOURCES
         services/cli/backend.c)
 
 SET(CLI_CLIENT_SOURCES
-        services/cli/commands.c)
+        services/cli/commands.c
+        services/cli/database.c
+        services/cli/library/show_callback.c)
 
 add_library(EdgeOS STATIC ${SOURCES})
 
