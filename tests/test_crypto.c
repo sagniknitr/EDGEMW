@@ -83,21 +83,19 @@ int crypto_test(int argc, char **argv)
     signature = edge_os_crypto_ecc_sign_message_sha256((const unsigned char *)message, strlen(message), privkey);
     if (!signature) {
         fprintf(stderr, "failed to sign messge\n");
-        return -1;
-    }
+    } else {
+        edge_os_hexdump("signature", signature->signature, signature->signature_len);
 
-    edge_os_hexdump("signature", signature->signature, signature->signature_len);
-
-    ret = edge_os_crypto_ecc_verify_message_sha256((const unsigned char *)message, strlen(message),
+        ret = edge_os_crypto_ecc_verify_message_sha256((const unsigned char *)message, strlen(message),
                                 signature->signature,
                                 signature->signature_len,
                                 pubkey);
-    if (ret < 0) {
-        fprintf(stderr, "failed to verify message\n");
-        return -1;
+        if (ret < 0) {
+            fprintf(stderr, "failed to verify message\n");
+        } else {
+            printf("verify status %d\n", ret);
+        }
     }
-
-    printf("verify status %d\n", ret);
 
     edge_os_crypto_ecc_free_signature(signature);
 
@@ -105,6 +103,22 @@ int crypto_test(int argc, char **argv)
 
     edge_os_hexdump("chacha20_key", chacha20_key, sizeof(chacha20_key));
     edge_os_hexdump("chacha20_iv", chacha20_iv, sizeof(chacha20_iv));
+
+    ret = edge_os_crypto_arc4_encrypt(msg, sizeof(msg), cipher, key, iv);
+    if (ret < 0) {
+        fprintf(stderr, "failed to arc4 encrypt\n");
+    } else {
+        char arc4_dec[100];
+
+        edge_os_hexdump("arc4_enc", (uint8_t *)cipher, ret);
+
+        ret = edge_os_crypto_arc4_decrypt(cipher, ret, arc4_dec, key, iv);
+        if (ret < 0) {
+            fprintf(stderr, "failed to arc4 decrypt\n");
+        } else {
+            fprintf(stderr, "arc4_dec: %s", arc4_dec);
+        }
+    }
 
     edge_os_crypto_deinit();
 

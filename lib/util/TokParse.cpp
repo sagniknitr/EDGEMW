@@ -20,7 +20,7 @@ std::vector<std::string> TokParse::parseTokens(std::string input, char token)
     int off = 0;
 
     while (1) {
-        off = token_parser(input.c_str(), input.length(), token, op, sizeof(op), off);
+        off = edge_os_token_parser(input.c_str(), input.length(), token, op, sizeof(op), off);
         if (off == -1)
             break;
 

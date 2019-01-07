@@ -3,11 +3,16 @@
 
 typedef enum {
     EDGE_OS_SECP256K1 = 1,
-    EDGE_OS_SECP128r1 = 2,
-    EDGE_OS_SECP128r2 = 3,
-    EDGE_OS_SECP224r1 = 4,
-    EDGE_OS_BRAINPOOLP224r1 = 5,
-    EDGE_OS_BRAINPOOLP256r1 = 6,
+    EDGE_OS_SECP160k1,
+    EDGE_OS_SECP160r1,
+    EDGE_OS_SECP160r2,
+    EDGE_OS_SECP192k1,
+    EDGE_OS_SECP128r1,
+    EDGE_OS_SECP128r2,
+    EDGE_OS_SECP224r1,
+    EDGE_OS_SECP224k1,
+    EDGE_OS_BRAINPOOLP224r1,
+    EDGE_OS_BRAINPOOLP256r1,
 } edge_os_ecc_key_algorithms_t;
 
 
@@ -53,17 +58,31 @@ int edge_os_crypto_aes_128_cbc_encrypt(void *plain, int plainlen, void *cipher, 
 int edge_os_crypto_aes_128_cbc_encrypt_file(const char *input_file, const char *output_file,
                                  const char *keyfile, const char *ivfile);
 
+/**
+ * Notes:
+ *
+ * arc4 expects the key size to be of 128 bits
+ */
+int edge_os_crypto_arc4_encrypt(void *plain, int plainlen, void *cipher, uint8_t *key, uint8_t *iv);
+
+int edge_os_crypto_arc4_decrypt(void *cipher, int cipherlen, void *plain, uint8_t *key, uint8_t *iv);
+
 int edge_os_crypto_aes_128_cbc_decrypt(void *cipher, int cipherlen, void *plain, uint8_t *key, uint8_t *iv);
 
 int edge_os_crypto_aes_128_cbc_decrypt_file(const char *cypher_file, const char *output_file,
                                      const char *keyfile, const char *ivfile);
 
+// signature and the length
 struct edge_os_ecc_signature {
+    // ECC signature
     uint8_t *signature;
+
+    // ECC signature length
     unsigned int signature_len;
 };
 
-int edge_os_crypto_generate_keypair(const char *pubkey, edge_os_ecc_key_algorithms_t algorithm, const char *privkey);
+int edge_os_crypto_generate_keypair(const char *pubkey,
+                                    edge_os_ecc_key_algorithms_t algorithm, const char *privkey);
 
 struct edge_os_ecc_signature *
 edge_os_crypto_ecc_sign_message_sha1(const unsigned char *data, int datalen,
@@ -75,12 +94,26 @@ edge_os_crypto_ecc_sign_message_sha256(const unsigned char *data, int datalen,
 
 void edge_os_crypto_ecc_free_signature(struct edge_os_ecc_signature *sig);
 
-int edge_os_crypto_ecc_verify_message_sha256(const uint8_t *buf, size_t bufsize, const uint8_t *signature, int signature_len, const char *pubkey);
+/**
+ * @brief - verify message with sha256
+ */
+int edge_os_crypto_ecc_verify_message_sha256(const uint8_t *buf, size_t bufsize,
+                                             const uint8_t *signature, int signature_len, const char *pubkey);
 
-int edge_os_crypto_ecc_verify_message_sha1(const uint8_t *buf, size_t bufsize, const uint8_t *signature, int signature_len, const char *pubkey);
+/**
+ * @brief - verify message with sha1
+ */
+int edge_os_crypto_ecc_verify_message_sha1(const uint8_t *buf, size_t bufsize,
+                                           const uint8_t *signature, int signature_len, const char *pubkey);
 
+/**
+ * @brief - initialise crypto ops .. algorithms etc
+ */
 void edge_os_crypto_init(void);
 
+/**
+ * @brief - deinitialise crypto ops
+ */
 void edge_os_crypto_deinit(void);
 
 #endif

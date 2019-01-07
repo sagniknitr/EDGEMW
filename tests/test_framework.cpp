@@ -11,6 +11,7 @@ int crypto_test(int argc, char **argv);
 int sched_test(int argc, char **argv);
 }
 
+int config_parser_test(int argc, char **argv);
 int fsAPI_test(int argc, char **argv);
 int tokparse_test(int argc, char **argv);
 
@@ -27,6 +28,7 @@ static struct test_cases {
     {"pthread_test", pthread_test},
     {"crypto_test", crypto_test},
     {"sched_test", sched_test},
+    {"config_parser_test", config_parser_test},
 };
 
 int main(int argc, char **argv)

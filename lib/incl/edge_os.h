@@ -1,6 +1,7 @@
 #ifndef __EDGE_OS_H__
 #define __EDGE_OS_H__
 
+#include <sys/select.h>
 #include <edgeos_list.h>
 #include <edgeos_evtloop.h>
 #include <edgeos_crypto.h>

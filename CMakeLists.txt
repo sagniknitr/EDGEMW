@@ -12,9 +12,9 @@ set(OS_FLAGS "-DOS_LINUX")
 if (CONFIG_USE_CLANG)
     message("using clang..")
     set(CMAKE_C_COMPILER "clang")
-    set(CMAKE_C_FLAGS "-Wall -Weverything ${OS_FLAGS}")
+    set(CMAKE_C_FLAGS "-Wall -Weverything ${OS_FLAGS} -DCONFIG_CRYPTO_LIB_OPENSSL")
     set(CMAKE_CXX_COMPILER "clang++")
-    set(CMAKE_CXX_FLAGS "-Wall -std=c++11 -Weverything ${OS_FLAGS}")
+    set(CMAKE_CXX_FLAGS "-Wall -std=c++11 -Weverything ${OS_FLAGS} -DCONFIG_CRYPTO_LIB_OPENSSL")
 else()
     message("using gcc..")
     set(CMAKE_C_COMPILER "gcc")
@@ -110,7 +110,8 @@ set(TEST_CASES_SOURCES
         tests/test_sysioctl.c
         tests/test_pthread.c
         tests/test_crypto.c
-        tests/test_sched.c)
+        tests/test_sched.c
+        tests/test_config_parser.cpp)
 
 set(TRANSFER_TEST_SOURCES
         tests/transfer_test.c)
@@ -146,7 +147,9 @@ include_directories(
     lib/crypto/
     lib/config/
     lib/linux/date_time/
-    lib/linux/process/)
+    lib/linux/process/
+    services/cli/
+    services/cli/library/)
 
 SET(SUPERVISOR_SOURCES
         services/supervisor/supervisor.c)
@@ -156,6 +159,15 @@ SET(TEST_SUPERVISOR_SOURCES
 
 SET(OTA_SOURCES
         services/ota/ota.c)
+
+SET(CLI_SERVICE_SOURCES
+        services/cli/backend.c)
+
+SET(CLI_CLIENT_SOURCES
+        services/cli/commands.c
+        services/cli/database.c
+        services/cli/library/show_callback.c
+        services/cli/rpc.c)
 
 add_library(EdgeOS STATIC ${SOURCES})
 
@@ -210,4 +222,10 @@ target_link_libraries(SupervisorTest pthread EdgeOS gcov protobuf-c crypto)
 
 add_executable(EdgeOSOTA ${OTA_SOURCES})
 target_link_libraries(EdgeOSOTA pthread EdgeOS gcov protobuf-c)
+
+add_executable(EdgeOSCLId ${CLI_SERVICE_SOURCES})
+target_link_libraries(EdgeOSCLId pthread EdgeOS gcov protobuf-c)
+
+add_executable(EdgeOSCLI ${CLI_CLIENT_SOURCES})
+target_link_libraries(EdgeOSCLI pthread EdgeOS gcov protobuf-c)
 

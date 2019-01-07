@@ -46,10 +46,16 @@ Right now testing is only done with in Travis with Linux, X86 architecture (most
     1. worker threads independent of the evtloop - thread scheduling
 
 8. Networking
-    1. raw socket API - with ether_header, iphdr, udphdr, tcphdr
+    1. raw socket API - sender, and receiver, with ether_header, iphdr, udphdr, tcphdr
+    2. ipv6 support - send, recv, create, delete, name to ip
 
 9. Databases
     1. interface with SQL database
+
+10. Bluetooth interface
+    1. with HCI library
+
+11. performance profiler interface library
 
 ## minor features
 

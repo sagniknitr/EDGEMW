@@ -12,6 +12,9 @@ struct edge_os_config_parse_set {
  *
  * @param set - set of type edge_os_config_parse_set returned from edge_os_config_parse
  *
+ * Description-
+ *
+ *      free configuration set returned from edge_os_config_parse
  */
 void edge_os_config_free(struct edge_os_config_parse_set *set);
 

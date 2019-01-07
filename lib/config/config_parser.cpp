@@ -1,8 +1,10 @@
 #include <iostream>
-#include <edgeos_config_parser.h>
 #include <string>
 #include <vector>
 #include <config_parser.hpp>
+extern "C" {
+#include <edgeos_config_parser.h>
+}
 
 namespace EdgeOS {
 

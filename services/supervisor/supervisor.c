@@ -102,7 +102,7 @@ static int supervisor_monitor_list_setup(struct supervisor_priv *priv)
             char output[256];
 
             while (1) {
-                ret = token_parser(set->val, input_len, ' ', output, sizeof(output), ret);
+                ret = edge_os_token_parser(set->val, input_len, ' ', output, sizeof(output), ret);
                 if (ret == -1) {
                     break;
                 }
