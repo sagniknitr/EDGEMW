@@ -132,7 +132,7 @@ void edge_os_dlist_for_each_backwards(struct edge_os_dlist_base *base,
 
     struct edge_os_dlist_struct *t;
 
-    for (t = base->tail; t; t = t->next) {
+    for (t = base->tail; t; t = t->prev) {
         for_each_cb(t->data);
     }
 }

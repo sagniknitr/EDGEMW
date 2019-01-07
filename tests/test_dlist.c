@@ -6,6 +6,14 @@ void print_f(void *data)
     printf("%02d ", *((int *)data));
 }
 
+int cmp_f(void *data, void *in)
+{
+    int *d = data;
+    int *i = in;
+
+    return (*d == *i);
+}
+
 int dlist_test(int argc, char **argv)
 {
     struct edge_os_dlist_base b;
@@ -32,6 +40,14 @@ int dlist_test(int argc, char **argv)
     edge_os_dlist_print_backwards(NULL, NULL);
     printf("\n");
 
+    printf("forward for_each:\n");
+    edge_os_dlist_for_each_forward(&b, print_f);
+    printf("\n");
+
+    printf("backward for_each:\n");
+    edge_os_dlist_for_each_backwards(&b, print_f);
+    printf("\n");
+
     edge_os_dlist_delete(&b, NULL, &array[0]);
 
     edge_os_dlist_delete(NULL, NULL, NULL);
@@ -45,6 +61,10 @@ int dlist_test(int argc, char **argv)
     printf("forward:\n");
     edge_os_dlist_print_forward(&b, print_f);
     printf("\n");
+
+    edge_os_dlist_find_elem(&b, cmp_f, &array[1]);
+    edge_os_dlist_find_elem(&b, cmp_f, &array[111]);
+    edge_os_dlist_find_elem(NULL, cmp_f, &array[4]);
 
     edge_os_dlist_free_all(&b, NULL);
 
