@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <edgeos_dlist.h>
 
-void print_f(void *data)
+static void print_f(void *data)
 {
     printf("%02d ", *((int *)data));
 }
 
-int cmp_f(void *data, void *in)
+static int cmp_f(void *data, void *in)
 {
     int *d = data;
     int *i = in;
