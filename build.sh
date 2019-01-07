@@ -44,6 +44,7 @@ run_gcc_tests() {
     ./build/TestExecutor config_parser_test ./tests/supervisor.conf
     ./build/TestExecutor config_parser_test
     ./build/TestExecutor dlist_test
+    ./build/TestExecutor static_list_test
     exit 0
 }
 
