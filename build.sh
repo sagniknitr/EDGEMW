@@ -41,6 +41,8 @@ run_gcc_tests() {
     ./build/TestExecutor pthread_test
     ./build/TestExecutor sched_test
     ./build/TestExecutor crypto_test
+    ./build/TestExecutor config_parser_test ../tests/supervisor.conf
+    ./build/TestExecutor config_parser_test
     exit 0
 }
 

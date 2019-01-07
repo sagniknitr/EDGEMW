@@ -110,7 +110,8 @@ set(TEST_CASES_SOURCES
         tests/test_sysioctl.c
         tests/test_pthread.c
         tests/test_crypto.c
-        tests/test_sched.c)
+        tests/test_sched.c
+        tests/test_config_parser.cpp)
 
 set(TRANSFER_TEST_SOURCES
         tests/transfer_test.c)
