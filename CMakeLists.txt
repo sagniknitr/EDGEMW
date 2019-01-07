@@ -36,7 +36,8 @@ else()
 endif()
 
 SET(ALG_SOURCES
-        lib/algorithms/list.c)
+        lib/algorithms/list.c
+        lib/algorithms/dlist.c)
 
 SET(LINUX_SPEC_SOURCES
         lib/linux/net/socket.c
@@ -111,7 +112,8 @@ set(TEST_CASES_SOURCES
         tests/test_pthread.c
         tests/test_crypto.c
         tests/test_sched.c
-        tests/test_config_parser.cpp)
+        tests/test_config_parser.cpp
+        tests/test_dlist.c)
 
 set(TRANSFER_TEST_SOURCES
         tests/transfer_test.c)

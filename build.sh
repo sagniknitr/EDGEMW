@@ -43,6 +43,7 @@ run_gcc_tests() {
     ./build/TestExecutor crypto_test
     ./build/TestExecutor config_parser_test ./tests/supervisor.conf
     ./build/TestExecutor config_parser_test
+    ./build/TestExecutor dlist_test
     exit 0
 }
 
