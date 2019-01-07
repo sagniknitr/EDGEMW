@@ -157,6 +157,12 @@ SET(TEST_SUPERVISOR_SOURCES
 SET(OTA_SOURCES
         services/ota/ota.c)
 
+SET(CLI_SERVICE_SOURCES
+        services/cli/backend.c)
+
+SET(CLI_CLIENT_SOURCES
+        services/cli/commands.c)
+
 add_library(EdgeOS STATIC ${SOURCES})
 
 if (CONFIG_SHAREDLIB)
@@ -210,4 +216,10 @@ target_link_libraries(SupervisorTest pthread EdgeOS gcov protobuf-c crypto)
 
 add_executable(EdgeOSOTA ${OTA_SOURCES})
 target_link_libraries(EdgeOSOTA pthread EdgeOS gcov protobuf-c)
+
+add_executable(EdgeOSCLId ${CLI_SERVICE_SOURCES})
+target_link_libraries(EdgeOSCLId pthread EdgeOS gcov protobuf-c)
+
+add_executable(EdgeOSCLI ${CLI_CLIENT_SOURCES})
+target_link_libraries(EdgeOSCLI pthread EdgeOS gcov protobuf-c)
 
