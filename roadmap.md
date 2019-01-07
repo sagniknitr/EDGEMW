@@ -55,6 +55,8 @@ Right now testing is only done with in Travis with Linux, X86 architecture (most
 10. Bluetooth interface
     1. with HCI library
 
+11. performance profiler interface library
+
 ## minor features
 
 1. extend network layer for all purposes - v6 support, raw socket and splices for large payload transmit and receive

@@ -32,16 +32,30 @@ int edge_os_cli_command_db_setup(struct edge_os_cli_command_priv *cmd_priv)
     return 0;
 }
 
-void edge_os_cli_call_callback(char *command,
+int edge_os_cli_call_callback(char *command,
                               void *priv,
                               struct edge_os_cli_command_arg_list *arg_list)
 {
     size_t i;
+    int flag = 0;
 
     for (i = 0; i < sizeof(base_list) / sizeof(base_list[0]); i ++) {
         if (!strcmp(base_list[i].command, command)) {
             base_list[i].callback(arg_list, priv);
+            flag = 1;
         }
+    }
+
+    return flag;
+}
+
+void edge_os_cli_show_help()
+{
+    size_t i;
+
+    printf("help:\n");
+    for (i = 0; i < sizeof(base_list) / sizeof(base_list[0]); i ++) {
+        printf("\t%s\n", base_list[i].command);
     }
 }
 

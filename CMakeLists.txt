@@ -165,7 +165,8 @@ SET(CLI_SERVICE_SOURCES
 SET(CLI_CLIENT_SOURCES
         services/cli/commands.c
         services/cli/database.c
-        services/cli/library/show_callback.c)
+        services/cli/library/show_callback.c
+        services/cli/rpc.c)
 
 add_library(EdgeOS STATIC ${SOURCES})
 

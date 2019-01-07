@@ -23,10 +23,15 @@ static int edge_os_cli_command_cmdargs_parse(
 
 int edge_os_cli_backend_setup(struct edge_os_cli_command_priv *cmd_priv)
 {
+    cmd_priv->fd = edge_os_create_tcp_unix_client(CLI_SERVER_PATH);
+    if (cmd_priv->fd < 0) {
+        return -1;
+    }
+
     return 0;
 }
 
-static void __edge_os_evtloop_console_read(int sock, void *app_priv)
+static void edge_os_evtloop_console_read(int sock, void *app_priv)
 {
     int ret;
     char read_buf[1024];
@@ -83,7 +88,11 @@ static void __edge_os_evtloop_console_read(int sock, void *app_priv)
         }
     }
 
-    edge_os_cli_call_callback(args->arg, cli_priv, args->next);
+    ret = edge_os_cli_call_callback(args->arg, cli_priv, args->next);
+    if (ret == 0) {
+        edge_os_error("cli: invalid command %s\n", args->arg);
+        edge_os_cli_show_help();
+    }
 
     struct edge_os_cli_command_arg_list *t1;
     struct edge_os_cli_command_arg_list *t2;
@@ -95,8 +104,6 @@ static void __edge_os_evtloop_console_read(int sock, void *app_priv)
         free(t2->arg);
         free(t2);
     }
-
-    edgeos_write_file(1, console_str, strlen(console_str));
 }
 
 int main(int argc, char **argv)
@@ -109,8 +116,6 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    edge_os_evtloop_init(&cmd_priv->base, NULL);
-
     ret = edge_os_cli_command_cmdargs_parse(
                         argc, argv, cmd_priv);
     if (ret < 0) {
@@ -122,17 +127,14 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    edge_os_evtloop_register_socket(&cmd_priv->base, cmd_priv,
-                            0, __edge_os_evtloop_console_read);
-
     ret = edge_os_cli_command_db_setup(cmd_priv);
     if (ret < 0) {
         return -1;
     }
 
-    edgeos_write_file(1, console_str, strlen(console_str));
-
-    edge_os_evtloop_run(&cmd_priv->base);
+    while (1) {
+        edge_os_evtloop_console_read(1, cmd_priv);
+    }
 
     return 0;
 }

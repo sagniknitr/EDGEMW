@@ -31,6 +31,7 @@ Below are some of the features. More to come soon.
         `AES-CBC-128`
         `AES-CBC-192`
         `AES-CBC-256`
+        `RC4`
         and key generation and iv generation
     3. ECC sign and verify:
         `ECC-with-sha1`
@@ -38,7 +39,14 @@ Below are some of the features. More to come soon.
         curve support:
             `SECP256k1`,
             `SECP128r1`,
+            `SECP128r2`,
             `SECP224r1`,
+            `SECP224r2`,
+            `SECP224k1`,
+            `SECP160k1`,
+            `SECP160r1`,
+            `SECP160r2`,
+            `SECP192k1`,
             `brainpoolp224r1`,
             `brainpoolp256r1`,
         and ECC keygen

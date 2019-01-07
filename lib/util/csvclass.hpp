@@ -12,7 +12,15 @@ class csvClass {
     public:
         csvClass();
         ~csvClass();
+
+        /**
+         * @brief - open a file with filename with mode "r" or "w"
+         *
+         * @param filename - filename of the CSV file
+         * @param mode - mode of "r" or "w"
+         */
         csvClass(std::string filename, std::string mode);
+        csvClass(std::string filename, std::string mode, bool hasHeader);
         int csvReadLine(std::string & line, std::vector<std::string> &output);
         int csvWriteLine(std::vector<std::string> rowInfo);
         int csvWriteLineBuf();

@@ -62,6 +62,17 @@ csvClass::csvClass(std::string filename, std::string mode)
     }
 }
 
+csvClass::csvClass(std::string filename, std::string mode, bool hasHeader)
+{
+    fp = fopen(filename.c_str(), mode.c_str());
+    if (!fp) {
+        return;
+    }
+
+    char line[1024];
+    fgets(line, sizeof(line), fp);
+}
+
 int csvClass::csvReadLine(std::string & line, std::vector<std::string> &output)
 {
     char inputbuf[2048];
