@@ -11,6 +11,7 @@ int crypto_test(int argc, char **argv);
 int sched_test(int argc, char **argv);
 int dlist_test(int argc, char **argv);
 int static_list_test(int argc, char **argv);
+int stack_test(int argc, char **argv);
 }
 
 int config_parser_test(int argc, char **argv);
@@ -33,6 +34,7 @@ static struct test_cases {
     {"config_parser_test", config_parser_test},
     {"dlist_test", dlist_test},
     {"static_list_test", static_list_test},
+    {"stack_test", stack_test},
 };
 
 int main(int argc, char **argv)

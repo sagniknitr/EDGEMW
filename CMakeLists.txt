@@ -38,7 +38,8 @@ endif()
 SET(ALG_SOURCES
         lib/algorithms/list.c
         lib/algorithms/dlist.c
-        lib/algorithms/static_list.c)
+        lib/algorithms/static_list.c
+        lib/algorithms/stack.c)
 
 SET(LINUX_SPEC_SOURCES
         lib/linux/net/socket.c
@@ -115,7 +116,8 @@ set(TEST_CASES_SOURCES
         tests/test_sched.c
         tests/test_config_parser.cpp
         tests/test_dlist.c
-        tests/test_static_list.c)
+        tests/test_static_list.c
+        tests/test_stack.c)
 
 set(TRANSFER_TEST_SOURCES
         tests/transfer_test.c)
