@@ -1,10 +1,13 @@
 language: c
-compiler: gcc
+compiler: gcc clang
 before_install:
   - pip install --user cpp-coveralls
+  - sudo apt-get install libprotobuf-c0-dev protobuf-c-compiler protobuf-compiler libprotobuf-dev libprotoc-dev libprotoc-dev libprotobuf-c-dev
 
-script: bash build.sh
+script:
+  - bash build.sh run_gcc_tests clang
+  - bash build.sh run_gcc_tests
 
 after_success:
   - pip install --user cpp-coveralls
-  - coveralls --exclude testing --gcov-options '\-lp'
+  - coveralls --exclude gpslib/src/tests/ --exclude logsrv/tests/  --exclude tests/ --gcov-options '\-lp'

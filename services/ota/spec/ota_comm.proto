@@ -1,0 +1,155 @@
+
+message ota_key_valdata {
+    required string key = 1;
+    required string val = 2;
+}
+
+message ota_message_poll {
+    required uint32 myversion_x = 1; // major
+    required uint32 myversion_y = 2; // minor
+    required uint32 myversion_z = 3; // patch level
+    required uint32 myversion_w = 4; // bug fix ?
+
+    required bytes deviceid = 5; // id of this device (like a sha1)
+
+    required string mfgdate = 6; // manufactured date time
+    required string hwrev = 7; // hwrevision
+
+    // these two lines for a second partition
+    required double cur_disk_used = 8; // current hdd storage used
+    required double free_disk = 9; // free hdd storage available
+
+    // list of hardware capabilities
+    repeated ota_key_valdata hwcaps = 10;
+
+    // list of software caps (like software name - revision pairs)
+    // if required to update only particular mdoule
+    repeated ota_key_valdata swcaps = 11;
+};
+
+message ota_message_poll_resp {
+
+    // same device id that is sent in poll is used to identify the receiver
+    required bytes deviceid = 1;
+    //  set to 1 if update is there.. 0 otherwise
+    required uint32 update_available = 2;
+
+    required uint32 newver_x = 3; // major
+    required uint32 newver_y = 4; // minor
+    required uint32 newver_z = 5; // patch level
+    required uint32 newver_w = 6; // build generated
+
+    required string firmware_name = 7;
+
+    // size of OTA update in bytes
+    required double update_size_bytes = 8;
+
+    enum ota_enc_alg {
+        OTA_ENC_ALG_AES_128 = 1;
+        OTA_ENC_ALG_AES_256 = 2;
+    }
+    required ota_enc_alg enc_alg = 9;
+
+    enum ota_sign_alg {
+        OTA_SIGN_ALG_ECC_256 = 1;
+        OTA_SIGN_ALG_RSA_1024 = 2;
+    }
+    required ota_sign_alg sign_alg = 10;
+};
+
+// let the server know we are ready
+message ota_message_tsfr_hook {
+    required bytes deviceid = 1;
+
+    // set to 1 and let the server expect an ACK for every 10 packets
+    // if server does not see an ack for 30 packets it drops the message sending process
+    //
+    // set to 0 for faster but may be lossy if device goes out of coverage
+    required uint32 sends_ack = 2;
+
+    // 10 times 20 times..
+    required uint32 ack_repeat_rate = 3;
+
+    // transfer buffer size
+    required uint32 txbuf_size = 4;
+};
+
+message ota_message_tsfr {
+    required bytes deviceid = 1;
+
+    //current sequence number in this transfer
+    required uint32 seqnum = 3;
+
+    required bytes payload = 4;
+};
+
+message ota_message_tsfr_ack {
+    required bytes deviceid = 1;
+};
+
+message ota_message_tsfr_query {
+    required bytes deviceid = 1;
+    required uint32 seqnum = 2;
+};
+
+//
+// the design is as follow
+//
+//
+// 1. client periodically polls for any new software update - poll interval is configured at client
+//
+// client sends additional information about its hw, sw capabilities and the current version of software its running
+//
+// in cases such as for example:
+//
+// a. a vendor's older version of hardware still requires backwards compatibility and seceurity updates but may not
+//    contain major updates like x and y component updates
+//
+// b. client may also send individual component status as a key val pair such as sofware name and version, so incase
+//    if there is an update for only particular software, that could be made available
+//
+// 2. server sends out a response in the ota dialogue if update is available, and whats the version and along with it the
+//    filesize and encryption being used on the firmware while its being generated - client must have same AES keys as
+//    that of the server for successful decrypt
+//
+// 3. once there is a software update, client may ask the server that it requesting a new update with an ack policy -
+//    both communications takes place over udp - the client must set its txbuf_size to a value that's deseriable at the
+//    client end, so that the server can sequentially divide the firmware into chunks with specific sequence numbers.
+//
+//    this is very important, because if there is a mismatch, and added packet loss, the cause could be that client may
+//    not be receiving a proper packet with requested seqnum
+//
+// 4. at every ack_policy repeat, the client pushes an ack so that server can know that client is "there" and not stopped
+//    or lost its network.
+//
+//    there can be cases where the packet loss cause of above. in such cases client can simply send out missed sequence
+//    numbers to the server and it may respond back to the client with required data
+message ota_message {
+    enum ota_proto_types {
+        OTA_MESSAGE_POLL = 1;
+        OTA_MESSAGE_POLL_RESP = 2;
+        OTA_MESSAGE_TSFR_HOOK = 3;
+        OTA_MESSAGE_TSFR_QUERY = 4;
+        OTA_MESSAGE_TSFR = 5;
+        OTA_MESSAGE_TSFR_ACK = 6;
+    }
+
+    required ota_proto_types type = 1;
+
+    // from device to the cloud
+    optional ota_message_poll poll = 2;
+
+    // from cloud to the device
+    optional ota_message_poll_resp poll_resp = 3;
+
+    // let server create a transfer connection to us
+    optional ota_message_tsfr_hook tsfr_hook = 4;
+
+    optional ota_message_tsfr tsfr_msg = 5;
+
+    // require an ack for every 10 packets
+    optional ota_message_tsfr_ack ack = 6;
+
+    optional ota_message_tsfr_query query = 7;
+};
+
