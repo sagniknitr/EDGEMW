@@ -12,6 +12,7 @@ int sched_test(int argc, char **argv);
 int dlist_test(int argc, char **argv);
 int static_list_test(int argc, char **argv);
 int stack_test(int argc, char **argv);
+int queue_test(int argc, char **argv);
 }
 
 int config_parser_test(int argc, char **argv);
@@ -35,6 +36,7 @@ static struct test_cases {
     {"dlist_test", dlist_test},
     {"static_list_test", static_list_test},
     {"stack_test", stack_test},
+    {"queue_test", queue_test},
 };
 
 int main(int argc, char **argv)

@@ -46,6 +46,7 @@ run_gcc_tests() {
     ./build/TestExecutor dlist_test
     ./build/TestExecutor static_list_test
     ./build/TestExecutor stack_test
+    ./build/TestExecutor queue_test
     exit 0
 }
 

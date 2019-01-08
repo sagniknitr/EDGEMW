@@ -939,6 +939,7 @@ static int __verify_message_evp_variant(const uint8_t *buf, size_t bufsize, cons
     if (ret != 1)
         return -1;
 
+    fclose(f);
     EVP_PKEY_CTX_free(evp_key_ctx);
     EVP_PKEY_free(evp_key);
 

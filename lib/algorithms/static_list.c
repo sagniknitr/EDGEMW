@@ -44,18 +44,28 @@ int edge_os_static_list_add(struct edge_os_static_list_base *base, void *elem)
     base->list[item].elem = elem;
     base->list[item].available = 0;
 
+    base->next_free = (base->next_free + 1) % base->count;
+    if (base->list[base->next_free].available) {
+        return 0;
+    }
+
     base->next_free = -1;
 
     if (((size_t)(item + 1) < base->count) &&
         ((item - 1) > 0)) {
-        if (base->list[item + 1].available)
+        if (base->list[item + 1].available) {
             base->next_free = item + 1;
-         else
+            return 0;
+        } else {
             base->next_free = -1;
-        if (base->list[item - 1].available)
+        }
+
+        if (base->list[item - 1].available) {
             base->next_free = item - 1;
-        else
+            return 0;
+        } else {
             base->next_free = -1;
+        }
     }
 
     return 0;
