@@ -1,6 +1,15 @@
 #ifndef __EDGEOS_FSAPI_H__
 #define __EDGEOS_FSAPI_H__
 
+typedef enum {
+    EDGE_OS_FILE_FULL = 1, // in cases for a limited size file
+} edge_os_fsmmap_types_t;
+
+struct edge_os_fsmmap_data {
+    void *data;
+    int datalen;
+};
+
 /**
  * file access mode permissions
  */
@@ -106,6 +115,16 @@ int edge_os_remove_directory(const char *dir);
 int edgeos_scan_directory_recurse(const char *dir,
                                   void *priv,
                                   void (*scan_callback)(char *fullpath, int is_dir, void *priv));
+
+void *edge_os_create_file_mmap(const char *filename, int file_size);
+
+void *edge_os_open_file_mmap(const char *filename, int file_size);
+
+int edge_os_write_file_mmap(void *ptr, void *bytes, int len);
+
+int edge_os_read_file_mmap(void *ptr, struct edge_os_fsmmap_data *mmap_data);
+
+int edge_os_close_file_mmap(void *ptr);
 
 #endif
 
