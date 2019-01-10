@@ -111,14 +111,10 @@ static int large_list_test()
 
 int list_test(int argc, char **argv)
 {
-    if (static_ptr_test())
-        return -1;
-    if (dynamic_ptr_test())
-        return -1;
-    if (small_list_test())
-        return -1;
-    if (large_list_test())
-        return -1;
+    static_ptr_test();
+    dynamic_ptr_test();
+    small_list_test();
+    large_list_test();
 
     return 0;
 }

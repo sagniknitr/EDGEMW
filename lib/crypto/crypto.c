@@ -6,7 +6,9 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <edgeos_crypto.h>
+#include <edgeos_netapi.h>
 #include <edgeos_fsapi.h>
+#include <edgeos_hashtbl.h>
 
 #ifdef CONFIG_CRYPTO_LIB_OPENSSL
 #include <openssl/conf.h>
@@ -18,6 +20,7 @@
 #include <openssl/bio.h>
 #include <openssl/pem.h>
 #include <openssl/rand.h>
+#include <openssl/ssl.h>
 
 typedef enum {
     EDGE_OS_CRYPTO_MD5,
@@ -976,6 +979,295 @@ void edge_os_crypto_deinit()
     CRYPTO_cleanup_all_ex_data();
 
     ERR_free_strings();
+}
+
+struct edge_os_crypto_ssl_client_ctx {
+    SSL *new_client;
+    char client_ip[40];
+    int client_port;
+    int client_fd;
+};
+
+static uint32_t __edge_os_ssl_hash(void *data)
+{
+    struct edge_os_crypto_ssl_client_ctx *cl = data;
+
+    return edge_os_realnum_hash(&cl->client_port);
+}
+
+struct edge_os_crypto_ssl_priv {
+    SSL_CTX *sslctx;
+    struct edge_os_hash_tbl_base client_set;
+    int n_conns;
+    int fd;
+};
+
+
+void *edge_os_crypto_ssl_tcp_server_create(const char *addr, int port, int n_conn,
+                                const char *certfile,  const char *privkeyfile)
+{
+    int ret;
+    const SSL_METHOD *method;
+    struct edge_os_crypto_ssl_priv *priv;
+
+    // client must call this.. but call here anyway
+    edge_os_crypto_init();
+
+    OpenSSL_add_ssl_algorithms();
+
+    SSL_load_error_strings();
+
+    method = SSLv23_server_method();
+
+    priv = calloc(1, sizeof(struct edge_os_crypto_ssl_priv));
+    if (!priv) {
+        return NULL;
+    }
+
+    ret = edge_os_hashtbl_init(&priv->client_set, n_conn, __edge_os_ssl_hash);
+    if (ret < 0) {
+        goto bad;
+    }
+
+    priv->sslctx = SSL_CTX_new(method);
+    if (!priv->sslctx) {
+        ERR_print_errors_fp(stderr);
+        goto bad;
+    }
+
+    ret = SSL_CTX_use_certificate_file(priv->sslctx, certfile, SSL_FILETYPE_PEM);
+    if (ret <= 0) {
+        ERR_print_errors_fp(stderr);
+        goto bad;
+    }
+
+    ret = SSL_CTX_use_PrivateKey_file(priv->sslctx, privkeyfile, SSL_FILETYPE_PEM);
+    if (ret <= 0) {
+        ERR_print_errors_fp(stderr);
+        goto bad;
+    }
+
+    ret = SSL_CTX_check_private_key(priv->sslctx);
+    if (ret <= 0) {
+        ERR_print_errors_fp(stderr);
+        goto bad;
+    }
+
+    priv->fd = edge_os_create_tcp_server(addr, port, n_conn);
+    if (priv->fd < 0)
+        goto bad;
+
+    return priv;
+
+bad:
+    free(priv);
+
+    return NULL;
+}
+
+int edge_os_crypto_get_server_fd(void *priv)
+{
+    struct edge_os_crypto_ssl_priv *spriv = priv;
+
+    return spriv->fd;
+}
+
+void *edge_os_crypto_ssl_accept_conn(void *priv)
+{
+    int ret;
+    struct edge_os_crypto_ssl_priv *spriv = priv;
+    struct edge_os_crypto_ssl_client_ctx *cl;
+    int client_fd;
+
+    client_fd = edge_os_accept_conn(spriv->fd, NULL, NULL);
+    if (client_fd < 0) {
+        return NULL;
+    }
+
+    cl = calloc(1, sizeof(struct edge_os_crypto_ssl_client_ctx));
+    if (!cl) {
+        goto bad;
+    }
+
+    cl->client_fd = client_fd;
+
+    cl->new_client = SSL_new(spriv->sslctx);
+
+    SSL_set_fd(cl->new_client, cl->client_fd);
+
+    ret = SSL_accept(cl->new_client);
+    if (ret <= 0) {
+        ERR_print_errors_fp(stderr);
+        goto bad;
+    }
+
+    edge_os_hashtbl_add(&spriv->client_set, cl);
+
+    return cl;
+
+bad:
+    close(client_fd);
+    return NULL;
+}
+
+int __edge_os_ssl_cmp(void *data, void *given)
+{
+    struct edge_os_crypto_ssl_client_ctx *cl = data;
+    int *fd = given;
+
+    return cl->client_fd == *fd;
+}
+
+int edge_os_crypto_ssl_server_send(void *priv, void *client_priv, void *msg, int msglen)
+{
+    struct edge_os_crypto_ssl_client_ctx *cl = client_priv;
+    int ret;
+
+    if (!cl) {
+        return -1;
+    }
+
+    ret = SSL_write(cl->new_client, msg, msglen);
+    if (ret <= 0) {
+        ERR_print_errors_fp(stderr);
+        return -1;
+    }
+
+    return ret;
+}
+
+int edge_os_crypto_ssl_server_recv(void *priv, void *client_priv, void *msg, int msglen)
+{
+    struct edge_os_crypto_ssl_client_ctx *cl = client_priv;
+    int ret;
+
+    if (!cl) {
+        return -1;
+    }
+
+    ret = SSL_read(cl->new_client, msg, msglen);
+    if (ret <= 0) {
+        ERR_print_errors_fp(stderr);
+        return -1;
+    }
+
+    return ret;
+}
+
+struct edge_os_crypto_ssl_client_priv {
+    int fd;
+    SSL_CTX *sslctx;
+    SSL *clientctx;
+};
+
+int edge_os_crypto_ssl_client_send(void *priv, void *msg, int msglen)
+{
+    int ret;
+    struct edge_os_crypto_ssl_client_priv *spriv = priv;
+
+    ret = SSL_write(spriv->clientctx, msg, msglen);
+    if (ret <= 0) {
+        ERR_print_errors_fp(stderr);
+        return -1;
+    }
+
+    return ret;
+}
+
+int edge_os_crypto_ssl_client_recv(void *priv, void *msg, int msglen)
+{
+    int ret;
+    struct edge_os_crypto_ssl_client_priv *spriv = priv;
+
+    ret = SSL_read(spriv->clientctx, msg, msglen);
+    if (ret <= 0) {
+        ERR_print_errors_fp(stderr);
+        return -1;
+    }
+
+    return ret;
+}
+void *edge_os_crypto_ssl_tcp_client_create(const char *addr, const char *protocol, int port, const char *certpath, const char *keypath)
+{
+    int ret;
+    const SSL_METHOD *method;
+    struct edge_os_crypto_ssl_client_priv *priv;
+
+    edge_os_crypto_init();
+
+    OpenSSL_add_ssl_algorithms();
+
+    SSL_load_error_strings();
+
+    method = SSLv23_client_method();
+
+    priv = calloc(1, sizeof(struct edge_os_crypto_ssl_client_priv));
+    if (!priv) {
+        return NULL;
+    }
+
+    priv->sslctx = SSL_CTX_new(method);
+    if (!priv->sslctx) {
+        ERR_print_errors_fp(stderr);
+        goto bad;
+    }
+
+    if (protocol) {
+        priv->fd = edge_os_connect_address4(addr, protocol);
+    } else {
+        priv->fd = edge_os_create_tcp_client(addr, port);
+    }
+
+    if (priv->fd < 0) {
+        goto bad;
+    }
+
+    priv->clientctx = SSL_new(priv->sslctx);
+
+    SSL_set_fd(priv->clientctx, priv->fd);
+
+    ret = SSL_connect(priv->clientctx);
+    if (ret <= 0) {
+        ERR_print_errors_fp(stderr);
+        goto bad;
+    }
+
+    //printf("connect ok %s encryption\n", SSL_get_cipher(priv->clientctx));
+
+#if 0
+    X509 *server_cert;
+    char *line;
+
+    server_cert = SSL_get_peer_certificate(priv->clientctx);
+    if (!server_cert) {
+        ERR_print_errors_fp(stderr);
+        goto bad;
+    }
+
+    line = X509_NAME_oneline(X509_get_subject_name(server_cert), 0, 0);
+    printf("sub: %s\n", line);
+    free(line);
+
+    line = X509_NAME_oneline(X509_get_issuer_name(server_cert), 0, 0);
+    printf("issue: %s\n", line);
+    free(line);
+
+    printf("version: %ld\n", X509_get_version(server_cert));
+
+#endif
+
+    return priv;
+
+
+bad:
+
+    if (priv) {
+        if (priv->fd > 0)
+            close(priv->fd);
+        free(priv);
+    }
+
+    return NULL;
 }
 
 #else

@@ -116,5 +116,21 @@ void edge_os_crypto_init(void);
  */
 void edge_os_crypto_deinit(void);
 
+void *edge_os_crypto_ssl_tcp_server_create(const char *addr, int port, int n_conn,
+                                const char *certfile,  const char *privkeyfile);
+
+void *edge_os_crypto_ssl_accept_conn(void *priv);
+
+void *edge_os_crypto_ssl_tcp_client_create(const char *addr, const char *protocol, int port, const char *certpath, const char *keypath);
+
+int edge_os_crypto_ssl_server_send(void *priv, void *client_priv, void *msg, int msglen);
+
+int edge_os_crypto_ssl_server_recv(void *priv, void *client_priv, void *msg, int msglen);
+
+int edge_os_crypto_ssl_client_send(void *priv, void *msg, int msglen);
+
+int edge_os_crypto_ssl_client_recv(void *priv, void *msg, int msglen);
+
+  
 #endif
 

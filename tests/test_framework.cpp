@@ -14,6 +14,8 @@ int static_list_test(int argc, char **argv);
 int stack_test(int argc, char **argv);
 int queue_test(int argc, char **argv);
 int fifo_test(int argc, char **argv);
+int ssl_test(int argc, char **argv);
+int hashtbl_test(int argc, char **argv);
 }
 
 int config_parser_test(int argc, char **argv);
@@ -39,6 +41,8 @@ static struct test_cases {
     {"stack_test", stack_test},
     {"queue_test", queue_test},
     {"fifo_test", fifo_test},
+    {"ssl_test", ssl_test},
+    {"hashtbl_test", hashtbl_test},
 };
 
 int main(int argc, char **argv)

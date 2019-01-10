@@ -10,6 +10,7 @@
 #include <edgeos_fsapi.h>
 #include <edgeos_sched.h>
 #include <edgeos_prng.h>
+#include <edgeos_pthreads.h>
 #include <edgeos_logger.h>
 #include <edgeos_config_parser.h>
 #include <edgeos_conv.h>

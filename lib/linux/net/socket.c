@@ -17,6 +17,7 @@
 #include <edgeos_evtloop.h>
 #include <stdlib.h>
 #include <edgeos_logger.h>
+#include <edgeos_ioctl.h>
 
 // managed server client configuration data
 struct edge_os_client_list {
@@ -191,6 +192,16 @@ int edge_os_create_tcp_unix_client(const char *path)
 fail:
     close(sock);
 
+    return -1;
+}
+
+int edge_os_create_tcp_server_on(const char *ifname, int port)
+{
+    return -1;
+}
+
+int edge_os_create_udp_server_on(const char *ifname, int port)
+{
     return -1;
 }
 
@@ -890,5 +901,12 @@ int edge_os_raw_socket_send_eth_frame(
     }
 
     return ret;
+}
+
+int edge_os_is_ip_multicast(const char *ip)
+{
+    // inet_aton
+    // IN_MULTICAST
+    return -1;
 }
 

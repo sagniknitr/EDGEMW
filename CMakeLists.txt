@@ -40,7 +40,8 @@ SET(ALG_SOURCES
         lib/algorithms/dlist.c
         lib/algorithms/static_list.c
         lib/algorithms/stack.c
-        lib/algorithms/queue.c)
+        lib/algorithms/queue.c
+        lib/algorithms/hashtbl.c)
 
 SET(LINUX_SPEC_SOURCES
         lib/linux/net/socket.c
@@ -121,7 +122,9 @@ set(TEST_CASES_SOURCES
         tests/test_static_list.c
         tests/test_stack.c
         tests/test_queue.c
-        tests/test_fifo.c)
+        tests/test_fifo.c
+        tests/test_ssl.c
+        tests/test_hashtbl.c)
 
 set(TRANSFER_TEST_SOURCES
         tests/transfer_test.c)
@@ -239,4 +242,16 @@ target_link_libraries(EdgeOSCLId pthread EdgeOS gcov protobuf-c)
 
 add_executable(EdgeOSCLI ${CLI_CLIENT_SOURCES})
 target_link_libraries(EdgeOSCLI pthread EdgeOS gcov protobuf-c)
+
+## building sample applications
+
+SET(SAMPLE_UDP_CLIENT_SOURCES examples/udp_client.c)
+
+SET(SAMPLE_UDP_SERVER_SOURCES examples/udp_server.c)
+
+add_executable(sample_udp_client ${SAMPLE_UDP_CLIENT_SOURCES})
+target_link_libraries(sample_udp_client pthread EdgeOS gcov protobuf-c)
+
+add_executable(sample_udp_server ${SAMPLE_UDP_SERVER_SOURCES})
+target_link_libraries(sample_udp_server pthread EdgeOS gcov protobuf-c)
 
