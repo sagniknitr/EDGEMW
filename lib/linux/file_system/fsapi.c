@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <edgeos_fsapi.h>
 #include <edgeos_logger.h>
+#include <shmem.h>
 
 int edgeos_create_file(const char *filename)
 {
@@ -367,5 +368,66 @@ int edge_os_remove_directory(const char *dir)
     }
 
     return 0;
+}
+
+void *edge_os_create_file_mmap(const char *filename, int file_size)
+{
+    return shmem_create_file_mmap(filename, "w", file_size);
+}
+
+void *edge_os_open_file_mmap(const char *filename, int file_size)
+{
+    return shmem_create_file_mmap(filename, "r", file_size);
+}
+
+int edge_os_write_file_mmap(void *ptr, void *bytes, int len)
+{
+    int ret;
+
+    ret = shmem_write(ptr, bytes, len);
+    if (ret != len) {
+        return -1;
+    }
+
+    if (ret == SHMEM_FILE_FULL) {
+        return EDGE_OS_FILE_FULL;
+    }
+
+    return len;
+}
+
+int edge_os_read_file_mmap(void *ptr, struct edge_os_fsmmap_data *mmap_data)
+{
+    mmap_data->data = shmem_read(ptr, &mmap_data->datalen);
+    if (!mmap_data->data) {
+        return -1;
+    }
+
+    return mmap_data->datalen;
+}
+
+int edge_os_close_file_mmap(void *ptr)
+{
+    return shmem_close(ptr);
+}
+
+int edge_os_check_if_file(const char *path)
+{
+    return -1;
+}
+
+int edge_os_check_if_directory(const char *path)
+{
+    return -1;
+}
+
+int edge_os_file_exist(const char *path)
+{
+    return -1;
+}
+
+int edge_os_dir_exist(const char *path)
+{
+    return -1;
 }
 

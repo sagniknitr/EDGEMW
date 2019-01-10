@@ -7,7 +7,7 @@
 
 #define CLI_SERVER_ADDR "/tmp/edge_os_cli.service"
 
-int edge_os_cli_cmdargs_parse(int argc, char **argv, struct edge_os_cli_service_priv *priv)
+static int edge_os_cli_cmdargs_parse(int argc, char **argv, struct edge_os_cli_service_priv *priv)
 {
     int ret;
 

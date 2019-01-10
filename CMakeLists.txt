@@ -54,7 +54,8 @@ SET(LINUX_SPEC_SOURCES
         lib/linux/pthreads/pthreads.c
         lib/linux/net/ds/generated/dist_sdp.pb-c.c
         lib/linux/date_time/date_time.c
-        lib/linux/process/process.c)
+        lib/linux/process/process.c
+        lib/linux/fifo/fifo.c)
 
 SET(UTIL_SOURCES
         lib/util/csvclass.cpp
@@ -119,7 +120,8 @@ set(TEST_CASES_SOURCES
         tests/test_dlist.c
         tests/test_static_list.c
         tests/test_stack.c
-        tests/test_queue.c)
+        tests/test_queue.c
+        tests/test_fifo.c)
 
 set(TRANSFER_TEST_SOURCES
         tests/transfer_test.c)
@@ -141,6 +143,7 @@ include_directories(
     lib/linux/transport/
     lib/linux/crypto/
     lib/incl/
+    lib/linux/fifo/
     services/distcom/
     lib/
     lib/gpslib/src/nmea/
