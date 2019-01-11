@@ -33,15 +33,21 @@ int ssl_test(int argc, char **argv)
                             4141,
                             NULL,
                             NULL);
-        if (!priv) {
-            return -1;
+        if (priv) {
+            printf("client connection %p\n", priv);
+            char msg[100];
+
+            edge_os_crypto_ssl_client_recv(priv, msg, sizeof(msg));
+            printf("server msg: %s\n", msg);
         }
 
-        printf("client connection %p\n", priv);
-        char msg[100];
-
-        edge_os_crypto_ssl_client_recv(priv, msg, sizeof(msg));
-        printf("server msg: %s\n", msg);
+        priv = edge_os_crypto_ssl_tcp_client_create(
+                            "www.google.com",
+                            "https",
+                            4141,
+                            NULL,
+                            NULL);
+        printf("google : %p\n", priv);
     }
 
     return 0;
