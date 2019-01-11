@@ -21,7 +21,7 @@ static int edge_os_cli_command_cmdargs_parse(
     return 0;
 }
 
-int edge_os_cli_backend_setup(struct edge_os_cli_command_priv *cmd_priv)
+static int edge_os_cli_backend_setup(struct edge_os_cli_command_priv *cmd_priv)
 {
     cmd_priv->fd = edge_os_create_tcp_unix_client(CLI_SERVER_PATH);
     if (cmd_priv->fd < 0) {
