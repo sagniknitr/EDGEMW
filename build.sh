@@ -51,6 +51,8 @@ run_gcc_tests() {
     ./build/TestExecutor ssl_test server&
     ./build/TestExecutor ssl_test client&
     ./build/TestExecutor hashtbl_test
+    ./build/TestExecutor msg_queue_test server /mq_test&
+    ./build/TestExecutor msg_queue_test client /mq_test&
     exit 0
 }
 

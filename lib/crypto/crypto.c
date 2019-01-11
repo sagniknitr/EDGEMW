@@ -710,6 +710,7 @@ int edge_os_crypto_generate_keypair(const char *pubkey, edge_os_ecc_key_algorith
 
     key = EC_KEY_new_by_curve_name(nid);
     if (!key) {
+        ERR_print_errors_fp(stderr);
         return -1;
     }
 
@@ -1212,6 +1213,7 @@ void *edge_os_crypto_ssl_tcp_client_create(const char *addr, const char *protoco
         goto bad;
     }
 
+    // either a name based service or an ipv4
     if (protocol) {
         priv->fd = edge_os_connect_address4(addr, protocol);
     } else {

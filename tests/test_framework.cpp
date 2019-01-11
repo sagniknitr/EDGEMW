@@ -21,6 +21,7 @@ int hashtbl_test(int argc, char **argv);
 int config_parser_test(int argc, char **argv);
 int fsAPI_test(int argc, char **argv);
 int tokparse_test(int argc, char **argv);
+int msg_queue_test(int argc, char **argv);
 
 
 static struct test_cases {
@@ -43,6 +44,7 @@ static struct test_cases {
     {"fifo_test", fifo_test},
     {"ssl_test", ssl_test},
     {"hashtbl_test", hashtbl_test},
+    {"msg_queue_test", msg_queue_test},
 };
 
 int main(int argc, char **argv)

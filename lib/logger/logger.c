@@ -3,6 +3,8 @@
 #include <errno.h>
 #include <stdarg.h>
 
+#ifdef CONFIG_EDGEOS_DETAILED_ERRORS
+
 #define EDGEOS_COLOR_RED "\x1B[31m"
 #define EDGEOS_COLOR_GREEN "\x1B[32m"
 #define EDGEOS_COLOR_YELLOW "\x1B[33m"
@@ -72,4 +74,25 @@ void edge_os_log_with_error(int error, char *fmt, ...)
 
     va_end(ap);
 }
+
+#else
+
+void edge_os_log(char *fmt, ...)
+{
+}
+
+void edge_os_debug(char *fmt, ...)
+{
+}
+
+void edge_os_error(char *fmt, ...)
+{
+}
+
+void edge_os_log_with_error(int error, char *fmt, ...)
+{
+}
+
+
+#endif
 

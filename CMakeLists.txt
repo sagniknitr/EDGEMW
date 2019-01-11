@@ -21,13 +21,13 @@ else()
 
     if (CONFIG_RELEASE)
 
-        set(CMAKE_C_FLAGS "-O3 -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow -fPIE -fPIC -D_FORTIFY_SOURCE=2 -DWC_NO_HARDEN -DCONFIG_CRYPTO_LIB_OPENSSL ${OS_FLAGS}")
-        set(CMAKE_CXX_FLAGS "-O3 -Wall -Wextra -Werror -Wno-unused-parameter -Wshadow -fPIC -fPIE -std=c++11 -DWC_NO_HARDEN -DCONFIG_CRYPTO_LIB_OPENSSL ${OS_FLAGS}")
+        set(CMAKE_C_FLAGS "-O3 -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow -fPIE -fPIC -D_FORTIFY_SOURCE=2 -DCONFIG_EDGEOS_DETAILED_ERRORS -DWC_NO_HARDEN -DCONFIG_CRYPTO_LIB_OPENSSL ${OS_FLAGS}")
+        set(CMAKE_CXX_FLAGS "-O3 -Wall -Wextra -Werror -Wno-unused-parameter -Wshadow -fPIC -fPIE -std=c++11 -DCONFIG_EDGEOS_DETAILED_ERRORS -DWC_NO_HARDEN -DCONFIG_CRYPTO_LIB_OPENSSL ${OS_FLAGS}")
 
     else()
 
-        set(CMAKE_C_FLAGS "-O0 -ggdb -g -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow -fPIE -fPIC -fprofile-arcs -ftest-coverage -D_FORTIFY_SOURCE=2 -DWC_NO_HARDEN -DCONFIG_CRYPTO_LIB_OPENSSL -pg ${OS_FLAGS}")
-        set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -Wno-unused-parameter -Wshadow -fPIC -fPIE -std=c++11 -pg -fprofile-arcs -ftest-coverage -pg -std=c++11 -DWC_NO_HARDEN -DCONFIG_CRYPTO_LIB_OPENSSL ${OS_FLAGS}")
+        set(CMAKE_C_FLAGS "-O0 -ggdb -g -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow -fPIE -fPIC -fprofile-arcs -ftest-coverage -D_FORTIFY_SOURCE=2 -DCONFIG_EDGEOS_DETAILED_ERRORS -DWC_NO_HARDEN -DCONFIG_CRYPTO_LIB_OPENSSL -pg ${OS_FLAGS}")
+        set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -Wno-unused-parameter -Wshadow -fPIC -fPIE -std=c++11 -pg -fprofile-arcs -ftest-coverage -pg -std=c++11 -DCONFIG_EDGEOS_DETAILED_ERRORS -DWC_NO_HARDEN -DCONFIG_CRYPTO_LIB_OPENSSL ${OS_FLAGS}")
 
     endif()
 
@@ -56,7 +56,8 @@ SET(LINUX_SPEC_SOURCES
         lib/linux/net/ds/generated/dist_sdp.pb-c.c
         lib/linux/date_time/date_time.c
         lib/linux/process/process.c
-        lib/linux/fifo/fifo.c)
+        lib/linux/fifo/fifo.c
+        lib/linux/msgqueue/msg_queue.c)
 
 SET(UTIL_SOURCES
         lib/util/csvclass.cpp
@@ -124,7 +125,8 @@ set(TEST_CASES_SOURCES
         tests/test_queue.c
         tests/test_fifo.c
         tests/test_ssl.c
-        tests/test_hashtbl.c)
+        tests/test_hashtbl.c
+        tests/test_msg_queue.cpp)
 
 set(TRANSFER_TEST_SOURCES
         tests/transfer_test.c)
@@ -159,6 +161,7 @@ include_directories(
     services/supervisor/
     services/ota/
     lib/crypto/
+    lib/linux/msgqueue/
     lib/config/
     lib/linux/date_time/
     lib/linux/process/
