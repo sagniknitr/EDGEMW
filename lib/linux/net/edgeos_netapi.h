@@ -125,5 +125,8 @@ int edge_os_connect_address6(const char *addr, const char *service_name);
 
 int edge_os_connect_address4(const char *addr, const char *service_name);
 
+
+int edge_os_is_ip_multicast(const char *ip);
+
 #endif
 

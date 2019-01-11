@@ -42,6 +42,7 @@ static void __edge_os_get_netdev_info(struct edge_os_iflist *t,
 
         i = calloc(1, sizeof(struct edge_os_ipaddr_set));
         if (!t) {
+            edge_os_error("sysioctl: failed to allocate @ %s %u\n", __func__, __LINE__);
             return;
         }
 
@@ -312,6 +313,9 @@ int edge_os_is_mac_multicast(const uint8_t *macaddr)
 #define EDGEOS_IFFLAGS_BROADCAST    0x02
 #define EDGEOS_IFFLAGS_MUTLICAST    0x04
 #define EDGEOS_IFFLAGS_UP           0x08
+#define EDGEOS_IFFLAGS_PROMISC      0x10
+#define EDGEOS_IFFLAGS_NO_PROMISC   0x20
+
 
 static int __edge_os_validate_ifflags(const char *ifname, int validate_flag)
 {
@@ -363,6 +367,10 @@ static int __edge_os_validate_ifflags(const char *ifname, int validate_flag)
         opt |= IFF_UP;
     }
 
+    if (validate_flag & EDGEOS_IFFLAGS_PROMISC) {
+        opt |= IFF_PROMISC;
+    }
+
     return !!(ifr.ifr_flags & opt);
 
 bad:
@@ -388,6 +396,11 @@ int edge_os_is_if_multicast(const char *ifname)
 int edge_os_is_if_up(const char *ifname)
 {
     return __edge_os_validate_ifflags(ifname, EDGEOS_IFFLAGS_UP);
+}
+
+int edge_os_is_if_promisc(const char *ifname)
+{
+    return __edge_os_validate_ifflags(ifname, EDGEOS_IFFLAGS_PROMISC);
 }
 
 int __edge_os_set_ifflags(const char *ifname, int setflags)
@@ -433,6 +446,14 @@ int __edge_os_set_ifflags(const char *ifname, int setflags)
         req.ifr_flags |= IFF_UP;
     }
 
+    if (setflags & EDGEOS_IFFLAGS_PROMISC) {
+        req.ifr_flags |= IFF_PROMISC;
+    }
+
+    if (setflags & EDGEOS_IFFLAGS_NO_PROMISC) {
+        req.ifr_flags &= ~IFF_PROMISC;
+    }
+
     ret = ioctl(fd, SIOCSIFFLAGS, &req);
     if (ret < 0) {
         edge_os_log_with_error(errno, "sysioctl: failed to ioctl ");
@@ -467,6 +488,16 @@ int edge_os_set_multicast(const char *ifname)
 int edge_os_set_iface_up(const char *ifname)
 {
     return __edge_os_set_ifflags(ifname, EDGEOS_IFFLAGS_UP);
+}
+
+int edge_os_set_iface_promisc(const char *ifname)
+{
+    return __edge_os_set_ifflags(ifname, EDGEOS_IFFLAGS_PROMISC);
+}
+
+int edge_os_set_iface_remove_promisc(const char *ifname)
+{
+    return __edge_os_set_ifflags(ifname, EDGEOS_IFFLAGS_NO_PROMISC);
 }
 
 
