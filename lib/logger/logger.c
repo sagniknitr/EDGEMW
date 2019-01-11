@@ -52,6 +52,12 @@ void edge_os_error(char *fmt, ...)
     va_end(ap);
 }
 
+void edge_os_alloc_err(const char *file, const char *func, int line)
+{
+    edge_os_error("%s: failed to allocate @ %s %u\n",
+                        file, func, line);
+}
+
 void edge_os_log_with_error(int error, char *fmt, ...)
 {
     va_list ap;
