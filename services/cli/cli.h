@@ -10,6 +10,7 @@ struct edge_os_cli_command_arg_list {
 
 struct edge_os_cli_command_priv {
     int fd;
+    void *backend_thread;
 };
 
 int edge_os_cli_command_db_setup(struct edge_os_cli_command_priv *cmd_priv);

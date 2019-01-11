@@ -35,10 +35,9 @@ Right now testing is only done with in Travis with Linux, X86 architecture (most
         3. timeout based Sliding window buffer manager, hash TBL and other ds
 
 6. File systems
-    1. use MMAP for larger file seeks, writes and reads
-    2. support sync and async features when CPU in idling mode
-    3. watching the files with inotify and notifying it to the corresponding registered callbak
-    4. unix domain socket interface support for `LogSrv`
+    1. support sync and async features when CPU in idling mode
+    2. watching the files with inotify and notifying it to the corresponding registered callbak
+    3. unix domain socket interface support for `LogSrv`
 
 7. Thread pools
     1. worker threads independent of the evtloop - thread scheduling
@@ -55,8 +54,6 @@ Right now testing is only done with in Travis with Linux, X86 architecture (most
     1. with HCI library
 
 11. performance profiler interface library
-
-12. message queues interface
 
 ## minor features
 
