@@ -7,7 +7,7 @@
 #include <fcntl.h>
 #include <edgeos_logger.h>
 
-#define EDGEOS_DEFAULT_FIFO_SIZE (8 * 1024 * 1024)
+#define EDGEOS_DEFAULT_FIFO_SIZE (1 * 1024 * 1024)
 
 int edge_os_fifo_create(const char *fifo_path, int fifo_size)
 {
@@ -47,8 +47,15 @@ int edge_os_fifo_open(const char *fifo_path)
 {
     int fd;
 
+    if (!fifo_path) {
+        edge_os_error("fifo: invalid fifo_path %p @ %s %u\n",
+                                fifo_path, __func__, __LINE__);
+        return -1;
+    }
+
     fd = open(fifo_path, O_RDONLY);
     if (fd < 0) {
+        edge_os_log_with_error(errno, "fifo: failed to open: ");
         return -1;
     }
 
@@ -65,3 +72,17 @@ int edge_os_fifo_read(int fd, void *buf, int buflen)
     return read(fd, buf, buflen);
 }
 
+int edge_os_fifo_close(int fd, const char *path)
+{
+    if (fd < 0) {
+        edge_os_error("fifo: invalid fd %d @ %s %u\n",
+                                fd, __func__, __LINE__);
+        return -1;
+    }
+
+    close(fd);
+    if (path)
+        unlink(path);
+
+    return 0;
+}
