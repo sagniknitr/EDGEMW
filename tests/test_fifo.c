@@ -11,6 +11,7 @@ int fifo_test(int argc, char **argv)
     int fd;
 
     fd = edge_os_fifo_open(NULL);
+    fd = edge_os_fifo_open("/root/test");
 
     pid = fork();
     if (pid == 0) {
