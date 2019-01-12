@@ -27,7 +27,7 @@ int edge_os_list_add_tail(struct edge_os_list_base *base, void *data)
 
     new = calloc(1, sizeof(struct edge_os_list));
     if (!new) {
-        edge_os_error("failed to allocate @ %s %u\n", __func__, __LINE__);
+        edge_os_alloc_err(__FILE__, __func__, __LINE__);
         return -1;
     }
 
