@@ -126,7 +126,7 @@ int edge_os_evtloop_unregister_socket(void *handle, int sock)
     struct edge_os_evtloop_socket *data;
 
     if (!handle || (sock < 0)) {
-        edge_os_error("evtloop: invalid handle @p / sock %d @ %s %u\n",
+        edge_os_error("evtloop: invalid handle %p / sock %d @ %s %u\n",
                                 handle, sock, __func__, __LINE__);
         return -1;
     }

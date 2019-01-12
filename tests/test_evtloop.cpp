@@ -116,13 +116,8 @@ void repeated_timer(void *priv)
     counter --;
 }
 
-int main(int argc, char **argv)
+int evtloop_test(int argc, char **argv)
 {
-    if (argc != 2) {
-        fprintf(stderr, "<%s> server/client\n", argv[0]);
-        return -1;
-    }
-
     edge_os_evtloop_init(NULL, NULL);
     edge_os_evtloop_register_timer(NULL, NULL, 0, 0, NULL);
     edge_os_evtloop_register_socket(NULL, NULL, -1, NULL);
@@ -144,5 +139,7 @@ int main(int argc, char **argv)
     }
 
     edge_os_evtloop_run(&base);
+
+	return 0;
 }
 

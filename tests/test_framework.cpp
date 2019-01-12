@@ -18,17 +18,18 @@ int ssl_test(int argc, char **argv);
 int hashtbl_test(int argc, char **argv);
 }
 
+int evtloop_test(int argc, char **argv);
 int config_parser_test(int argc, char **argv);
 int fsAPI_test(int argc, char **argv);
 int tokparse_test(int argc, char **argv);
 int msg_queue_test(int argc, char **argv);
-
 
 static struct test_cases {
     std::string name;
     int (*executor)(int argc, char **argv);
 } test_case[] = {
     {"list_test", list_test},
+    {"evtloop_test", evtloop_test},
     {"prng_test", prng_test},
     {"fsapi_test", fsAPI_test},
     {"tokparse_test", tokparse_test},

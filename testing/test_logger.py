@@ -13,7 +13,7 @@ os.system('./build/loggerTest 127.0.0.1 4898 &')
 char = 0
 
 # let the comm happen and log
-time.sleep(10)
+time.sleep(1);
 
 os.system("killall EdgeOSLogger")
 os.system("killall loggerTest")
@@ -31,7 +31,7 @@ os.system('./build/distCommMaster&')
 os.system('./build/DistTest -p&')
 os.system('./build/DistTest -s&')
 
-time.sleep(10);
+time.sleep(1);
 
 os.system("./build/nmeaTest ./lib/gpslib/src/tests/nmea_data/nmea_12_12_2018.txt")
 

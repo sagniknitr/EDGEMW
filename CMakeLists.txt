@@ -102,9 +102,6 @@ set(DIST_TEST_SOURCES
 set(NMEA_TEST_SOURCES
         lib/gpslib/src/tests/unit_tests/unit_core.cpp)
 
-set(EVTLOOP_TEST_SOURCES
-        tests/test_evtloop.cpp)
-
 set(TCPSERVER_TEST_SOURCES
         tests/test_TcpServer.cpp)
 
@@ -113,6 +110,7 @@ set(TEST_CASES_SOURCES
         tests/test_fsapi.cpp
         tests/test_tokparse.cpp
         tests/test_list.c
+        tests/test_evtloop.cpp
         tests/test_prng.c
         tests/test_sysioctl.c
         tests/test_pthread.c
@@ -212,9 +210,6 @@ target_link_libraries(DistTest pthread EdgeOS gcov)
 
 add_executable(nmeaTest ${NMEA_TEST_SOURCES})
 target_link_libraries(nmeaTest pthread EdgeOS gcov)
-
-add_executable(ELTest ${EVTLOOP_TEST_SOURCES})
-target_link_libraries(ELTest pthread EdgeOS gcov)
 
 add_executable(TcpServerTest ${TCPSERVER_TEST_SOURCES})
 target_link_libraries(TcpServerTest pthread EdgeOS gcov)
