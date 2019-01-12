@@ -101,6 +101,11 @@ static int large_list_test()
 
 int list_test(int argc, char **argv)
 {
+
+	edge_os_list_init(NULL);
+	edge_os_list_add_tail(NULL, NULL);
+	edge_os_list_delete(NULL, NULL, NULL);
+	edge_os_list_for_each(NULL, NULL, NULL);
     static_ptr_test();
     dynamic_ptr_test();
     small_list_test();

@@ -121,13 +121,13 @@ int edge_os_list_for_each(struct edge_os_list_base *base,
                           void (*list_for_callback)(void *data, void *priv),
                           void *priv)
 {
-    struct edge_os_list *t  = base->head;
-
     if (!base || !list_for_callback) {
         edge_os_error("list: invalid base ptr %p / list_for_callback ptr %p @ %s %u\n",
                             base, list_for_callback, __func__, __LINE__);
         return -1;
     }
+
+    struct edge_os_list *t  = base->head;
 
     while (t) {
         list_for_callback(t->data, priv);
