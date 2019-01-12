@@ -62,5 +62,11 @@ struct edge_os_iflist* edge_os_get_netdev_info();
 
 void edge_os_free_netdev_info(struct edge_os_iflist *dev);
 
+int edge_os_set_iface_promisc(const char *ifname);
+
+int edge_os_is_if_promisc(const char *ifname);
+
+int edge_os_set_iface_remove_promisc(const char *iface);
+
 #endif
 

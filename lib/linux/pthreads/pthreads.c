@@ -12,14 +12,16 @@
 #include <edgeos_logger.h>
 #include <edgeos_list.h>
 
-struct edgeos_threadpool_work_priv {
+struct edge_os_threadpool_work_priv {
     void (*work)(void *data);
     void *data;
 };
 
-struct edgeos_thread_priv {
+struct edge_os_thread_priv {
     pthread_t tid;
     pthread_attr_t attr;
+    int started;
+    pthread_mutex_t start_up_lock;
     pthread_mutex_t mutex;
     pthread_cond_t cond;
     void *data;
@@ -29,23 +31,29 @@ struct edgeos_thread_priv {
     uint64_t exec_time_ns_avg;
     int n_work_complete;
     int n_work_pending;
+    int is_stop_thread;
 #define EDGEOS_EXEC_TIME_COUNT 1000
     pthread_mutex_t work_mutex;
     struct edge_os_list_base work_set;
 };
 
-struct edgeos_thread_pool_priv {
-    struct edgeos_thread_priv *threads;
+struct edge_os_thread_pool_priv {
+    struct edge_os_thread_priv *threads;
     int n_threads;
 };
 
 void * thread_func_(void *data)
 {
-    struct edgeos_thread_priv *tpriv = data;
+    struct edge_os_thread_priv *tpriv = data;
 
     while (1) {
         struct edge_os_list *list_item;
-        struct edgeos_threadpool_work_priv *work_item;
+        struct edge_os_threadpool_work_priv *work_item;
+
+
+        pthread_mutex_lock(&tpriv->start_up_lock);
+        tpriv->started = 1;
+        pthread_mutex_unlock(&tpriv->start_up_lock);
 
         pthread_mutex_lock(&tpriv->mutex);
 
@@ -56,27 +64,36 @@ void * thread_func_(void *data)
         // and using the thread
         pthread_cond_wait(&tpriv->cond, &tpriv->mutex);
 
+        if (tpriv->is_stop_thread) {
+            return NULL;
+        }
+
         for (list_item = tpriv->work_set.head; list_item != NULL; list_item = list_item->next) {
             // each worker thread will have readonly access to their worksets
             pthread_mutex_lock(&tpriv->work_mutex); // add only at the end when scheduling jobs !
             work_item = list_item->data;
             if (work_item) {
                 work_item->work(work_item->data);
+                if (tpriv->is_stop_thread) {
+                    return NULL;
+                }
             }
             pthread_mutex_unlock(&tpriv->work_mutex);
         }
 
         pthread_mutex_unlock(&tpriv->mutex);
     }
+
+    return NULL;
 }
 
-void * edgeos_thread_create(void (*thread_callback)(void *data), void *data, int *cpulist, int cpulist_len)
+void * edge_os_thread_create(void (*thread_callback)(void *data), void *data, int *cpulist, int cpulist_len)
 {
-    struct edgeos_threadpool_work_priv *work_priv = NULL;
-    struct edgeos_thread_priv *tpriv;
+    struct edge_os_threadpool_work_priv *work_priv = NULL;
+    struct edge_os_thread_priv *tpriv;
     int ret;
 
-    tpriv = calloc(1, sizeof(struct edgeos_thread_priv));
+    tpriv = calloc(1, sizeof(struct edge_os_thread_priv));
     if (!tpriv) {
         edge_os_error("pthreads: failed to allocate @ %s %u\n",
                                 __func__, __LINE__);
@@ -107,7 +124,7 @@ void * edgeos_thread_create(void (*thread_callback)(void *data), void *data, int
 
     edge_os_list_init(&tpriv->work_set);
 
-    work_priv = calloc(1, sizeof(struct edgeos_threadpool_work_priv));
+    work_priv = calloc(1, sizeof(struct edge_os_threadpool_work_priv));
     if (!work_priv)
         goto bad;
 
@@ -149,18 +166,29 @@ bad:
     return NULL;
 }
 
-int edgeos_thread_execute(void *tr_priv)
+int edge_os_thread_execute(void *tr_priv)
 {
-    struct edgeos_thread_priv *tpriv = tr_priv;
+    struct edge_os_thread_priv *tpriv = tr_priv;
 
+    while (1) {
+       pthread_mutex_lock(&tpriv->start_up_lock);
+       if (tpriv->started) {
+          pthread_mutex_unlock(&tpriv->start_up_lock);
+          break;
+       }
+       pthread_mutex_unlock(&tpriv->start_up_lock);
+    }
+
+    pthread_mutex_lock(&tpriv->mutex);
     pthread_cond_signal(&tpriv->cond);
+    pthread_mutex_unlock(&tpriv->mutex);
 
     return 0;
 }
 
-void * edgeos_thread_create_detached(void (*thread_callback)(void *data), void *data, int *cpulist, int cpulist_len);
+void * edge_os_thread_create_detached(void (*thread_callback)(void *data), void *data, int *cpulist, int cpulist_len);
 
-int edgeos_threads_set_cpu(void *tr_priv, int *cpulist, int cpulist_len);
+int edge_os_threads_set_cpu(void *tr_priv, int *cpulist, int cpulist_len);
 
 void * edge_os_threadpool_create(int n_threads);
 
@@ -169,9 +197,13 @@ void edge_os_threadpool_schedule_work(void *tr_priv, void (*work)(void *data));
 
 void edge_os_thread_stop(void *tr_priv)
 {
-//   struct edgeos_thread_priv *tpriv = tr_priv;
+   struct edge_os_thread_priv *tpriv = tr_priv;
 
 //    pthread_kill(tpriv->tid, SIGINT);
+    pthread_mutex_lock(&tpriv->mutex);
+    tpriv->is_stop_thread = 1;
+    pthread_cond_signal(&tpriv->cond);
+    pthread_mutex_unlock(&tpriv->mutex);
 }
 
 

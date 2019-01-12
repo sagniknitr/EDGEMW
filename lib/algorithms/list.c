@@ -27,7 +27,7 @@ int edge_os_list_add_tail(struct edge_os_list_base *base, void *data)
 
     new = calloc(1, sizeof(struct edge_os_list));
     if (!new) {
-        edge_os_error("failed to allocate @ %s %u\n", __func__, __LINE__);
+        edge_os_alloc_err(__FILE__, __func__, __LINE__);
         return -1;
     }
 
@@ -121,13 +121,13 @@ int edge_os_list_for_each(struct edge_os_list_base *base,
                           void (*list_for_callback)(void *data, void *priv),
                           void *priv)
 {
-    struct edge_os_list *t  = base->head;
-
     if (!base || !list_for_callback) {
         edge_os_error("list: invalid base ptr %p / list_for_callback ptr %p @ %s %u\n",
                             base, list_for_callback, __func__, __LINE__);
         return -1;
     }
+
+    struct edge_os_list *t  = base->head;
 
     while (t) {
         list_for_callback(t->data, priv);

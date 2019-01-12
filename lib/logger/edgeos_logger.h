@@ -8,6 +8,7 @@ void edge_os_log(char *fmt, ...);
 void edge_os_log_with_error(int error, char *fmt, ...);
 void edge_os_debug(char *fmt, ...);
 void edge_os_error(char *fmt, ...);
+void edge_os_alloc_err(const char *file, const char *func, int line);
 
 void *edge_os_logger_init(char *ipaddr, int port);
 void edge_os_logger_deinit(void *handle);

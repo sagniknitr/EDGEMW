@@ -17,6 +17,7 @@
 #include <edgeos_evtloop.h>
 #include <stdlib.h>
 #include <edgeos_logger.h>
+#include <edgeos_ioctl.h>
 
 // managed server client configuration data
 struct edge_os_client_list {
@@ -191,6 +192,16 @@ int edge_os_create_tcp_unix_client(const char *path)
 fail:
     close(sock);
 
+    return -1;
+}
+
+int edge_os_create_tcp_server_on(const char *ifname, int port)
+{
+    return -1;
+}
+
+int edge_os_create_udp_server_on(const char *ifname, int port)
+{
     return -1;
 }
 
@@ -812,12 +823,13 @@ void* edge_os_raw_socket_create(edge_os_raw_sock_type_t type, const char *ifname
 
     raw_params = calloc(1, sizeof(struct edge_os_raw_sock_params));
     if (!raw_params) {
+        edge_os_error("net: failed to allocate @ %s %u\n", __func__, __LINE__);
         return NULL;
     }
 
     raw_params->fd = socket(AF_PACKET, SOCK_RAW, ETH_P_ALL);
     if (raw_params->fd < 0) {
-        return NULL;
+        goto bad;
     }
 
     if (type == EDGEOS_RAW_SOCK_ETH) {
@@ -845,10 +857,22 @@ void* edge_os_raw_socket_create(edge_os_raw_sock_type_t type, const char *ifname
         memcpy(raw_params->srcmac, (uint8_t *)(raw_params->ifr.ifr_hwaddr.sa_data), 6);
         memcpy(raw_params->eh.ether_shost, raw_params->srcmac, 6);
     } else {
-        return NULL;
+        goto bad;
     }
 
     return raw_params;
+
+bad:
+    if (raw_params) {
+        if (raw_params->txbuf)
+            free(raw_params->txbuf);
+
+        if (raw_params->fd > 0)
+            close(raw_params->fd);
+        free(raw_params);
+    }
+
+    return NULL;
 }
 
 int edge_os_raw_socket_send_eth_frame(
@@ -890,5 +914,14 @@ int edge_os_raw_socket_send_eth_frame(
     }
 
     return ret;
+}
+
+int edge_os_is_ip_multicast(const char *ip)
+{
+    in_addr_t addr;
+
+    addr = inet_addr(ip);
+
+    return IN_MULTICAST(addr);
 }
 

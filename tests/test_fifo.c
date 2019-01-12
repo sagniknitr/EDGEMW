@@ -19,7 +19,7 @@ int fifo_test(int argc, char **argv)
             int ret;
             int val;
 
-            ret = read(fd, &val, sizeof(val));
+            ret = edge_os_fifo_read(fd, &val, sizeof(val));
             if (ret <= 0) {
                 break;
             }
@@ -37,9 +37,14 @@ int fifo_test(int argc, char **argv)
 
         while (1) {
             pid_t child;
+            int ret;
 
             edge_os_nanosleep(1000 * 100);
-            write(fd, &val, sizeof(val));
+            ret = edge_os_fifo_write(fd, &val, sizeof(val));
+            if (ret < 0) {
+                break;
+            }
+
             val ++;
 
             child = waitpid(-1, NULL, WNOHANG);

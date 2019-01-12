@@ -123,6 +123,11 @@ int main(int argc, char **argv)
         return -1;
     }
 
+    edge_os_evtloop_init(NULL, NULL);
+    edge_os_evtloop_register_timer(NULL, NULL, 0, 0, NULL);
+    edge_os_evtloop_register_socket(NULL, NULL, -1, NULL);
+    edge_os_evtloop_unregister_socket(NULL, -1);
+
     edge_os_evtloop_init(&base, NULL);
 
     if (!strcmp(argv[1], "server")) {

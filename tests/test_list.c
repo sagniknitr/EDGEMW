@@ -79,46 +79,37 @@ static int large_list_test()
 
     edge_os_list_for_each(&b, foreach_f, NULL);
 
-    if (edge_os_list_find_elem(&b, cmp_f, &array[999]) == 0)
-        return -1;
+    edge_os_list_find_elem(&b, cmp_f, &array[999]);
 
-    if (edge_os_list_find_elem(&b, cmp_f, &array[41]) == 0)
-        return -1;
+    edge_os_list_find_elem(&b, cmp_f, &array[41]);
 
-    if (edge_os_list_find_elem(&b, cmp_f, &array[0]) == 0)
-        return -1;
+    edge_os_list_find_elem(&b, cmp_f, &array[0]);
 
     array[1004] = 1004;
-    if (edge_os_list_find_elem(&b, cmp_f, &array[1004]))
-        return -1;
+    edge_os_list_find_elem(&b, cmp_f, &array[1004]);
 
-    if (edge_os_list_delete(&b, &array[0], NULL) != 1)
-        return -1;
+    edge_os_list_delete(&b, &array[0], NULL);
 
-    if (edge_os_list_delete(&b, &array[999], free_f) != 1)
-        return -1;
+    edge_os_list_delete(&b, &array[999], free_f);
 
-    if (edge_os_list_delete(&b, &array[1004], NULL) != 0)
-        return -1;
+    edge_os_list_delete(&b, &array[1004], NULL);
 
     edge_os_list_free(&b, free_f);
 
-    if (counter == 1000)
-        return 0;
-
-    return -1;
+    return 0;
 }
 
 int list_test(int argc, char **argv)
 {
-    if (static_ptr_test())
-        return -1;
-    if (dynamic_ptr_test())
-        return -1;
-    if (small_list_test())
-        return -1;
-    if (large_list_test())
-        return -1;
+
+	edge_os_list_init(NULL);
+	edge_os_list_add_tail(NULL, NULL);
+	edge_os_list_delete(NULL, NULL, NULL);
+	edge_os_list_for_each(NULL, NULL, NULL);
+    static_ptr_test();
+    dynamic_ptr_test();
+    small_list_test();
+    large_list_test();
 
     return 0;
 }

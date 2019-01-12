@@ -30,17 +30,14 @@ Right now testing is only done with in Travis with Linux, X86 architecture (most
 
 5. Algorithms:
     1. Data structures:
-        1. DLL
-        2. HashTBL
-        3. Circular Q
-        4. Sliding Window
-        5. timeout based Sliding window buffer manager, hash TBL and other ds
+        1. Circular Q
+        2. Sliding Window
+        3. timeout based Sliding window buffer manager, hash TBL and other ds
 
 6. File systems
-    1. use MMAP for larger file seeks, writes and reads
-    2. support sync and async features when CPU in idling mode
-    3. watching the files with inotify and notifying it to the corresponding registered callbak
-    4. unix domain socket interface support for `LogSrv`
+    1. support sync and async features when CPU in idling mode
+    2. watching the files with inotify and notifying it to the corresponding registered callbak
+    3. unix domain socket interface support for `LogSrv`
 
 7. Thread pools
     1. worker threads independent of the evtloop - thread scheduling
@@ -48,6 +45,7 @@ Right now testing is only done with in Travis with Linux, X86 architecture (most
 8. Networking
     1. raw socket API - sender, and receiver, with ether_header, iphdr, udphdr, tcphdr
     2. ipv6 support - send, recv, create, delete, name to ip
+    3. extend network layer for all purposes - v6 support, raw socket and splices for large payload transmit and receive
 
 9. Databases
     1. interface with SQL database
@@ -59,8 +57,7 @@ Right now testing is only done with in Travis with Linux, X86 architecture (most
 
 ## minor features
 
-1. extend network layer for all purposes - v6 support, raw socket and splices for large payload transmit and receive
-2. add ublox protocol support GPS
+1. add ublox protocol support GPS
 
 one last but important feature is to support C++ class interfaces to the library API.
 

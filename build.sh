@@ -48,6 +48,11 @@ run_gcc_tests() {
     ./build/TestExecutor stack_test
     ./build/TestExecutor queue_test
     ./build/TestExecutor fifo_test
+    ./build/TestExecutor ssl_test server&
+    ./build/TestExecutor ssl_test client&
+    ./build/TestExecutor hashtbl_test
+    #./build/TestExecutor msg_queue_test server /mq_test&
+    #./build/TestExecutor msg_queue_test client /mq_test&
     exit 0
 }
 
@@ -63,6 +68,10 @@ make_release() {
     fi
 
     make -j12
+    if [ "$?" -ne 0 ] ; then
+        echo "failed to generate a release image.. check your tests"
+        exit 1
+    fi
 
     cd ..
 

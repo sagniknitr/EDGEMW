@@ -70,7 +70,10 @@ csvClass::csvClass(std::string filename, std::string mode, bool hasHeader)
     }
 
     char line[1024];
-    fgets(line, sizeof(line), fp);
+
+    char *buf = fgets(line, sizeof(line), fp);
+    if (!buf) {
+    }
 }
 
 int csvClass::csvReadLine(std::string & line, std::vector<std::string> &output)
