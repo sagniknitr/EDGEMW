@@ -1,3 +1,9 @@
+/**
+ * @brief - networking layer interfaces from EDGEOS
+ * @Author - Devendra Naga (devendra.aaru@gmail.com)
+ * @Copyright  - all rights reserved
+ * License - Apache
+ */
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
@@ -70,7 +76,8 @@ int edge_os_new_unix_socket()
 
 void edge_os_del_udp_socket(int sock)
 {
-    close(sock);
+    if (sock >= 0)
+        close(sock);
 }
 
 int edge_os_create_udp_client()
@@ -196,11 +203,13 @@ fail:
     return -1;
 }
 
+// FIXME: implement
 int edge_os_create_tcp_server_on(const char *ifname, int port)
 {
     return -1;
 }
 
+// FIXME: implement
 int edge_os_create_udp_server_on(const char *ifname, int port)
 {
     return -1;
@@ -512,37 +521,77 @@ int edge_os_socket_ioctl_set_nonblock(int fd)
 
 int edge_os_socket_ioctl_bind_to_device(int fd)
 {
+    int ret;
     int set = 1;
 
-    return setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, &set, sizeof(set));
+    ret = setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, &set, sizeof(set));
+    if (ret < 0) {
+        edge_os_log_with_error(errno, "net: failed to setsockopt: @ %s %u ",
+                                        __func__, __LINE__);
+        return -1;
+    }
+
+    return 0;
 }
 
 int edge_os_socket_ioctl_reuse_addr(int fd)
 {
+    int ret;
     int set = 1;
 
-    return setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &set, sizeof(set));
+    ret = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &set, sizeof(set));
+    if (ret < 0) {
+        edge_os_log_with_error(errno, "net: failed to setsockopt: @ %s %u ",
+                                        __func__, __LINE__);
+        return -1;
+    }
+
+    return 0;
 }
 
 int edge_os_socket_ioctl_reset_reuse_addr(int fd)
 {
+    int ret;
     int set = 0;
 
-    return setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &set, sizeof(set));
+    ret = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &set, sizeof(set));
+    if (ret < 0) {
+        edge_os_log_with_error(errno, "net: failed to setsockopt: @ %s %u ",
+                                        __func__, __LINE__);
+        return -1;
+    }
+
+    return 0;
 }
 
 int edge_os_socket_ioctl_set_broadcast(int fd)
 {
+    int ret;
     int set = 1;
 
-    return setsockopt(fd, SOL_SOCKET, SO_BROADCAST, &set, sizeof(set));
+    ret = setsockopt(fd, SOL_SOCKET, SO_BROADCAST, &set, sizeof(set));
+    if (ret < 0) {
+        edge_os_log_with_error(errno, "net: failed to setsockopt: @ %s %u ",
+                                        __func__, __LINE__);
+        return -1;
+    }
+
+    return 0;
 }
 
 int edge_os_socket_ioctl_keepalive(int fd)
 {
+    int ret;
     int set = 1;
 
-    return setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &set, sizeof(set));
+    ret = setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &set, sizeof(set));
+    if (ret < 0) {
+        edge_os_log_with_error(errno, "net: failed to setsockopt: @ %s %u ",
+                                        __func__, __LINE__);
+        return -1;
+    }
+
+    return 0;
 }
 
 int edge_os_net_setmaxconn(int conns)
@@ -552,6 +601,7 @@ int edge_os_net_setmaxconn(int conns)
     char buf[10];
     int ret;
 
+    // setting -1 will result in a dynamic connections ? here or at listen()
     ret = snprintf(buf, sizeof(buf), "%d\n", conns);
 
     fd = open(SOMAX_CONN_FILE, O_WRONLY);
@@ -875,12 +925,15 @@ void* edge_os_raw_socket_create(edge_os_raw_sock_type_t type, const char *ifname
 
     raw_params->fd = socket(AF_PACKET, SOCK_RAW, ETH_P_ALL);
     if (raw_params->fd < 0) {
+        edge_os_log_with_error(errno, "net: failed to socket @ %s %u ",
+                                    __func__, __LINE__);
         goto bad;
     }
 
     if (type == EDGEOS_RAW_SOCK_ETH) {
         raw_params->txbuf = calloc(1, txbuf_len + sizeof(struct ether_header));
         if (!raw_params->txbuf) {
+            edge_os_alloc_err(__FILE__, __func__, __LINE__);
             return NULL;
         }
 
@@ -889,6 +942,8 @@ void* edge_os_raw_socket_create(edge_os_raw_sock_type_t type, const char *ifname
         strcpy(raw_params->ifr.ifr_name, ifname);
         ret = ioctl(raw_params->fd, SIOCGIFINDEX, &raw_params->ifr);
         if (ret < 0) {
+            edge_os_log_with_error(errno, "net: failed to ioctl @ %s %u ",
+                                        __func__, __LINE__);
             return NULL;
         }
 
@@ -897,6 +952,8 @@ void* edge_os_raw_socket_create(edge_os_raw_sock_type_t type, const char *ifname
         memset(&raw_params->ifr, 0, sizeof(raw_params->ifr));
         ret = ioctl(raw_params->fd, SIOCGIFHWADDR, &raw_params->ifr);
         if (ret < 0) {
+            edge_os_log_with_error(errno, "net: failed to ioctl @ %s %u ",
+                                        __func__, __LINE__);
             return NULL;
         }
 

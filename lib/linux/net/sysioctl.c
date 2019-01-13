@@ -16,7 +16,7 @@
 #include <ifaddrs.h>
 #include <edgeos_ioctl.h>
 
-static void __edge_os_get_netdev_info(struct edge_os_iflist *t,
+static int __edge_os_get_netdev_info(struct edge_os_iflist *t,
                                       struct ifaddrs *it)
 {
     int valid_ip = 0;
@@ -49,7 +49,7 @@ static void __edge_os_get_netdev_info(struct edge_os_iflist *t,
         i = calloc(1, sizeof(struct edge_os_ipaddr_set));
         if (!t) {
             edge_os_error("sysioctl: failed to allocate @ %s %u\n", __func__, __LINE__);
-            return;
+            return -1;
         }
 
         if (it->ifa_addr->sa_family == AF_INET) {
@@ -60,7 +60,9 @@ static void __edge_os_get_netdev_info(struct edge_os_iflist *t,
             ret = inet_ntop(AF_INET, &(ip->sin_addr.s_addr),
                                 i->ipaddr, sizeof(i->ipaddr));
             if (!ret) {
-                return;
+				edge_os_log_with_error(errno, "sysioctl: failed to inet_ntop  @ %s %u ",
+											__func__, __LINE__);
+                return -1;
             }
             valid_ip = 1;
         } else if (it->ifa_addr->sa_family == AF_INET6) {
@@ -71,13 +73,15 @@ static void __edge_os_get_netdev_info(struct edge_os_iflist *t,
             ret = inet_ntop(AF_INET6, &ip6->sin6_addr.s6_addr,
                                 i->ipaddr, sizeof(i->ipaddr));
             if (!ret) {
-                return;
+				edge_os_log_with_error(errno, "sysioctl: failed to inet_ntop @ %s %u ",
+											__func__, __LINE__);
+                return -1;
             }
             valid_ip = 1;
         } else {
             valid_ip = 0;
             free(i);
-            return;
+            return -1;
         }
     }
 
@@ -94,6 +98,8 @@ static void __edge_os_get_netdev_info(struct edge_os_iflist *t,
             j->next = i;
         }
     }
+
+	return 0;
 }
 
 struct edge_os_iflist *edge_os_get_netdev_info()
@@ -128,7 +134,10 @@ struct edge_os_iflist *edge_os_get_netdev_info()
 
             t->set = NULL;
 
-            __edge_os_get_netdev_info(t, it);
+            ret = __edge_os_get_netdev_info(t, it);
+			if (ret) {
+				goto bad;
+			}
 
             if (!s) {
                 s = t;
@@ -138,7 +147,10 @@ struct edge_os_iflist *edge_os_get_netdev_info()
                 tail = t;
             }
         } else {
-            __edge_os_get_netdev_info(f, it);
+            ret = __edge_os_get_netdev_info(f, it);
+			if (ret) {
+				goto bad;
+			}
         }
     }
 

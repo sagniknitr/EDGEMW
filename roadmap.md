@@ -58,6 +58,7 @@ Right now testing is only done with in Travis with Linux, X86 architecture (most
 
 10. Bluetooth interface
     1. with HCI library
+	2. bluetooth low energy component
 
 11. performance profiler interface library
 
@@ -65,6 +66,10 @@ Right now testing is only done with in Travis with Linux, X86 architecture (most
 	1. send telemetry info
 		1. realtime - cpu load, memory, bandwidth usage for each radio, network hardware (packets sent and received)
 		2. non realtime
+
+13. communications
+	1. d-bus system bus interfacing
+	2. shared memory based communication
 
 ## minor features
 
