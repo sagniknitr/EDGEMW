@@ -53,7 +53,11 @@ run_gcc_tests() {
     ./build/TestExecutor hashtbl_test
     #./build/TestExecutor msg_queue_test server /mq_test&
     #./build/TestExecutor msg_queue_test client /mq_test&
-    exit 0
+	./build/TestExecutor evtloop_test server&
+	./build/TestExecutor evtloop_test client&
+	sleep 1
+	echo "test complete.."
+	exit 0
 }
 
 make_release() {

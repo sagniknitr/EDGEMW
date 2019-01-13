@@ -97,7 +97,11 @@ int edge_os_udp_sendto(int fd, void *msg, int msglen, char *dest, int dest_port)
 int edge_os_udp_recvfrom(int fd, void *msg, int msglen, char *dest, int *dest_len);
 
 int edge_os_tcp_send(int fd, void *msg, int msglen);
+int edge_os_tcp_send_tfo(int fd, void *msg, int msglen, char *dest, int dest_port);
+
 int edge_os_tcp_recv(int fd, void *msg, int msglen);
+int edge_os_tcp_recv_tfo(int fd, void *msg, int msglen, char *dest, int *dest_port);
+
 
 int edge_os_udp_unix_sendto(int fd, void *msg, int msglen, char *dest);
 
@@ -106,6 +110,7 @@ int edge_os_socket_ioctl_set_mcast_add_member(int fd, char *ipaddr, char *ifname
 int edge_os_socket_ioctl_set_mcast_if(int fd, char *ipaddr);
 int edge_os_socket_ioctl_bind_to_device(int fd);
 int edge_os_socket_ioctl_reuse_addr(int fd);
+int edge_os_socket_ioctl_tfo(int fd, int que_len);
 
 
 

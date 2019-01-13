@@ -22,6 +22,3 @@ os.system('./build/EOSTest -c -u -U')
 # -ve
 
 os.system('./build/EOSTest -i 127.0.0.1 -p 4898 -t -s -C -10')
-
-os.system('./build/ELTest server &')
-os.system('./build/ELTest client')

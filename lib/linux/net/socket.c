@@ -7,6 +7,7 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <sys/ioctl.h>
+#include <netinet/tcp.h>
 #include <netinet/ether.h>
 #include <linux/if_packet.h>
 #include <net/if.h>
@@ -416,6 +417,20 @@ bad:
     return -1;
 }
 
+int edge_os_socket_ioctl_tfo(int fd, int que_len)
+{
+    int ret;
+
+    ret = setsockopt(fd, SOL_TCP, TCP_FASTOPEN, &que_len, sizeof(que_len));
+    if (ret < 0) {
+        edge_os_log_with_error(errno, "net: failed to tcp fast open @ %s %u ",
+                                    __func__, __LINE__);
+        return -1;
+    }
+
+    return 0;
+}
+
 int edge_os_create_udp_mcast_client(char *ip, int port, char *mcast_group, char *ipaddr)
 {
     int sock;
@@ -441,12 +456,20 @@ int edge_os_create_udp_mcast_client(char *ip, int port, char *mcast_group, char 
 
 int edge_os_socket_ioctl_set_mcast_if(int fd, char *ipaddr)
 {
+    int ret;
     struct ip_mreq mcast_if;
 
     mcast_if.imr_interface.s_addr = inet_addr(ipaddr);
 
-    return setsockopt(fd, IPPROTO_IP, IP_MULTICAST_IF,
+    ret = setsockopt(fd, IPPROTO_IP, IP_MULTICAST_IF,
                       &mcast_if.imr_interface, sizeof(struct in_addr));
+    if (ret < 0) {
+        edge_os_log_with_error(errno, "net: failed to setsockopt @ %s %u ",
+                                    __func__, __LINE__);
+        return -1;
+    }
+
+    return 0;
 }
 
 int edge_os_socket_ioctl_set_mcast_add_member(int fd, char *ipaddr, char *group)
@@ -567,9 +590,32 @@ int edge_os_tcp_send(int fd, void *msg, int msglen)
     return send(fd, msg, msglen, 0);
 }
 
+int edge_os_tcp_send_tfo(int fd, void *msg, int msglen, char *dest, int dest_port)
+{
+    struct sockaddr_in d = {
+        .sin_addr.s_addr = inet_addr(dest),
+        .sin_port = htons(dest_port),
+        .sin_family = AF_INET,
+    };
+    int ret;
+
+    ret = sendto(fd, msg, msglen, MSG_FASTOPEN, (struct sockaddr *)&d, sizeof(d));
+    if (ret < 0) {
+        edge_os_log_with_error(errno, "failed to sendto @ %s %u ",
+                                        __func__, __LINE__);
+    }
+
+    return ret;
+}
+
 int edge_os_tcp_recv(int fd, void *msg, int msglen)
 {
     return recv(fd, msg, msglen, 0);
+}
+
+int edge_os_tcp_recv_tfo(int fd, void *msg, int msglen, char *dest, int *dest_port)
+{
+    return edge_os_udp_recvfrom(fd, msg, msglen, dest, dest_port);
 }
 
 int edge_os_udp_sendto(int fd, void *msg, int msglen, char *dest, int dest_port)

@@ -10,6 +10,9 @@ int fifo_test(int argc, char **argv)
     pid_t pid;
     int fd;
 
+    fd = edge_os_fifo_open(NULL);
+    fd = edge_os_fifo_open("/root/test");
+
     pid = fork();
     if (pid == 0) {
         sleep(1); // lets wait for parent process to creat a fifo
@@ -28,9 +31,10 @@ int fifo_test(int argc, char **argv)
             if (val == 100 * 100) {
                 break;
             }
+            edge_os_fifo_close(fd, NULL);
         }
     } else {
-        fd = edge_os_fifo_create("./test", 1024 * 1024);
+        fd = edge_os_fifo_create("./test", 0);
         printf("%d\n", fd);
 
         int val = 0;
@@ -52,6 +56,7 @@ int fifo_test(int argc, char **argv)
                 break;
             }
         }
+        edge_os_fifo_close(fd, "./test");
     }
 
     return 0;

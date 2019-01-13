@@ -9,6 +9,8 @@ int edge_os_fifo_write(int fd, void *buf, int buflen);
 
 int edge_os_fifo_read(int fd, void *buf, int buflen);
 
+int edge_os_fifo_close(int fd, const char *path);
+
 #endif
 
 
