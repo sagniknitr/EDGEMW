@@ -24,6 +24,22 @@ int hashtbl_test(int argc, char **argv)
     struct edge_os_hash_tbl_base h;
     int ret;
 
+	ret = edge_os_hashtbl_init(NULL, 10, NULL);
+	ret = edge_os_hashtbl_add(NULL, NULL);
+	ret = edge_os_hashtbl_delete(NULL, NULL, NULL);
+	void *data = edge_os_hashtbl_find(NULL, NULL, NULL);
+	if (data) {
+	}
+	ret = edge_os_hashtbl_foreach(NULL, NULL, NULL);
+	ret = edge_os_hashtbl_free(NULL, NULL);
+
+	int number = 1201;
+	uint8_t ipv6[] = {0x20, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+					  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+	printf("real numhash : %u\n", edge_os_realnum_hash(&number));
+	printf("ipaddr hash: %u\n", edge_os_ipaddr_hash(&number));
+	printf("ipv6addr hash: %u\n", edge_os_ip6addr_hash(ipv6));
+
     ret = edge_os_hashtbl_init(&h, 10, edge_os_string_hash);
     if (ret < 0) {
         return -1;
