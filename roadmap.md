@@ -33,14 +33,20 @@ Right now testing is only done with in Travis with Linux, X86 architecture (most
         1. Circular Q
         2. Sliding Window
         3. timeout based Sliding window buffer manager, hash TBL and other ds
+		4. circular doubly linked lists
+		5. circular lists
+		6. binary tree
 
 6. File systems
     1. support sync and async features when CPU in idling mode
     2. watching the files with inotify and notifying it to the corresponding registered callbak
     3. unix domain socket interface support for `LogSrv`
+	4. packet logger based on libpcap header format - for reduced memory foot print
+	5. packet reader based on libpcap header format - for reduced memory foot print
 
 7. Thread pools
     1. worker threads independent of the evtloop - thread scheduling
+	2. make scheduling of work for each worker thread work!
 
 8. Networking
     1. raw socket API - sender, and receiver, with ether_header, iphdr, udphdr, tcphdr
@@ -54,6 +60,11 @@ Right now testing is only done with in Travis with Linux, X86 architecture (most
     1. with HCI library
 
 11. performance profiler interface library
+
+12. telemetry service
+	1. send telemetry info
+		1. realtime - cpu load, memory, bandwidth usage for each radio, network hardware (packets sent and received)
+		2. non realtime
 
 ## minor features
 
