@@ -8,7 +8,7 @@ int rawsock_test(int argc, char **argv)
 {
     void *raw_priv;
 
-    raw_priv = edge_os_raw_socket_create(EDGEOS_RAW_SOCK_ETH, "wlp68s0", 2048);
+    raw_priv = edge_os_raw_socket_create(EDGEOS_RAW_SOCK_ETH, "enp67s0", 2048);
     if (!raw_priv) {
         return -1;
     }
@@ -30,6 +30,7 @@ int rawsock_test(int argc, char **argv)
         }
     }
 
+    edge_os_raw_socket_delete(raw_priv);
     return 0;
 }
 

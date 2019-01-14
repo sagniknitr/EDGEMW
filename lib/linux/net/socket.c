@@ -1021,6 +1021,19 @@ int edge_os_raw_socket_send_eth_frame(
     return ret;
 }
 
+void edge_os_raw_socket_delete(void *raw_handle)
+{
+    struct edge_os_raw_sock_params *raw_params = raw_handle;
+
+    if (raw_params->txbuf)
+        free(raw_params->txbuf);
+
+    if (raw_params->fd > 0)
+        close(raw_params->fd);
+
+    free(raw_params);
+}
+
 int edge_os_is_ip_multicast(const char *ip)
 {
     in_addr_t addr;

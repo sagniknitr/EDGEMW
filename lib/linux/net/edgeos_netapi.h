@@ -140,6 +140,8 @@ int edge_os_raw_socket_send_eth_frame(
                     uint8_t *data,
                     uint32_t datalen);
 
+void edge_os_raw_socket_delete(void *raw_handle);
+
 int edge_os_is_ip_multicast(const char *ip);
 
 #endif
