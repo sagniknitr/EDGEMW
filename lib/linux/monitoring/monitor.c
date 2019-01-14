@@ -1,9 +1,18 @@
+/**
+ * @brief - monitoring layer interfaces from EDGEOS
+ * @Author - Devendra Naga (devendra.aaru@gmail.com)
+ * @Copyright  - all rights reserved
+ * License - Apache
+ */
+
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include <sys/inotify.h>
 #include <edgeos_monitor.h>
+#include <edgeos_logger.h>
 
 struct edge_os_monitor_watch {
     int wfd;
@@ -16,12 +25,13 @@ struct edge_os_monitor_priv {
     char read_buf[4096];
 };
 
-void* edge_os_file_monitor_init()
+void* edge_os_monitor_init()
 {
     struct edge_os_monitor_priv *priv;
 
     priv = calloc(1, sizeof(struct edge_os_monitor_priv));
     if (!priv) {
+        edge_os_alloc_err(__FILE__, __func__, __LINE__);
         return NULL;
     }
 
@@ -34,6 +44,8 @@ void* edge_os_file_monitor_init()
 
     priv->fd = inotify_init();
     if (priv->fd < 0) {
+        edge_os_log_with_error(errno, "monitor: failed to inotify_init @ %s %u ",
+                                        __func__, __LINE__);
         return NULL;
     }
 
@@ -48,10 +60,16 @@ int edge_os_monitor_add(void *mon_priv, const char *filename, edge_os_monitor_ev
     uint32_t i;
     uint32_t size;
 
+    if (!filename) {
+        return -1;
+    }
+
     size = sizeof(priv->wfd_set) / sizeof(priv->wfd_set[0]);
 
     ret = access(filename, R_OK);
     if (ret < 0) {
+        edge_os_log_with_error(errno, "monitor: failed to access %s @ %s %u ",
+                                    filename, __func__, __LINE__);
         return -1;
     }
 
@@ -77,13 +95,18 @@ int edge_os_monitor_add(void *mon_priv, const char *filename, edge_os_monitor_ev
     }
 
     if (i == size) {
+        edge_os_error("monitor: no valid watch fd index found for insertion @ %s %u\n",
+                            __func__, __LINE__);
         return -1;
     }
 
     priv->wfd_set[i].wfd = inotify_add_watch(priv->fd, filename, mode);
     if (priv->wfd_set[i].wfd < 0) {
+        edge_os_log_with_error(errno, "monitor: failed to add watch @ %s %u ",
+                            __func__, __LINE__);
         return -1;
     }
+
     priv->wfd_set[i].path = strdup(filename);
 
     return 0;

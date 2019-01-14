@@ -1,3 +1,9 @@
+/**
+ * @brief - networking layer interfaces from EDGEOS
+ * @Author - Devendra Naga (devendra.aaru@gmail.com)
+ * @Copyright  - all rights reserved
+ * License - Apache
+ */
 #ifndef __EDGEOS_NETAPI_H__
 #define __EDGEOS_NETAPI_H__
 

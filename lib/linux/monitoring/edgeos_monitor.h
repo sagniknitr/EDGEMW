@@ -1,3 +1,10 @@
+/**
+ * @brief - monitoring layer interfaces from EDGEOS
+ * @Author - Devendra Naga (devendra.aaru@gmail.com)
+ * @Copyright  - all rights reserved
+ * License - Apache
+ */
+
 #ifndef __EDGEOS_MONITOR_H__
 #define __EDGEOS_MONITOR_H__
 
@@ -14,7 +21,7 @@ struct edge_os_watch_status {
     struct edge_os_watch_status *next;
 };
 
-void* edge_os_file_monitor_init();
+void* edge_os_monitor_init();
 
 int edge_os_monitor_add(void *mon_priv, const char *filename, edge_os_monitor_event events);
 

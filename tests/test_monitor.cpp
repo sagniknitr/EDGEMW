@@ -33,7 +33,7 @@ int monitor_test(int argc, char **argv)
     printf("argv[1] %s\n", argv[1]);
     edge_os_evtloop_init(&base, NULL);
 
-    mon_priv = edge_os_file_monitor_init();
+    mon_priv = edge_os_monitor_init();
     edge_os_monitor_event event = static_cast<edge_os_monitor_event>(EDGEOS_MONITOR_EVT_INACCESS | EDGEOS_MONITOR_EVT_INDELETE | EDGEOS_MONITOR_EVT_INMODIFY | EDGEOS_MONITOR_EVT_INOPEN);
 
     ret = edge_os_monitor_add(mon_priv, argv[1], event);
