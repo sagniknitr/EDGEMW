@@ -55,6 +55,8 @@ run_gcc_tests() {
     #./build/TestExecutor msg_queue_test client /mq_test&
 	./build/TestExecutor evtloop_test server&
 	./build/TestExecutor evtloop_test client&
+    ./build/TestExecutor rawsock_test
+    sudo ./build/TestExecutor rawsock_test
 	sleep 1
 	echo "test complete.."
 	exit 0

@@ -126,7 +126,8 @@ set(TEST_CASES_SOURCES
         tests/test_ssl.c
         tests/test_hashtbl.c
         tests/test_msg_queue.cpp
-        tests/test_monitor.cpp)
+        tests/test_monitor.cpp
+        tests/test_raw.c)
 
 set(TRANSFER_TEST_SOURCES
         tests/transfer_test.c)

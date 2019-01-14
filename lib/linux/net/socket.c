@@ -950,6 +950,8 @@ void* edge_os_raw_socket_create(edge_os_raw_sock_type_t type, const char *ifname
         raw_params->ifidnex = raw_params->ifr.ifr_ifindex;
 
         memset(&raw_params->ifr, 0, sizeof(raw_params->ifr));
+
+        strcpy(raw_params->ifr.ifr_name, ifname);
         ret = ioctl(raw_params->fd, SIOCGIFHWADDR, &raw_params->ifr);
         if (ret < 0) {
             edge_os_log_with_error(errno, "net: failed to ioctl @ %s %u ",
@@ -1003,7 +1005,7 @@ int edge_os_raw_socket_send_eth_frame(
 
     memcpy(raw_params->eh.ether_shost, srcmac, 6);
     memcpy(raw_params->eh.ether_dhost, dstmac, 6);
-    raw_params->eh.ether_type = ethertype;
+    raw_params->eh.ether_type = htons(ethertype);
 
     memcpy(raw_params->txbuf, &raw_params->eh, sizeof(raw_params->eh));
     memcpy(raw_params->txbuf + sizeof(raw_params->eh),

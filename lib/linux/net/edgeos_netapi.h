@@ -130,6 +130,15 @@ int edge_os_connect_address6(const char *addr, const char *service_name);
 
 int edge_os_connect_address4(const char *addr, const char *service_name);
 
+void* edge_os_raw_socket_create(edge_os_raw_sock_type_t type, const char *ifname, int txbuf_len);
+
+int edge_os_raw_socket_send_eth_frame(
+                    void *raw_handle,
+                    uint8_t *srcmac,
+                    uint8_t *dstmac,
+                    uint16_t ethertype,
+                    uint8_t *data,
+                    uint32_t datalen);
 
 int edge_os_is_ip_multicast(const char *ip);
 
