@@ -22,6 +22,7 @@ static void monitor_files(int fd, void *priv)
         printf("s->path %s s->events %02x\n",
                             s->path, s->events);
     }
+    exit(1);
 }
 
 int monitor_test(int argc, char **argv)

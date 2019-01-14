@@ -57,6 +57,9 @@ run_gcc_tests() {
 	./build/TestExecutor evtloop_test client&
     ./build/TestExecutor rawsock_test
     sudo ./build/TestExecutor rawsock_test
+    toch f
+    ./build/TestExecutor monitor_test f&
+    touch f
 	sleep 1
 	echo "test complete.."
 	exit 0
