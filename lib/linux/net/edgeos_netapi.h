@@ -19,7 +19,15 @@ typedef enum {
 typedef enum {
     EDGEOS_RAW_SOCK_ETH = 1,
     EDGEOS_RAW_SOCK_ICMP = 2,
+    EDGEOS_RAW_SOCK_UDP = 3,
+    EDGEOS_RAW_SOCK_SNIFFER = 127,
 } edge_os_raw_sock_type_t;
+
+struct edge_os_raw_sock_rx_params {
+    int protocol;
+    int ifindex;
+    int pkt_type;
+};
 
 /**
  * @brief - create new udp socket
@@ -142,7 +150,14 @@ int edge_os_raw_socket_send_eth_frame(
 
 void edge_os_raw_socket_delete(void *raw_handle);
 
+int edge_os_raw_socket_get_fd(void *raw_handle);
+
 int edge_os_is_ip_multicast(const char *ip);
+
+int edge_os_raw_recvfrom(int fd,
+                         void *msg,
+                         int msglen,
+                         struct edge_os_raw_sock_rx_params *rx);
 
 #endif
 

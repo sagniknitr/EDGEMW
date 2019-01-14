@@ -13,6 +13,7 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <sys/ioctl.h>
+#include <netinet/udp.h>
 #include <netinet/tcp.h>
 #include <netinet/ether.h>
 #include <linux/if_packet.h>
@@ -717,6 +718,31 @@ int edge_os_udp_recvfrom(int fd, void *msg, int msglen, char *dest, int *dest_po
     return ret;
 }
 
+
+int edge_os_raw_recvfrom(int fd,
+                         void *msg,
+                         int msglen,
+                         struct edge_os_raw_sock_rx_params *rx)
+{
+    struct sockaddr_ll ll;
+    socklen_t ll_l = sizeof(ll);
+    int ret;
+
+    ret = recvfrom(fd, msg, msglen, 0, (struct sockaddr *)&ll, &ll_l);
+    if (ret < 0) {
+        return -1;
+    }
+
+    if (rx) {
+        rx->protocol = ll.sll_protocol;
+        rx->ifindex = ll.sll_ifindex;
+        rx->pkt_type = ll.sll_pkttype;
+    }
+
+    return ret;
+}
+
+
 static int edge_os_client_list_for_each(void *data, void *priv)
 {
     struct edge_os_client_list *cl = data;
@@ -923,44 +949,73 @@ void* edge_os_raw_socket_create(edge_os_raw_sock_type_t type, const char *ifname
         return NULL;
     }
 
-    raw_params->fd = socket(AF_PACKET, SOCK_RAW, ETH_P_ALL);
+    int sock_type = 0;
+    int txbuf_adjustment = 0;
+
+    switch (type) {
+        case EDGEOS_RAW_SOCK_ETH:
+        case EDGEOS_RAW_SOCK_SNIFFER: {
+            sock_type = htons(ETH_P_ALL);
+
+            txbuf_adjustment = sizeof(struct ether_header);
+        } break;
+        case EDGEOS_RAW_SOCK_UDP:
+            // we let ip layer handle the ip fills
+            sock_type = IPPROTO_UDP;
+
+            txbuf_adjustment = sizeof(struct udphdr);
+        break;
+        case EDGEOS_RAW_SOCK_ICMP:
+        default:
+            goto bad;
+    }
+
+    raw_params->fd = socket(AF_PACKET, SOCK_RAW, sock_type);
     if (raw_params->fd < 0) {
         edge_os_log_with_error(errno, "net: failed to socket @ %s %u ",
                                     __func__, __LINE__);
         goto bad;
     }
 
+    raw_params->txbuf = calloc(1, txbuf_len + txbuf_adjustment);
+    if (!raw_params->txbuf) {
+        edge_os_alloc_err(__FILE__, __func__, __LINE__);
+        return NULL;
+    }
+
+    strcpy(raw_params->ifr.ifr_name, ifname);
+    ret = ioctl(raw_params->fd, SIOCGIFINDEX, &raw_params->ifr);
+    if (ret < 0) {
+        edge_os_log_with_error(errno, "net: failed to ioctl @ %s %u ",
+                                        __func__, __LINE__);
+        return NULL;
+    }
+
+    raw_params->ifidnex = raw_params->ifr.ifr_ifindex;
+
+    memset(&raw_params->ifr, 0, sizeof(raw_params->ifr));
+
+    strcpy(raw_params->ifr.ifr_name, ifname);
+    ret = ioctl(raw_params->fd, SIOCGIFHWADDR, &raw_params->ifr);
+    if (ret < 0) {
+        edge_os_log_with_error(errno, "net: failed to ioctl @ %s %u ",
+                                        __func__, __LINE__);
+        return NULL;
+    }
+
+
     if (type == EDGEOS_RAW_SOCK_ETH) {
-        raw_params->txbuf = calloc(1, txbuf_len + sizeof(struct ether_header));
-        if (!raw_params->txbuf) {
-            edge_os_alloc_err(__FILE__, __func__, __LINE__);
-            return NULL;
-        }
 
         raw_params->txbuflen = txbuf_len + sizeof(struct ether_header);
 
-        strcpy(raw_params->ifr.ifr_name, ifname);
-        ret = ioctl(raw_params->fd, SIOCGIFINDEX, &raw_params->ifr);
-        if (ret < 0) {
-            edge_os_log_with_error(errno, "net: failed to ioctl @ %s %u ",
-                                        __func__, __LINE__);
-            return NULL;
-        }
-
-        raw_params->ifidnex = raw_params->ifr.ifr_ifindex;
-
-        memset(&raw_params->ifr, 0, sizeof(raw_params->ifr));
-
-        strcpy(raw_params->ifr.ifr_name, ifname);
-        ret = ioctl(raw_params->fd, SIOCGIFHWADDR, &raw_params->ifr);
-        if (ret < 0) {
-            edge_os_log_with_error(errno, "net: failed to ioctl @ %s %u ",
-                                        __func__, __LINE__);
-            return NULL;
-        }
-
         memcpy(raw_params->srcmac, (uint8_t *)(raw_params->ifr.ifr_hwaddr.sa_data), 6);
         memcpy(raw_params->eh.ether_shost, raw_params->srcmac, 6);
+    } else if (type == EDGEOS_RAW_SOCK_SNIFFER) {
+        ret = edge_os_set_iface_promisc(ifname);
+        if (ret < 0) {
+        }
+    } else if (type == EDGEOS_RAW_SOCK_UDP) {
+
     } else {
         goto bad;
     }
@@ -1019,6 +1074,13 @@ int edge_os_raw_socket_send_eth_frame(
     }
 
     return ret;
+}
+
+int edge_os_raw_socket_get_fd(void *raw_handle)
+{
+    struct edge_os_raw_sock_params *raw_params = raw_handle;
+
+    return raw_params->fd;
 }
 
 void edge_os_raw_socket_delete(void *raw_handle)
