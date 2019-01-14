@@ -23,6 +23,7 @@ int config_parser_test(int argc, char **argv);
 int fsAPI_test(int argc, char **argv);
 int tokparse_test(int argc, char **argv);
 int msg_queue_test(int argc, char **argv);
+int monitor_test(int argc, char **argv);
 
 static struct test_cases {
     std::string name;
@@ -46,6 +47,7 @@ static struct test_cases {
     {"ssl_test", ssl_test},
     {"hashtbl_test", hashtbl_test},
     {"msg_queue_test", msg_queue_test},
+    {"monitor_test", monitor_test},
 };
 
 int main(int argc, char **argv)

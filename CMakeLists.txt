@@ -57,7 +57,8 @@ SET(LINUX_SPEC_SOURCES
         lib/linux/date_time/date_time.c
         lib/linux/process/process.c
         lib/linux/fifo/fifo.c
-        lib/linux/msgqueue/msg_queue.c)
+        lib/linux/msgqueue/msg_queue.c
+        lib/linux/monitoring/monitor.c)
 
 SET(UTIL_SOURCES
         lib/util/csvclass.cpp
@@ -124,7 +125,8 @@ set(TEST_CASES_SOURCES
         tests/test_fifo.c
         tests/test_ssl.c
         tests/test_hashtbl.c
-        tests/test_msg_queue.cpp)
+        tests/test_msg_queue.cpp
+        tests/test_monitor.cpp)
 
 set(TRANSFER_TEST_SOURCES
         tests/transfer_test.c)
@@ -163,6 +165,7 @@ include_directories(
     lib/config/
     lib/linux/date_time/
     lib/linux/process/
+    lib/linux/monitoring/
     services/cli/
     services/cli/library/)
 
