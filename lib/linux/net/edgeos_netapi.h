@@ -26,6 +26,7 @@ typedef enum {
     EDGEOS_RAW_SOCK_ETH = 1,
     EDGEOS_RAW_SOCK_ICMP = 2,
     EDGEOS_RAW_SOCK_UDP = 3,
+	EDGEOS_RAW_SOCK_ARP = 4,
     EDGEOS_RAW_SOCK_SNIFFER = 127,
 } edge_os_raw_sock_type_t;
 
@@ -164,6 +165,12 @@ int edge_os_raw_recvfrom(int fd,
                          void *msg,
                          int msglen,
                          struct edge_os_raw_sock_rx_params *rx);
+
+int edge_os_initiate_arp_request(void *raw_handle,
+								 uint8_t *myaddr,
+								 char *myip,
+								 uint8_t *taaddr,
+								 char *taip);
 
 #endif
 
