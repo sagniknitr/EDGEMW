@@ -2,7 +2,7 @@
  * @brief - monitoring layer interfaces from EDGEOS
  * @Author - Devendra Naga (devendra.aaru@gmail.com)
  * @Copyright  - all rights reserved
- * License - Apache
+ * License - MIT
  */
 
 #ifndef __EDGEOS_MONITOR_H__

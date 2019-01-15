@@ -2,7 +2,7 @@
  * @brief - networking layer interfaces from EDGEOS
  * @Author - Devendra Naga (devendra.aaru@gmail.com)
  * @Copyright  - all rights reserved
- * License - Apache
+ * License - MIT 
  */
 #include <stdio.h>
 #include <string.h>
@@ -1134,6 +1134,49 @@ int edge_os_build_ether_addr(void *raw_handle,
     return 0;
 }
 
+int edge_os_build_arp_reply(void *raw_handle,
+                            uint8_t *myaddr,
+                            char *myip,
+                            uint8_t *taaddr,
+                            char *taip)
+{
+    struct edge_os_raw_sock_params *raw_params = raw_handle;
+    struct ether_arp *arp;
+    in_addr_t addr;
+
+    arp = (struct ether_arp *)(raw_params->txbuf + sizeof(struct ether_header));
+
+    arp->ea_hdr.ar_hrd = htons(ARPHRD_ETHER);
+    arp->ea_hdr.ar_pro = htons(0x800);
+    arp->ea_hdr.ar_hln = 6;
+    arp->ea_hdr.ar_pln = 4;
+    arp->ea_hdr.ar_op = htons(2);
+
+    arp->arp_sha[0] = myaddr[0];
+    arp->arp_sha[1] = myaddr[1];
+    arp->arp_sha[2] = myaddr[2];
+    arp->arp_sha[3] = myaddr[3];
+    arp->arp_sha[4] = myaddr[4];
+    arp->arp_sha[5] = myaddr[5];
+
+    addr = inet_addr(myip);
+
+    memcpy(arp->arp_spa, &addr, sizeof(arp->arp_spa));
+
+    arp->arp_tha[0] = taaddr[0];
+    arp->arp_tha[1] = taaddr[1];
+    arp->arp_tha[2] = taaddr[2];
+    arp->arp_tha[3] = taaddr[3];
+    arp->arp_tha[4] = taaddr[4];
+    arp->arp_tha[5] = taaddr[5];
+
+    addr = inet_addr(taip);
+
+    memcpy(arp->arp_tpa, &addr, sizeof(arp->arp_tpa));
+
+    return 0;
+}
+
 int edge_os_build_arp_request(void *raw_handle,
                               uint8_t *myaddr,
                               char *myip,
@@ -1163,12 +1206,12 @@ int edge_os_build_arp_request(void *raw_handle,
 
     memcpy(arp->arp_spa, &addr, sizeof(arp->arp_spa));
 
-    arp->arp_tha[0] = taaddr[0];
-    arp->arp_tha[1] = taaddr[1];
-    arp->arp_tha[2] = taaddr[2];
-    arp->arp_tha[3] = taaddr[3];
-    arp->arp_tha[4] = taaddr[4];
-    arp->arp_tha[5] = taaddr[5];
+    arp->arp_tha[0] = 0x0;
+    arp->arp_tha[1] = 0x0;
+    arp->arp_tha[2] = 0x0;
+    arp->arp_tha[3] = 0x0;
+    arp->arp_tha[4] = 0x0;
+    arp->arp_tha[5] = 0x0;
 
     addr = inet_addr(taip);
 
@@ -1179,7 +1222,7 @@ int edge_os_build_arp_request(void *raw_handle,
 
 #define EDGEOS_ETHERTYPE_ARP 0x0806
 
-int edge_os_initiate_arp_request(void *raw_handle,
+int edge_os_initiate_arp_reply(void *raw_handle,
                                  uint8_t *myaddr,
                                  char *myip,
                                  uint8_t *taaddr,
@@ -1189,12 +1232,13 @@ int edge_os_initiate_arp_request(void *raw_handle,
     struct sockaddr_ll d;
     struct edge_os_raw_sock_params *raw_params = raw_handle;
 
+    // address all the nodes
     ret = edge_os_build_ether_addr(raw_handle, myaddr, taaddr, EDGEOS_ETHERTYPE_ARP);
     if (ret < 0) {
         return -1;
     }
 
-    ret = edge_os_build_arp_request(raw_handle, myaddr, myip, taaddr, taip);
+    ret = edge_os_build_arp_reply(raw_handle, myaddr, myip, taaddr, taip);
     if (ret < 0) {
         return -1;
     }
@@ -1211,6 +1255,45 @@ int edge_os_initiate_arp_request(void *raw_handle,
     d.sll_addr[3] = taaddr[3];
     d.sll_addr[4] = taaddr[4];
     d.sll_addr[5] = taaddr[5];
+
+
+    return sendto(raw_params->fd, raw_params->txbuf, sizeof(struct ether_arp) + sizeof(struct ether_header), 0, (struct sockaddr *)&d, sizeof(struct sockaddr_ll));
+}
+
+int edge_os_initiate_arp_request(void *raw_handle,
+                                 uint8_t *myaddr,
+                                 char *myip,
+                                 uint8_t *taaddr,
+                                 char *taip)
+{
+    int ret;
+    struct sockaddr_ll d;
+    uint8_t bmac[] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+    struct edge_os_raw_sock_params *raw_params = raw_handle;
+
+    // address all the nodes
+    ret = edge_os_build_ether_addr(raw_handle, myaddr, bmac, EDGEOS_ETHERTYPE_ARP);
+    if (ret < 0) {
+        return -1;
+    }
+
+    ret = edge_os_build_arp_request(raw_handle, myaddr, myip, taaddr, taip);
+    if (ret < 0) {
+        return -1;
+    }
+
+    d.sll_family = AF_PACKET;
+    d.sll_protocol = htons(0x806);
+    d.sll_ifindex = raw_params->ifidnex;
+    d.sll_hatype = htons(ARPHRD_ETHER);
+    d.sll_pkttype = PACKET_OTHERHOST;
+    d.sll_halen = 6;
+    d.sll_addr[0] = bmac[0];
+    d.sll_addr[1] = bmac[1];
+    d.sll_addr[2] = bmac[2];
+    d.sll_addr[3] = bmac[3];
+    d.sll_addr[4] = bmac[4];
+    d.sll_addr[5] = bmac[5];
 
 
     return sendto(raw_params->fd, raw_params->txbuf, sizeof(struct ether_arp) + sizeof(struct ether_header), 0, (struct sockaddr *)&d, sizeof(struct sockaddr_ll));

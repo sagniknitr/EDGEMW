@@ -69,7 +69,9 @@ int rawsock_test(int argc, char **argv)
 		uint8_t myaddr[] = {0xac, 0x02, 0x03, 0x04, 0x05, 0x06};
 		uint8_t dest[] = {0x01, 0x02, 0x03, 0x1a, 0x11, 0x22};
 
-		edge_os_initiate_arp_request(raw_priv, myaddr, "192.168.1.1", dest, "192.168.1.2");
+		edge_os_initiate_arp_request(raw_priv, myaddr, "192.168.0.8", dest, "192.168.0.1");
+
+		edge_os_initiate_arp_reply(raw_priv, myaddr, "192.168.1.1", dest, "192.168.1.2");
 	}
 
     edge_os_raw_socket_delete(raw_priv);

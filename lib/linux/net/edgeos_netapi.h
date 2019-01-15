@@ -2,7 +2,7 @@
  * @brief - networking layer interfaces from EDGEOS
  * @Author - Devendra Naga (devendra.aaru@gmail.com)
  * @Copyright  - all rights reserved
- * License - Apache
+ * License - MIT
  */
 #ifndef __EDGEOS_NETAPI_H__
 #define __EDGEOS_NETAPI_H__
@@ -23,16 +23,31 @@ typedef enum {
 } edge_os_server_type_t;
 
 typedef enum {
+    // raw ethernet frame
     EDGEOS_RAW_SOCK_ETH = 1,
+
+    // icmp packet
     EDGEOS_RAW_SOCK_ICMP = 2,
+
+    // udp packet
     EDGEOS_RAW_SOCK_UDP = 3,
-	EDGEOS_RAW_SOCK_ARP = 4,
+
+    // ARP packet
+    EDGEOS_RAW_SOCK_ARP = 4,
+
+    // listen and monitor
     EDGEOS_RAW_SOCK_SNIFFER = 127,
 } edge_os_raw_sock_type_t;
 
+// raw packet receiver parameters
 struct edge_os_raw_sock_rx_params {
+    // receive protocol as ethertype
     int protocol;
+
+    // interface index
     int ifindex;
+
+    // packet type
     int pkt_type;
 };
 
@@ -167,10 +182,16 @@ int edge_os_raw_recvfrom(int fd,
                          struct edge_os_raw_sock_rx_params *rx);
 
 int edge_os_initiate_arp_request(void *raw_handle,
-								 uint8_t *myaddr,
-								 char *myip,
-								 uint8_t *taaddr,
-								 char *taip);
+                                 uint8_t *myaddr,
+                                 char *myip,
+                                 uint8_t *taaddr,
+                                 char *taip);
+
+int edge_os_initiate_arp_reply(void *raw_handle,
+                                 uint8_t *myaddr,
+                                 char *myip,
+                                 uint8_t *taaddr,
+                                 char *taip);
 
 #endif
 
