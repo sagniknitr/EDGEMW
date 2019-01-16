@@ -50,11 +50,13 @@ run_gcc_tests() {
     ./build/TestExecutor fifo_test
     ./build/TestExecutor ssl_test server&
     ./build/TestExecutor ssl_test client&
+    sleep 1
     ./build/TestExecutor hashtbl_test
     #./build/TestExecutor msg_queue_test server /mq_test&
     #./build/TestExecutor msg_queue_test client /mq_test&
 	./build/TestExecutor evtloop_test server&
 	./build/TestExecutor evtloop_test client&
+    sleep 1
     ./build/TestExecutor rawsock_test
     sudo ./build/TestExecutor rawsock_test sender
     toch f

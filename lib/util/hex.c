@@ -28,5 +28,6 @@ void edge_os_hexdump_pretty(const char *str, uint8_t *buf, int buflen)
         }
         fprintf(stderr, "%02x ", buf[i]);
     }
+    fprintf(stderr, "\n");
 }
 

@@ -3,6 +3,7 @@
 
 typedef enum {
     EDGE_OS_SECP256K1 = 1,
+    EDGE_OS_prime256v1,
     EDGE_OS_SECP160k1,
     EDGE_OS_SECP160r1,
     EDGE_OS_SECP160r2,
@@ -71,6 +72,10 @@ int edge_os_crypto_aes_128_cbc_decrypt(void *cipher, int cipherlen, void *plain,
 
 int edge_os_crypto_aes_128_cbc_decrypt_file(const char *cypher_file, const char *output_file,
                                      const char *keyfile, const char *ivfile);
+
+int edge_os_crypto_encrypt_aes_gcm(void *plain, int plainlen, void *auth_header, int auth_header_len, void *tag, void *cipher, uint8_t *key, int keysize, uint8_t *iv, int ivsize);
+
+int edge_os_crypto_decrypt_aes_gcm(void *cipher, int cipherlen, uint8_t *tag, void *auth_header, int auth_header_len, uint8_t *key, int keysize, uint8_t *iv, int ivsize, void *plain);
 
 // signature and the length
 struct edge_os_ecc_signature {

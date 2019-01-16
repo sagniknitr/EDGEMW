@@ -88,7 +88,6 @@ set(SOURCES
         services/distcom/dist_sdp.c
         ${GPSLIB_SOURCES}
         ${CRYPTO_SOURCES}
-        lib/init.c
         ${CONFIG_PARSER_SOURCES})
 
 set(LIB_TEST_SOURCES

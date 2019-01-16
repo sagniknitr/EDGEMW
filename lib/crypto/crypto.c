@@ -295,6 +295,156 @@ enum {
     EDGEOS_CIPHER_CHACHA20, // key 256 iv 96
 };
 
+int edge_os_crypto_encrypt_aes_gcm(void *plain, int plainlen, void *auth_header, int auth_header_len, void *tag, void *cipher, uint8_t *key, int keysize, uint8_t *iv, int ivsize)
+{
+    const EVP_CIPHER *crypto_cipher;
+    EVP_CIPHER_CTX *ctx;
+    int len;
+    int ret;
+    int cipher_len;
+
+    ctx = EVP_CIPHER_CTX_new();
+    if (!ctx) {
+        ERR_print_errors_fp(stderr);
+        return -1;
+    }
+
+    if (keysize == 16) {
+        crypto_cipher = EVP_aes_128_gcm();
+    } else if (keysize == 24) {
+        crypto_cipher = EVP_aes_192_gcm();
+    } else if (keysize == 32) {
+        crypto_cipher = EVP_aes_256_gcm();
+    } else {
+        return -1;
+    }
+
+    ret = EVP_EncryptInit_ex(ctx, crypto_cipher, NULL, NULL, NULL);
+    if (ret != 1) {
+        ERR_print_errors_fp(stderr);
+        return -1;
+    }
+
+    ret = EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, ivsize, NULL);
+    if (ret != 1) {
+        ERR_print_errors_fp(stderr);
+        return -1;
+    }
+
+    ret = EVP_EncryptInit_ex(ctx, NULL, NULL, key, iv);
+    if (ret != 1) {
+        ERR_print_errors_fp(stderr);
+        return -1;
+    }
+
+    ret = EVP_EncryptUpdate(ctx, NULL, &len, auth_header, auth_header_len);
+    if (ret != 1) {
+        ERR_print_errors_fp(stderr);
+        return -1;
+    }
+
+    ret = EVP_EncryptUpdate(ctx, cipher, &len, plain, plainlen);
+    if (ret != 1) {
+        ERR_print_errors_fp(stderr);
+        return -1;
+    }
+
+    cipher_len = len;
+
+    ret = EVP_EncryptFinal_ex(ctx, cipher + len, &len);
+    if (ret != 1) {
+        ERR_print_errors_fp(stderr);
+        return -1;
+    }
+
+    cipher_len += len;
+
+    ret = EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, 16, tag);
+    if (ret != 1) {
+        ERR_print_errors_fp(stderr);
+        return -1;
+    }
+
+    EVP_CIPHER_CTX_free(ctx);
+
+    return cipher_len;
+}
+
+
+int edge_os_crypto_decrypt_aes_gcm(void *cipher, int cipherlen, uint8_t *tag, void *auth_header, int auth_header_len, uint8_t *key, int keysize, uint8_t *iv, int ivsize, void *plain)
+{
+    const EVP_CIPHER *crypto_cipher;
+    EVP_CIPHER_CTX *ctx;
+    int len;
+    int plain_len;
+    int ret;
+
+    ctx = EVP_CIPHER_CTX_new();
+    if (!ctx) {
+        return -1;
+    }
+
+    if (keysize == 16) {
+        crypto_cipher = EVP_aes_128_gcm();
+    } else if (keysize == 24) {
+        crypto_cipher = EVP_aes_192_gcm();
+    } else if (keysize == 32) {
+        crypto_cipher = EVP_aes_256_gcm();
+    } else {
+        return -1;
+    }
+
+    ret = EVP_DecryptInit_ex(ctx, crypto_cipher, NULL, NULL, NULL);
+    if (ret != 1) {
+        ERR_print_errors_fp(stderr);
+        return -1;
+    }
+
+    ret = EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, ivsize, NULL);
+    if (ret != 1) {
+        ERR_print_errors_fp(stderr);
+        return -1;
+    }
+
+    ret = EVP_DecryptInit_ex(ctx, NULL, NULL, key, iv);
+    if (ret != 1) {
+        ERR_print_errors_fp(stderr);
+        return -1;
+    }
+
+    ret = EVP_DecryptUpdate(ctx, NULL, &len, auth_header, auth_header_len);
+    if (ret != 1) {
+        ERR_print_errors_fp(stderr);
+        return -1;
+    }
+
+    ret = EVP_DecryptUpdate(ctx, plain, &len, cipher, cipherlen);
+    if (ret != 1) {
+        ERR_print_errors_fp(stderr);
+        return -1;
+    }
+
+    plain_len = len;
+
+    ret = EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, 16, tag);
+    if (ret != 1) {
+        ERR_print_errors_fp(stderr);
+        return -1;
+    }
+
+    ret = EVP_DecryptFinal_ex(ctx,  plain + len, &len);
+    if (ret <= 0) {
+        ERR_print_errors_fp(stderr);
+        return -1;
+    }
+
+    plain_len += len;
+
+    EVP_CIPHER_CTX_free(ctx);
+
+    return plain_len;
+}
+
 static int __edge_os_crypto_encrypt(void *plain, int plainlen, int cipher_type, void *cipher, uint8_t *key, uint8_t *iv)
 {
     EVP_CIPHER_CTX *ctx;
