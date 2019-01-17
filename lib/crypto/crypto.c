@@ -32,6 +32,30 @@ typedef enum {
     EDGE_OS_CRYPTO_SHA512,
 } edge_os_crypto_digest_t;
 
+struct edge_os_crypto_err_table {
+    unsigned long err;
+    char *error_buf;
+} err_sets[] = {
+    {0x608008b, "Digest not set"},
+};
+
+static void edge_os_crypto_error()
+{
+    unsigned long err = ERR_get_error();
+    char err_string[1024];
+    unsigned int i;
+
+    for (i = 0; i < sizeof(err_sets) / sizeof(err_sets[0]); i ++) {
+        if (err_sets[i].err == err) {
+            fprintf(stderr, "crypto: %s\n", err_sets[i].error_buf);
+            break;
+        }
+    }
+
+    ERR_error_string_n(err, err_string, sizeof(err_string));
+    printf("crypto: unknown error %s\n", err_string);
+}
+
 static int __edge_os_crypto_digest_msg(const unsigned char *msg, edge_os_crypto_digest_t digest, size_t msglen, uint8_t *digest_final)
 {
     EVP_MD_CTX *ctx;
@@ -71,6 +95,7 @@ static int __edge_os_crypto_digest_msg(const unsigned char *msg, edge_os_crypto_
 
     ret = EVP_DigestInit(ctx, md);
     if (ret != 1)
+        //ERR_print_errors_fp(stderr);
         goto bad;
 
     ret = EVP_DigestUpdate(ctx, msg, msglen);
@@ -86,6 +111,7 @@ static int __edge_os_crypto_digest_msg(const unsigned char *msg, edge_os_crypto_
     return digest_len;
 
 bad:
+    edge_os_crypto_error();
     return -1;
 }
 
@@ -158,6 +184,7 @@ int __edge_os_crypto_digest_file(const char *file, edge_os_crypto_digest_t diges
     return digest_len;
 
 bad:
+
     EVP_MD_CTX_destroy(ctx);
     if (fd > 0)
         edgeos_close_file(fd);
@@ -305,7 +332,6 @@ int edge_os_crypto_encrypt_aes_gcm(void *plain, int plainlen, void *auth_header,
 
     ctx = EVP_CIPHER_CTX_new();
     if (!ctx) {
-        ERR_print_errors_fp(stderr);
         return -1;
     }
 
@@ -321,31 +347,26 @@ int edge_os_crypto_encrypt_aes_gcm(void *plain, int plainlen, void *auth_header,
 
     ret = EVP_EncryptInit_ex(ctx, crypto_cipher, NULL, NULL, NULL);
     if (ret != 1) {
-        ERR_print_errors_fp(stderr);
         return -1;
     }
 
     ret = EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, ivsize, NULL);
     if (ret != 1) {
-        ERR_print_errors_fp(stderr);
         return -1;
     }
 
     ret = EVP_EncryptInit_ex(ctx, NULL, NULL, key, iv);
     if (ret != 1) {
-        ERR_print_errors_fp(stderr);
         return -1;
     }
 
     ret = EVP_EncryptUpdate(ctx, NULL, &len, auth_header, auth_header_len);
     if (ret != 1) {
-        ERR_print_errors_fp(stderr);
         return -1;
     }
 
     ret = EVP_EncryptUpdate(ctx, cipher, &len, plain, plainlen);
     if (ret != 1) {
-        ERR_print_errors_fp(stderr);
         return -1;
     }
 
@@ -353,7 +374,6 @@ int edge_os_crypto_encrypt_aes_gcm(void *plain, int plainlen, void *auth_header,
 
     ret = EVP_EncryptFinal_ex(ctx, cipher + len, &len);
     if (ret != 1) {
-        ERR_print_errors_fp(stderr);
         return -1;
     }
 
@@ -361,7 +381,6 @@ int edge_os_crypto_encrypt_aes_gcm(void *plain, int plainlen, void *auth_header,
 
     ret = EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, 16, tag);
     if (ret != 1) {
-        ERR_print_errors_fp(stderr);
         return -1;
     }
 
@@ -396,31 +415,26 @@ int edge_os_crypto_decrypt_aes_gcm(void *cipher, int cipherlen, uint8_t *tag, vo
 
     ret = EVP_DecryptInit_ex(ctx, crypto_cipher, NULL, NULL, NULL);
     if (ret != 1) {
-        ERR_print_errors_fp(stderr);
         return -1;
     }
 
     ret = EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, ivsize, NULL);
     if (ret != 1) {
-        ERR_print_errors_fp(stderr);
         return -1;
     }
 
     ret = EVP_DecryptInit_ex(ctx, NULL, NULL, key, iv);
     if (ret != 1) {
-        ERR_print_errors_fp(stderr);
         return -1;
     }
 
     ret = EVP_DecryptUpdate(ctx, NULL, &len, auth_header, auth_header_len);
     if (ret != 1) {
-        ERR_print_errors_fp(stderr);
         return -1;
     }
 
     ret = EVP_DecryptUpdate(ctx, plain, &len, cipher, cipherlen);
     if (ret != 1) {
-        ERR_print_errors_fp(stderr);
         return -1;
     }
 
@@ -428,13 +442,11 @@ int edge_os_crypto_decrypt_aes_gcm(void *cipher, int cipherlen, uint8_t *tag, vo
 
     ret = EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, 16, tag);
     if (ret != 1) {
-        ERR_print_errors_fp(stderr);
         return -1;
     }
 
     ret = EVP_DecryptFinal_ex(ctx,  plain + len, &len);
     if (ret <= 0) {
-        ERR_print_errors_fp(stderr);
         return -1;
     }
 
@@ -632,7 +644,6 @@ static int __edge_os_crypto_decrypt(void *cipher, int cipherlen, int cipher_type
 
     ctx = EVP_CIPHER_CTX_new();
     if (!ctx) {
-        ERR_print_errors_fp(stderr);
         return -1;
     }
 
@@ -655,13 +666,11 @@ static int __edge_os_crypto_decrypt(void *cipher, int cipherlen, int cipher_type
 
     ret = EVP_DecryptInit_ex(ctx, crypto_cipher, NULL, key, iv);
     if (ret != 1) {
-        ERR_print_errors_fp(stderr);
         return -1;
     }
 
     ret = EVP_DecryptUpdate(ctx, plain, &len, cipher, cipherlen);
     if (ret != 1) {
-        ERR_print_errors_fp(stderr);
         return -1;
     }
 
@@ -669,7 +678,6 @@ static int __edge_os_crypto_decrypt(void *cipher, int cipherlen, int cipher_type
 
     ret = EVP_DecryptFinal_ex(ctx, plain + len, &len);
     if (ret != 1) {
-        ERR_print_errors_fp(stderr);
         return -1;
     }
 
@@ -860,7 +868,6 @@ int edge_os_crypto_generate_keypair(const char *pubkey, edge_os_ecc_key_algorith
 
     key = EC_KEY_new_by_curve_name(nid);
     if (!key) {
-        ERR_print_errors_fp(stderr);
         return -1;
     }
 
@@ -1182,25 +1189,21 @@ void *edge_os_crypto_ssl_tcp_server_create(const char *addr, int port, int n_con
 
     priv->sslctx = SSL_CTX_new(method);
     if (!priv->sslctx) {
-        ERR_print_errors_fp(stderr);
         goto bad;
     }
 
     ret = SSL_CTX_use_certificate_file(priv->sslctx, certfile, SSL_FILETYPE_PEM);
     if (ret <= 0) {
-        ERR_print_errors_fp(stderr);
         goto bad;
     }
 
     ret = SSL_CTX_use_PrivateKey_file(priv->sslctx, privkeyfile, SSL_FILETYPE_PEM);
     if (ret <= 0) {
-        ERR_print_errors_fp(stderr);
         goto bad;
     }
 
     ret = SSL_CTX_check_private_key(priv->sslctx);
     if (ret <= 0) {
-        ERR_print_errors_fp(stderr);
         goto bad;
     }
 
@@ -1248,7 +1251,6 @@ void *edge_os_crypto_ssl_accept_conn(void *priv)
 
     ret = SSL_accept(cl->new_client);
     if (ret <= 0) {
-        ERR_print_errors_fp(stderr);
         goto bad;
     }
 
@@ -1280,7 +1282,6 @@ int edge_os_crypto_ssl_server_send(void *priv, void *client_priv, void *msg, int
 
     ret = SSL_write(cl->new_client, msg, msglen);
     if (ret <= 0) {
-        ERR_print_errors_fp(stderr);
         return -1;
     }
 
@@ -1298,7 +1299,6 @@ int edge_os_crypto_ssl_server_recv(void *priv, void *client_priv, void *msg, int
 
     ret = SSL_read(cl->new_client, msg, msglen);
     if (ret <= 0) {
-        ERR_print_errors_fp(stderr);
         return -1;
     }
 
@@ -1318,7 +1318,6 @@ int edge_os_crypto_ssl_client_send(void *priv, void *msg, int msglen)
 
     ret = SSL_write(spriv->clientctx, msg, msglen);
     if (ret <= 0) {
-        ERR_print_errors_fp(stderr);
         return -1;
     }
 
@@ -1332,7 +1331,6 @@ int edge_os_crypto_ssl_client_recv(void *priv, void *msg, int msglen)
 
     ret = SSL_read(spriv->clientctx, msg, msglen);
     if (ret <= 0) {
-        ERR_print_errors_fp(stderr);
         return -1;
     }
 
@@ -1359,7 +1357,6 @@ void *edge_os_crypto_ssl_tcp_client_create(const char *addr, const char *protoco
 
     priv->sslctx = SSL_CTX_new(method);
     if (!priv->sslctx) {
-        ERR_print_errors_fp(stderr);
         goto bad;
     }
 
@@ -1380,7 +1377,6 @@ void *edge_os_crypto_ssl_tcp_client_create(const char *addr, const char *protoco
 
     ret = SSL_connect(priv->clientctx);
     if (ret <= 0) {
-        ERR_print_errors_fp(stderr);
         goto bad;
     }
 
