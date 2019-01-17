@@ -1418,6 +1418,195 @@ bad:
     return NULL;
 }
 
+int edge_os_crypto_make_hmac_key(uint8_t *key, int keysize)
+{
+    int ret;
+
+    ret = RAND_bytes(key, keysize);
+    if (ret != 1) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int edge_os_crypto_make_hmac_keyfile(const char *keyfile, int keysize)
+{
+    uint8_t *key;
+    int ret;
+
+    key = calloc(1, keysize);
+    if (!key)
+        return -1;
+
+    ret = RAND_bytes(key, keysize);
+    if (ret != 1) {
+        goto bad;
+    }
+
+    edge_os_write_file2(keyfile, key, keysize);
+
+    free(key);
+    return 0;
+
+bad:
+    free(key);
+    return -1;
+}
+
+static struct edge_os_hmac_signature* __edge_os_crypto_sign_hmac(void *input, int input_len, uint8_t *key, edge_os_crypto_digest_t digest, int keysize)
+{
+    struct edge_os_hmac_signature *hmac_s;
+    const EVP_MD *md;
+    EVP_PKEY *evp_key;
+    long unsigned int len;
+    int ret;
+    EVP_MD_CTX *ctx;
+
+    switch (digest) {
+        case EDGE_OS_CRYPTO_SHA256:
+            md = EVP_sha256();
+        break;
+        default:
+            return NULL;
+    }
+
+    evp_key = EVP_PKEY_new_mac_key(EVP_PKEY_HMAC, NULL, key, keysize);
+    if (!evp_key) {
+        return NULL;
+    }
+
+    ctx = EVP_MD_CTX_create();
+    if (!ctx) {
+        return NULL;
+    }
+
+    ret = EVP_DigestInit_ex(ctx, md, NULL);
+    if (ret != 1) {
+        goto bad;
+    }
+
+    ret = EVP_DigestSignInit(ctx, NULL, md, NULL, evp_key);
+    if (ret != 1) {
+        goto bad;
+    }
+
+    ret = EVP_DigestSignUpdate(ctx, input, input_len);
+    if (ret != 1) {
+        goto bad;
+    }
+
+    ret = EVP_DigestSignFinal(ctx, NULL, &len);
+    if (ret != 1) {
+        goto bad;
+    }
+
+    hmac_s = calloc(1, sizeof(struct edge_os_hmac_signature));
+    if (!hmac_s) {
+        goto bad;
+    }
+
+    hmac_s->signature = calloc(1, len);
+    if (!hmac_s->signature) {
+        goto bad;
+    }
+
+    hmac_s->signature_len = len;
+    ret = EVP_DigestSignFinal(ctx, hmac_s->signature, &hmac_s->signature_len);
+    if (ret != 1) {
+        goto bad;
+    }
+
+    return hmac_s;
+
+bad:
+    if (hmac_s) {
+        if (hmac_s->signature)
+            free(hmac_s->signature);
+        free(hmac_s);
+    }
+
+    return NULL;
+}
+
+struct edge_os_hmac_signature* edge_os_crypto_sign_hmac_sha256(void *input, int input_len, uint8_t *key)
+{
+    return __edge_os_crypto_sign_hmac(input, input_len, key, EDGE_OS_CRYPTO_SHA256, 32); // 256 bits = 32 bytes
+}
+
+void edge_os_crypto_free_hmac_signatures(struct edge_os_hmac_signature *signature)
+{
+    free(signature->signature);
+    free(signature);
+}
+
+static int __edge_os_crypto_verify_hmac(void *signature, long unsigned int signature_len, void *input, int input_len, uint8_t *key, edge_os_crypto_digest_t digest, int keysize)
+{
+    EVP_MD_CTX *ctx;
+    EVP_PKEY *evp_key;
+    int ret;
+    const EVP_MD *md;
+
+    switch (digest) {
+        case EDGE_OS_CRYPTO_SHA256:
+            md = EVP_sha256();
+        break;
+        default:
+            return -1;
+    }
+
+    evp_key = EVP_PKEY_new_mac_key(EVP_PKEY_HMAC, NULL, key, keysize);
+    if (!evp_key) {
+        return -1;
+    }
+
+    ctx = EVP_MD_CTX_create();
+    if (!ctx) {
+        goto bad;
+    }
+
+    ret = EVP_DigestSignInit(ctx, NULL, md, NULL, evp_key);
+    if (ret != 1) {
+        goto bad;
+    }
+
+    uint8_t hmac_signature[128];
+    long unsigned int hmac_signature_len;
+
+    ret = EVP_DigestSignUpdate(ctx, input, input_len);
+    if (ret != 1) {
+        goto bad;
+    }
+
+    ret = EVP_DigestSignFinal(ctx, hmac_signature, &hmac_signature_len);
+    if (ret != 1) {
+        goto bad;
+    }
+
+    size_t m = (hmac_signature_len < signature_len) ? hmac_signature_len : signature_len;
+
+    ret = !!CRYPTO_memcmp(signature, hmac_signature, m);
+
+    EVP_MD_CTX_destroy(ctx);
+
+    if (ret < 0) {
+        return -1;
+    }
+
+    return 0;
+
+
+bad:
+    edge_os_crypto_error();
+    return -1;
+}
+
+int edge_os_crypto_verify_hmac_sha256(void *signature, long unsigned int signature_len, void *input, int input_len, uint8_t *key)
+{
+    return __edge_os_crypto_verify_hmac(signature, signature_len, input, input_len, key, EDGE_OS_CRYPTO_SHA256, 32);
+}
+
+
 #else
 int edge_os_crypto_md5sum(const unsigned char *data, int datalen, uint8_t *md5sum)
 {

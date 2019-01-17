@@ -136,6 +136,22 @@ int edge_os_crypto_ssl_client_send(void *priv, void *msg, int msglen);
 
 int edge_os_crypto_ssl_client_recv(void *priv, void *msg, int msglen);
 
+int edge_os_crypto_make_hmac_key(uint8_t *key, int keysize);
+
+int edge_os_crypto_make_hmac_keyfile(const char *keyfile, int keysize);
+
+struct edge_os_hmac_signature {
+    uint8_t *signature;
+    long unsigned int signature_len;
+};
+
+
+struct edge_os_hmac_signature* edge_os_crypto_sign_hmac_sha256(void *input, int input_len, uint8_t *key);
+
+void edge_os_crypto_free_hmac_signatures(struct edge_os_hmac_signature *signature);
+
+int edge_os_crypto_verify_hmac_sha256(void *signature, long unsigned int signature_len, void *input, int input_len, uint8_t *key);
+
   
 #endif
 

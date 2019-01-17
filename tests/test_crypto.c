@@ -153,6 +153,33 @@ int crypto_test(int argc, char **argv)
 
     printf("decrypt text *%s*\n", plain_text_dec_g);
 
+    struct edge_os_hmac_signature *hmac;
+
+    char plain_text_for_hmac[] = "this is plaintext for hmac to get signature";
+
+    uint8_t hmac_key[32];
+
+    ret = edge_os_crypto_make_hmac_key(hmac_key, sizeof(hmac_key));
+    if (ret != 0) {
+        printf("failed to generate hmac key\n");
+    }
+
+    hmac = edge_os_crypto_sign_hmac_sha256(plain_text_for_hmac, strlen(plain_text_for_hmac), hmac_key);
+
+    if (!hmac) {
+        printf("failed to hmac sign\n");
+    } else {
+        edge_os_hexdump_pretty("hmac signature", hmac->signature, hmac->signature_len);
+    }
+
+    ret = edge_os_crypto_verify_hmac_sha256(hmac->signature, hmac->signature_len, plain_text_for_hmac, strlen(plain_text_for_hmac), hmac_key);
+    if (ret != 0) {
+        printf("failed to verify hmac\n");
+    } else {
+        printf("verify hmac ok\n");
+    }
+
+
     edge_os_crypto_deinit();
 
     return 0;
