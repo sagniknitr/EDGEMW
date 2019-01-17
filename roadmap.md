@@ -52,7 +52,9 @@ Right now testing is only done with in Travis with Linux, X86 architecture (most
     1. raw socket API - sender, and receiver, with ether_header, iphdr, udphdr, tcphdr, tuntap
     2. ipv6 support - send, recv, create, delete, name to ip
     3. extend network layer for all purposes - v6 support, raw socket and splices for large payload transmit and receive
-	4. wireless ioctl and wireless 802.11 packet parsing and packing
+    4. wireless ioctl and wireless 802.11 packet parsing and packing
+    5. tools to perform arp poisoning (only for learning), arp poison detection
+    6. reverse ARP API
 
 9. Databases
     1. interface with SQL database
