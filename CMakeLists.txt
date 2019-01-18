@@ -187,6 +187,9 @@ SET(CLI_CLIENT_SOURCES
         services/cli/library/show_callback.c
         services/cli/rpc.c)
 
+set(ASN1_COMPILER_SOURCES
+        lib/asn1/compiler/core.cpp)
+
 add_library(EdgeOS STATIC ${SOURCES})
 
 if (CONFIG_SHAREDLIB)
@@ -195,6 +198,9 @@ if (CONFIG_SHAREDLIB)
 endif()
 
 target_link_libraries(EdgeOS pthread rt gcov protobuf-c crypto ssl)
+
+add_executable(asn1compiler ${ASN1_COMPILER_SOURCES})
+target_link_libraries(asn1compiler rt)
 
 add_executable(EdgeOSLogger services/logsrv/edgeos_logsrv.cpp)
 target_link_libraries(EdgeOSLogger pthread EdgeOS gcov rt)
