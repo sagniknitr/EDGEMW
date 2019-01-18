@@ -951,11 +951,6 @@ __sign_message_evp_variant(const unsigned char *buf, int bufsize, const char *ce
         return NULL;
     }
 
-    sign = calloc(1, sizeof(struct edge_os_ecc_signature));
-    if (!sign) {
-        return NULL;
-    }
-
     // EVP_KEY = EC_KEY
     //
     f = fopen(cert_path, "r");
@@ -989,6 +984,11 @@ __sign_message_evp_variant(const unsigned char *buf, int bufsize, const char *ce
     if (ret != 1)
         return NULL;
 
+    sign = calloc(1, sizeof(struct edge_os_ecc_signature));
+    if (!sign) {
+        return NULL;
+    }
+
     // compute signature length and so the signature can be alloced
     ret = EVP_PKEY_sign(evp_key_ctx, NULL, (long unsigned int *)&sign->signature_len, buf, bufsize);
     if (ret != 1)
@@ -996,6 +996,9 @@ __sign_message_evp_variant(const unsigned char *buf, int bufsize, const char *ce
 
     // allcoate sign
     sign->signature = calloc(1, sign->signature_len);
+    if (!sign->signature) {
+        return NULL;
+    }
 
     // sign the message
     ret = EVP_PKEY_sign(evp_key_ctx, sign->signature, (long unsigned int *)&sign->signature_len, buf, bufsize);
