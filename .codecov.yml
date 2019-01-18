@@ -14,5 +14,5 @@ parser:
 
 
 ignore:
-  - "services/cli/"
-  - "tests"
+  - "services/cli/*"
+  - "tests/*"
