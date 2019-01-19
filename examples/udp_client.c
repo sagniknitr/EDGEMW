@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
 #include <edgeos_datetime.h>
 #include <edgeos_netapi.h>
 

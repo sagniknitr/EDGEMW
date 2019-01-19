@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <edgeos_netapi.h>
 
 int main(int argc, char **argv)

@@ -32,6 +32,30 @@ typedef enum {
     EDGE_OS_CRYPTO_SHA512,
 } edge_os_crypto_digest_t;
 
+struct edge_os_crypto_err_table {
+    unsigned long err;
+    char *error_buf;
+} err_sets[] = {
+    {0x608008b, "Digest not set"},
+};
+
+static void edge_os_crypto_error()
+{
+    unsigned long err = ERR_get_error();
+    char err_string[1024];
+    unsigned int i;
+
+    for (i = 0; i < sizeof(err_sets) / sizeof(err_sets[0]); i ++) {
+        if (err_sets[i].err == err) {
+            fprintf(stderr, "crypto: %s\n", err_sets[i].error_buf);
+            break;
+        }
+    }
+
+    ERR_error_string_n(err, err_string, sizeof(err_string));
+    printf("crypto: unknown error %s\n", err_string);
+}
+
 static int __edge_os_crypto_digest_msg(const unsigned char *msg, edge_os_crypto_digest_t digest, size_t msglen, uint8_t *digest_final)
 {
     EVP_MD_CTX *ctx;
@@ -71,6 +95,7 @@ static int __edge_os_crypto_digest_msg(const unsigned char *msg, edge_os_crypto_
 
     ret = EVP_DigestInit(ctx, md);
     if (ret != 1)
+        //ERR_print_errors_fp(stderr);
         goto bad;
 
     ret = EVP_DigestUpdate(ctx, msg, msglen);
@@ -86,6 +111,7 @@ static int __edge_os_crypto_digest_msg(const unsigned char *msg, edge_os_crypto_
     return digest_len;
 
 bad:
+    edge_os_crypto_error();
     return -1;
 }
 
@@ -158,6 +184,7 @@ int __edge_os_crypto_digest_file(const char *file, edge_os_crypto_digest_t diges
     return digest_len;
 
 bad:
+
     EVP_MD_CTX_destroy(ctx);
     if (fd > 0)
         edgeos_close_file(fd);
@@ -294,6 +321,141 @@ enum {
     EDGEOS_CIPHER_ARC4,
     EDGEOS_CIPHER_CHACHA20, // key 256 iv 96
 };
+
+int edge_os_crypto_encrypt_aes_gcm(void *plain, int plainlen, void *auth_header, int auth_header_len, void *tag, void *cipher, uint8_t *key, int keysize, uint8_t *iv, int ivsize)
+{
+    const EVP_CIPHER *crypto_cipher;
+    EVP_CIPHER_CTX *ctx;
+    int len;
+    int ret;
+    int cipher_len;
+
+    ctx = EVP_CIPHER_CTX_new();
+    if (!ctx) {
+        return -1;
+    }
+
+    if (keysize == 16) {
+        crypto_cipher = EVP_aes_128_gcm();
+    } else if (keysize == 24) {
+        crypto_cipher = EVP_aes_192_gcm();
+    } else if (keysize == 32) {
+        crypto_cipher = EVP_aes_256_gcm();
+    } else {
+        return -1;
+    }
+
+    ret = EVP_EncryptInit_ex(ctx, crypto_cipher, NULL, NULL, NULL);
+    if (ret != 1) {
+        return -1;
+    }
+
+    ret = EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, ivsize, NULL);
+    if (ret != 1) {
+        return -1;
+    }
+
+    ret = EVP_EncryptInit_ex(ctx, NULL, NULL, key, iv);
+    if (ret != 1) {
+        return -1;
+    }
+
+    ret = EVP_EncryptUpdate(ctx, NULL, &len, auth_header, auth_header_len);
+    if (ret != 1) {
+        return -1;
+    }
+
+    ret = EVP_EncryptUpdate(ctx, cipher, &len, plain, plainlen);
+    if (ret != 1) {
+        return -1;
+    }
+
+    cipher_len = len;
+
+    ret = EVP_EncryptFinal_ex(ctx, cipher + len, &len);
+    if (ret != 1) {
+        return -1;
+    }
+
+    cipher_len += len;
+
+    ret = EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, 16, tag);
+    if (ret != 1) {
+        return -1;
+    }
+
+    EVP_CIPHER_CTX_free(ctx);
+
+    return cipher_len;
+}
+
+
+int edge_os_crypto_decrypt_aes_gcm(void *cipher, int cipherlen, uint8_t *tag, void *auth_header, int auth_header_len, uint8_t *key, int keysize, uint8_t *iv, int ivsize, void *plain)
+{
+    const EVP_CIPHER *crypto_cipher;
+    EVP_CIPHER_CTX *ctx;
+    int len;
+    int plain_len;
+    int ret;
+
+    ctx = EVP_CIPHER_CTX_new();
+    if (!ctx) {
+        return -1;
+    }
+
+    if (keysize == 16) {
+        crypto_cipher = EVP_aes_128_gcm();
+    } else if (keysize == 24) {
+        crypto_cipher = EVP_aes_192_gcm();
+    } else if (keysize == 32) {
+        crypto_cipher = EVP_aes_256_gcm();
+    } else {
+        return -1;
+    }
+
+    ret = EVP_DecryptInit_ex(ctx, crypto_cipher, NULL, NULL, NULL);
+    if (ret != 1) {
+        return -1;
+    }
+
+    ret = EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, ivsize, NULL);
+    if (ret != 1) {
+        return -1;
+    }
+
+    ret = EVP_DecryptInit_ex(ctx, NULL, NULL, key, iv);
+    if (ret != 1) {
+        return -1;
+    }
+
+    ret = EVP_DecryptUpdate(ctx, NULL, &len, auth_header, auth_header_len);
+    if (ret != 1) {
+        return -1;
+    }
+
+    ret = EVP_DecryptUpdate(ctx, plain, &len, cipher, cipherlen);
+    if (ret != 1) {
+        return -1;
+    }
+
+    plain_len = len;
+
+    ret = EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, 16, tag);
+    if (ret != 1) {
+        return -1;
+    }
+
+    ret = EVP_DecryptFinal_ex(ctx,  plain + len, &len);
+    if (ret <= 0) {
+        return -1;
+    }
+
+    plain_len += len;
+
+    EVP_CIPHER_CTX_free(ctx);
+
+    return plain_len;
+}
 
 static int __edge_os_crypto_encrypt(void *plain, int plainlen, int cipher_type, void *cipher, uint8_t *key, uint8_t *iv)
 {
@@ -482,7 +644,6 @@ static int __edge_os_crypto_decrypt(void *cipher, int cipherlen, int cipher_type
 
     ctx = EVP_CIPHER_CTX_new();
     if (!ctx) {
-        ERR_print_errors_fp(stderr);
         return -1;
     }
 
@@ -505,13 +666,11 @@ static int __edge_os_crypto_decrypt(void *cipher, int cipherlen, int cipher_type
 
     ret = EVP_DecryptInit_ex(ctx, crypto_cipher, NULL, key, iv);
     if (ret != 1) {
-        ERR_print_errors_fp(stderr);
         return -1;
     }
 
     ret = EVP_DecryptUpdate(ctx, plain, &len, cipher, cipherlen);
     if (ret != 1) {
-        ERR_print_errors_fp(stderr);
         return -1;
     }
 
@@ -519,7 +678,6 @@ static int __edge_os_crypto_decrypt(void *cipher, int cipherlen, int cipher_type
 
     ret = EVP_DecryptFinal_ex(ctx, plain + len, &len);
     if (ret != 1) {
-        ERR_print_errors_fp(stderr);
         return -1;
     }
 
@@ -710,7 +868,6 @@ int edge_os_crypto_generate_keypair(const char *pubkey, edge_os_ecc_key_algorith
 
     key = EC_KEY_new_by_curve_name(nid);
     if (!key) {
-        ERR_print_errors_fp(stderr);
         return -1;
     }
 
@@ -794,11 +951,6 @@ __sign_message_evp_variant(const unsigned char *buf, int bufsize, const char *ce
         return NULL;
     }
 
-    sign = calloc(1, sizeof(struct edge_os_ecc_signature));
-    if (!sign) {
-        return NULL;
-    }
-
     // EVP_KEY = EC_KEY
     //
     f = fopen(cert_path, "r");
@@ -832,6 +984,11 @@ __sign_message_evp_variant(const unsigned char *buf, int bufsize, const char *ce
     if (ret != 1)
         return NULL;
 
+    sign = calloc(1, sizeof(struct edge_os_ecc_signature));
+    if (!sign) {
+        return NULL;
+    }
+
     // compute signature length and so the signature can be alloced
     ret = EVP_PKEY_sign(evp_key_ctx, NULL, (long unsigned int *)&sign->signature_len, buf, bufsize);
     if (ret != 1)
@@ -839,6 +996,9 @@ __sign_message_evp_variant(const unsigned char *buf, int bufsize, const char *ce
 
     // allcoate sign
     sign->signature = calloc(1, sign->signature_len);
+    if (!sign->signature) {
+        return NULL;
+    }
 
     // sign the message
     ret = EVP_PKEY_sign(evp_key_ctx, sign->signature, (long unsigned int *)&sign->signature_len, buf, bufsize);
@@ -1032,25 +1192,21 @@ void *edge_os_crypto_ssl_tcp_server_create(const char *addr, int port, int n_con
 
     priv->sslctx = SSL_CTX_new(method);
     if (!priv->sslctx) {
-        ERR_print_errors_fp(stderr);
         goto bad;
     }
 
     ret = SSL_CTX_use_certificate_file(priv->sslctx, certfile, SSL_FILETYPE_PEM);
     if (ret <= 0) {
-        ERR_print_errors_fp(stderr);
         goto bad;
     }
 
     ret = SSL_CTX_use_PrivateKey_file(priv->sslctx, privkeyfile, SSL_FILETYPE_PEM);
     if (ret <= 0) {
-        ERR_print_errors_fp(stderr);
         goto bad;
     }
 
     ret = SSL_CTX_check_private_key(priv->sslctx);
     if (ret <= 0) {
-        ERR_print_errors_fp(stderr);
         goto bad;
     }
 
@@ -1098,7 +1254,6 @@ void *edge_os_crypto_ssl_accept_conn(void *priv)
 
     ret = SSL_accept(cl->new_client);
     if (ret <= 0) {
-        ERR_print_errors_fp(stderr);
         goto bad;
     }
 
@@ -1130,7 +1285,6 @@ int edge_os_crypto_ssl_server_send(void *priv, void *client_priv, void *msg, int
 
     ret = SSL_write(cl->new_client, msg, msglen);
     if (ret <= 0) {
-        ERR_print_errors_fp(stderr);
         return -1;
     }
 
@@ -1148,7 +1302,6 @@ int edge_os_crypto_ssl_server_recv(void *priv, void *client_priv, void *msg, int
 
     ret = SSL_read(cl->new_client, msg, msglen);
     if (ret <= 0) {
-        ERR_print_errors_fp(stderr);
         return -1;
     }
 
@@ -1168,7 +1321,6 @@ int edge_os_crypto_ssl_client_send(void *priv, void *msg, int msglen)
 
     ret = SSL_write(spriv->clientctx, msg, msglen);
     if (ret <= 0) {
-        ERR_print_errors_fp(stderr);
         return -1;
     }
 
@@ -1182,7 +1334,6 @@ int edge_os_crypto_ssl_client_recv(void *priv, void *msg, int msglen)
 
     ret = SSL_read(spriv->clientctx, msg, msglen);
     if (ret <= 0) {
-        ERR_print_errors_fp(stderr);
         return -1;
     }
 
@@ -1209,7 +1360,6 @@ void *edge_os_crypto_ssl_tcp_client_create(const char *addr, const char *protoco
 
     priv->sslctx = SSL_CTX_new(method);
     if (!priv->sslctx) {
-        ERR_print_errors_fp(stderr);
         goto bad;
     }
 
@@ -1230,7 +1380,6 @@ void *edge_os_crypto_ssl_tcp_client_create(const char *addr, const char *protoco
 
     ret = SSL_connect(priv->clientctx);
     if (ret <= 0) {
-        ERR_print_errors_fp(stderr);
         goto bad;
     }
 
@@ -1271,6 +1420,195 @@ bad:
 
     return NULL;
 }
+
+int edge_os_crypto_make_hmac_key(uint8_t *key, int keysize)
+{
+    int ret;
+
+    ret = RAND_bytes(key, keysize);
+    if (ret != 1) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int edge_os_crypto_make_hmac_keyfile(const char *keyfile, int keysize)
+{
+    uint8_t *key;
+    int ret;
+
+    key = calloc(1, keysize);
+    if (!key)
+        return -1;
+
+    ret = RAND_bytes(key, keysize);
+    if (ret != 1) {
+        goto bad;
+    }
+
+    edge_os_write_file2(keyfile, key, keysize);
+
+    free(key);
+    return 0;
+
+bad:
+    free(key);
+    return -1;
+}
+
+static struct edge_os_hmac_signature* __edge_os_crypto_sign_hmac(void *input, int input_len, uint8_t *key, edge_os_crypto_digest_t digest, int keysize)
+{
+    struct edge_os_hmac_signature *hmac_s;
+    const EVP_MD *md;
+    EVP_PKEY *evp_key;
+    long unsigned int len;
+    int ret;
+    EVP_MD_CTX *ctx;
+
+    switch (digest) {
+        case EDGE_OS_CRYPTO_SHA256:
+            md = EVP_sha256();
+        break;
+        default:
+            return NULL;
+    }
+
+    evp_key = EVP_PKEY_new_mac_key(EVP_PKEY_HMAC, NULL, key, keysize);
+    if (!evp_key) {
+        return NULL;
+    }
+
+    ctx = EVP_MD_CTX_create();
+    if (!ctx) {
+        return NULL;
+    }
+
+    ret = EVP_DigestInit_ex(ctx, md, NULL);
+    if (ret != 1) {
+        goto bad;
+    }
+
+    ret = EVP_DigestSignInit(ctx, NULL, md, NULL, evp_key);
+    if (ret != 1) {
+        goto bad;
+    }
+
+    ret = EVP_DigestSignUpdate(ctx, input, input_len);
+    if (ret != 1) {
+        goto bad;
+    }
+
+    ret = EVP_DigestSignFinal(ctx, NULL, &len);
+    if (ret != 1) {
+        goto bad;
+    }
+
+    hmac_s = calloc(1, sizeof(struct edge_os_hmac_signature));
+    if (!hmac_s) {
+        goto bad;
+    }
+
+    hmac_s->signature = calloc(1, len);
+    if (!hmac_s->signature) {
+        goto bad;
+    }
+
+    hmac_s->signature_len = len;
+    ret = EVP_DigestSignFinal(ctx, hmac_s->signature, &hmac_s->signature_len);
+    if (ret != 1) {
+        goto bad;
+    }
+
+    return hmac_s;
+
+bad:
+    if (hmac_s) {
+        if (hmac_s->signature)
+            free(hmac_s->signature);
+        free(hmac_s);
+    }
+
+    return NULL;
+}
+
+struct edge_os_hmac_signature* edge_os_crypto_sign_hmac_sha256(void *input, int input_len, uint8_t *key)
+{
+    return __edge_os_crypto_sign_hmac(input, input_len, key, EDGE_OS_CRYPTO_SHA256, 32); // 256 bits = 32 bytes
+}
+
+void edge_os_crypto_free_hmac_signatures(struct edge_os_hmac_signature *signature)
+{
+    free(signature->signature);
+    free(signature);
+}
+
+static int __edge_os_crypto_verify_hmac(void *signature, long unsigned int signature_len, void *input, int input_len, uint8_t *key, edge_os_crypto_digest_t digest, int keysize)
+{
+    EVP_MD_CTX *ctx;
+    EVP_PKEY *evp_key;
+    int ret;
+    const EVP_MD *md;
+
+    switch (digest) {
+        case EDGE_OS_CRYPTO_SHA256:
+            md = EVP_sha256();
+        break;
+        default:
+            return -1;
+    }
+
+    evp_key = EVP_PKEY_new_mac_key(EVP_PKEY_HMAC, NULL, key, keysize);
+    if (!evp_key) {
+        return -1;
+    }
+
+    ctx = EVP_MD_CTX_create();
+    if (!ctx) {
+        goto bad;
+    }
+
+    ret = EVP_DigestSignInit(ctx, NULL, md, NULL, evp_key);
+    if (ret != 1) {
+        goto bad;
+    }
+
+    uint8_t hmac_signature[128];
+    long unsigned int hmac_signature_len;
+
+    ret = EVP_DigestSignUpdate(ctx, input, input_len);
+    if (ret != 1) {
+        goto bad;
+    }
+
+    ret = EVP_DigestSignFinal(ctx, hmac_signature, &hmac_signature_len);
+    if (ret != 1) {
+        goto bad;
+    }
+
+    size_t m = (hmac_signature_len < signature_len) ? hmac_signature_len : signature_len;
+
+    ret = !!CRYPTO_memcmp(signature, hmac_signature, m);
+
+    EVP_MD_CTX_destroy(ctx);
+
+    if (ret < 0) {
+        return -1;
+    }
+
+    return 0;
+
+
+bad:
+    edge_os_crypto_error();
+    return -1;
+}
+
+int edge_os_crypto_verify_hmac_sha256(void *signature, long unsigned int signature_len, void *input, int input_len, uint8_t *key)
+{
+    return __edge_os_crypto_verify_hmac(signature, signature_len, input, input_len, key, EDGE_OS_CRYPTO_SHA256, 32);
+}
+
 
 #else
 int edge_os_crypto_md5sum(const unsigned char *data, int datalen, uint8_t *md5sum)

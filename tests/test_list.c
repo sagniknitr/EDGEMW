@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <edgeos_list.h>
+#include <edgeos_logger.h>
 
 static int static_ptr_test()
 {
@@ -101,11 +102,12 @@ static int large_list_test()
 
 int list_test(int argc, char **argv)
 {
-
-	edge_os_list_init(NULL);
-	edge_os_list_add_tail(NULL, NULL);
-	edge_os_list_delete(NULL, NULL, NULL);
-	edge_os_list_for_each(NULL, NULL, NULL);
+    edge_os_log("test: starting list_test\n");
+    edge_os_list_init(NULL);
+    edge_os_list_add_tail(NULL, NULL);
+    edge_os_list_delete(NULL, NULL, NULL);
+    edge_os_list_for_each(NULL, NULL, NULL);
+    edge_os_debug("tests: checking if there is no segfaults ..\n");
     static_ptr_test();
     dynamic_ptr_test();
     small_list_test();

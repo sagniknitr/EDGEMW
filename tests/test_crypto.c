@@ -58,14 +58,12 @@ int crypto_test(int argc, char **argv)
                                     keyfile, ivfile);
     if (ret < 0) {
         fprintf(stderr, "failed to encrypt file\n");
-        return -1;
     }
 
     ret = edge_os_crypto_aes_128_cbc_decrypt_file(output_file, dec_file,
                                     keyfile, ivfile);
     if (ret < 0) {
         fprintf(stderr, "failed to decrypt file\n");
-        return -1;
     }
 
     ret = edge_os_crypto_md5sum_file((const char *)input_file, md5sum);
@@ -119,6 +117,68 @@ int crypto_test(int argc, char **argv)
             fprintf(stderr, "arc4_dec: %s", arc4_dec);
         }
     }
+
+    uint8_t gcm_key[16];
+    uint8_t gcm_iv[12];
+    char plain_text_gcm[] = "gcm encryption with auth tag";
+    char auth_header[] = "header info";
+    uint8_t cipher_text_gcm[100];
+    char plain_text_dec_g[100];
+    uint8_t tag_gcm[16];
+
+    ret = edge_os_crypto_gen_keyiv(gcm_key, sizeof(gcm_key), gcm_iv, sizeof(gcm_iv));
+    if (ret != 0) {
+        fprintf(stderr, "failed to generate gcm\n");
+        return -1;
+    }
+
+    ret = edge_os_crypto_encrypt_aes_gcm(plain_text_gcm, strlen(plain_text_gcm), auth_header, strlen(auth_header), tag_gcm, cipher_text_gcm, gcm_key, sizeof(gcm_key), gcm_iv, sizeof(gcm_iv));
+    if (ret < 0) {
+        fprintf(stderr, "failed to encrypt gcm\n");
+        return -1;
+    }
+
+    printf("encrypt ok\n");
+
+    edge_os_hexdump_pretty("encrypted out", cipher_text_gcm, ret);
+    edge_os_hexdump_pretty("tag", tag_gcm, 16);
+
+    ret = edge_os_crypto_decrypt_aes_gcm(cipher_text_gcm, ret, tag_gcm, auth_header, strlen(auth_header), gcm_key, sizeof(gcm_key), gcm_iv, sizeof(gcm_iv), plain_text_dec_g);
+    if (ret < 0) {
+        fprintf(stderr, "failed to decrypt gcm\n");
+        return -1;
+    }
+
+    printf("decrypt ok\n");
+
+    printf("decrypt text *%s*\n", plain_text_dec_g);
+
+    struct edge_os_hmac_signature *hmac;
+
+    char plain_text_for_hmac[] = "this is plaintext for hmac to get signature";
+
+    uint8_t hmac_key[32];
+
+    ret = edge_os_crypto_make_hmac_key(hmac_key, sizeof(hmac_key));
+    if (ret != 0) {
+        printf("failed to generate hmac key\n");
+    }
+
+    hmac = edge_os_crypto_sign_hmac_sha256(plain_text_for_hmac, strlen(plain_text_for_hmac), hmac_key);
+
+    if (!hmac) {
+        printf("failed to hmac sign\n");
+    } else {
+        edge_os_hexdump_pretty("hmac signature", hmac->signature, hmac->signature_len);
+    }
+
+    ret = edge_os_crypto_verify_hmac_sha256(hmac->signature, hmac->signature_len, plain_text_for_hmac, strlen(plain_text_for_hmac), hmac_key);
+    if (ret != 0) {
+        printf("failed to verify hmac\n");
+    } else {
+        printf("verify hmac ok\n");
+    }
+
 
     edge_os_crypto_deinit();
 

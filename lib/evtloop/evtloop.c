@@ -5,7 +5,7 @@
  *
  * @Author: Dev Naga (devendra.aaru@gmail.com)
  *
- * License Apache
+ * License MIT
  */
 
 #include <stdio.h>
