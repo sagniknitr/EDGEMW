@@ -188,7 +188,8 @@ SET(CLI_CLIENT_SOURCES
         services/cli/rpc.c)
 
 set(ASN1_COMPILER_SOURCES
-        lib/asn1/compiler/core.cpp)
+        lib/asn1/compiler/core.cpp
+		lib/asn1/compiler/types.c)
 
 add_library(EdgeOS STATIC ${SOURCES})
 
