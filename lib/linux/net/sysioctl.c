@@ -16,7 +16,7 @@
 #include <ifaddrs.h>
 #include <edgeos_ioctl.h>
 
-static void __edge_os_get_netdev_info(struct edge_os_iflist *t,
+static int __edge_os_get_netdev_info(struct edge_os_iflist *t,
                                       struct ifaddrs *it)
 {
     int valid_ip = 0;
@@ -35,6 +35,12 @@ static void __edge_os_get_netdev_info(struct edge_os_iflist *t,
     if (it->ifa_flags & IFF_LOOPBACK)
         t->is_loopback = 1;
 
+    if (it->ifa_flags & IFF_RUNNING)
+        t->is_running = 1;
+    
+    if (it->ifa_flags & IFF_PROMISC)
+        t->is_promisc = 1;
+
     struct edge_os_ipaddr_set *i = NULL;
 
     if (it->ifa_addr) {
@@ -42,7 +48,8 @@ static void __edge_os_get_netdev_info(struct edge_os_iflist *t,
 
         i = calloc(1, sizeof(struct edge_os_ipaddr_set));
         if (!t) {
-            return;
+            edge_os_error("sysioctl: failed to allocate @ %s %u\n", __func__, __LINE__);
+            return -1;
         }
 
         if (it->ifa_addr->sa_family == AF_INET) {
@@ -53,7 +60,9 @@ static void __edge_os_get_netdev_info(struct edge_os_iflist *t,
             ret = inet_ntop(AF_INET, &(ip->sin_addr.s_addr),
                                 i->ipaddr, sizeof(i->ipaddr));
             if (!ret) {
-                return;
+				edge_os_log_with_error(errno, "sysioctl: failed to inet_ntop  @ %s %u ",
+											__func__, __LINE__);
+                return -1;
             }
             valid_ip = 1;
         } else if (it->ifa_addr->sa_family == AF_INET6) {
@@ -64,13 +73,15 @@ static void __edge_os_get_netdev_info(struct edge_os_iflist *t,
             ret = inet_ntop(AF_INET6, &ip6->sin6_addr.s6_addr,
                                 i->ipaddr, sizeof(i->ipaddr));
             if (!ret) {
-                return;
+				edge_os_log_with_error(errno, "sysioctl: failed to inet_ntop @ %s %u ",
+											__func__, __LINE__);
+                return -1;
             }
             valid_ip = 1;
         } else {
             valid_ip = 0;
             free(i);
-            return;
+            return -1;
         }
     }
 
@@ -87,6 +98,8 @@ static void __edge_os_get_netdev_info(struct edge_os_iflist *t,
             j->next = i;
         }
     }
+
+	return 0;
 }
 
 struct edge_os_iflist *edge_os_get_netdev_info()
@@ -121,7 +134,10 @@ struct edge_os_iflist *edge_os_get_netdev_info()
 
             t->set = NULL;
 
-            __edge_os_get_netdev_info(t, it);
+            ret = __edge_os_get_netdev_info(t, it);
+			if (ret) {
+				goto bad;
+			}
 
             if (!s) {
                 s = t;
@@ -131,7 +147,10 @@ struct edge_os_iflist *edge_os_get_netdev_info()
                 tail = t;
             }
         } else {
-            __edge_os_get_netdev_info(f, it);
+            ret = __edge_os_get_netdev_info(f, it);
+			if (ret) {
+				goto bad;
+			}
         }
     }
 
@@ -312,6 +331,11 @@ int edge_os_is_mac_multicast(const uint8_t *macaddr)
 #define EDGEOS_IFFLAGS_BROADCAST    0x02
 #define EDGEOS_IFFLAGS_MUTLICAST    0x04
 #define EDGEOS_IFFLAGS_UP           0x08
+#define EDGEOS_IFFLAGS_PROMISC      0x10
+#define EDGEOS_IFFLAGS_NO_PROMISC   0x20
+#define EDGEOS_IFFLAGS_RUNNING      0x40
+#define EDGEOS_IFFLAGS_NO_RUNNING   0x80
+
 
 static int __edge_os_validate_ifflags(const char *ifname, int validate_flag)
 {
@@ -363,6 +387,14 @@ static int __edge_os_validate_ifflags(const char *ifname, int validate_flag)
         opt |= IFF_UP;
     }
 
+    if (validate_flag & EDGEOS_IFFLAGS_PROMISC) {
+        opt |= IFF_PROMISC;
+    }
+
+    if (validate_flag & EDGEOS_IFFLAGS_RUNNING) {
+        opt |= IFF_RUNNING;
+    }
+
     return !!(ifr.ifr_flags & opt);
 
 bad:
@@ -388,6 +420,16 @@ int edge_os_is_if_multicast(const char *ifname)
 int edge_os_is_if_up(const char *ifname)
 {
     return __edge_os_validate_ifflags(ifname, EDGEOS_IFFLAGS_UP);
+}
+
+int edge_os_is_if_promisc(const char *ifname)
+{
+    return __edge_os_validate_ifflags(ifname, EDGEOS_IFFLAGS_PROMISC);
+}
+
+int edge_os_is_if_running(const char *ifname)
+{
+    return __edge_os_validate_ifflags(ifname, EDGEOS_IFFLAGS_RUNNING);
 }
 
 int __edge_os_set_ifflags(const char *ifname, int setflags)
@@ -433,6 +475,22 @@ int __edge_os_set_ifflags(const char *ifname, int setflags)
         req.ifr_flags |= IFF_UP;
     }
 
+    if (setflags & EDGEOS_IFFLAGS_PROMISC) {
+        req.ifr_flags |= IFF_PROMISC;
+    }
+
+    if (setflags & EDGEOS_IFFLAGS_NO_PROMISC) {
+        req.ifr_flags &= ~IFF_PROMISC;
+    }
+
+    if (setflags & EDGEOS_IFFLAGS_RUNNING) {
+        req.ifr_flags |= IFF_RUNNING;
+    }
+
+    if (setflags & EDGEOS_IFFLAGS_NO_RUNNING) {
+        req.ifr_flags &= ~IFF_RUNNING;
+    }
+
     ret = ioctl(fd, SIOCSIFFLAGS, &req);
     if (ret < 0) {
         edge_os_log_with_error(errno, "sysioctl: failed to ioctl ");
@@ -469,6 +527,25 @@ int edge_os_set_iface_up(const char *ifname)
     return __edge_os_set_ifflags(ifname, EDGEOS_IFFLAGS_UP);
 }
 
+int edge_os_set_iface_promisc(const char *ifname)
+{
+    return __edge_os_set_ifflags(ifname, EDGEOS_IFFLAGS_PROMISC);
+}
+
+int edge_os_set_iface_remove_promisc(const char *ifname)
+{
+    return __edge_os_set_ifflags(ifname, EDGEOS_IFFLAGS_NO_PROMISC);
+}
+
+int edge_os_set_iface_running(const char *ifname)
+{
+    return __edge_os_set_ifflags(ifname, EDGEOS_IFFLAGS_RUNNING);
+}
+
+int edge_os_set_iface_no_running(const char *ifname)
+{
+    return __edge_os_set_ifflags(ifname, EDGEOS_IFFLAGS_NO_RUNNING);
+}
 
 int edge_os_get_mtu(const char *ifname)
 {

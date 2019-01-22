@@ -1,3 +1,9 @@
+/**
+ * @brief - networking layer interfaces from EDGEOS
+ * @Author - Devendra Naga (devendra.aaru@gmail.com)
+ * @Copyright  - all rights reserved
+ * License - MIT 
+ */
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
@@ -7,6 +13,8 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <sys/ioctl.h>
+#include <netinet/udp.h>
+#include <netinet/tcp.h>
 #include <netinet/ether.h>
 #include <linux/if_packet.h>
 #include <net/if.h>
@@ -17,6 +25,7 @@
 #include <edgeos_evtloop.h>
 #include <stdlib.h>
 #include <edgeos_logger.h>
+#include <edgeos_ioctl.h>
 
 // managed server client configuration data
 struct edge_os_client_list {
@@ -68,7 +77,8 @@ int edge_os_new_unix_socket()
 
 void edge_os_del_udp_socket(int sock)
 {
-    close(sock);
+    if (sock >= 0)
+        close(sock);
 }
 
 int edge_os_create_udp_client()
@@ -191,6 +201,18 @@ int edge_os_create_tcp_unix_client(const char *path)
 fail:
     close(sock);
 
+    return -1;
+}
+
+// FIXME: implement
+int edge_os_create_tcp_server_on(const char *ifname, int port)
+{
+    return -1;
+}
+
+// FIXME: implement
+int edge_os_create_udp_server_on(const char *ifname, int port)
+{
     return -1;
 }
 
@@ -405,6 +427,20 @@ bad:
     return -1;
 }
 
+int edge_os_socket_ioctl_tfo(int fd, int que_len)
+{
+    int ret;
+
+    ret = setsockopt(fd, SOL_TCP, TCP_FASTOPEN, &que_len, sizeof(que_len));
+    if (ret < 0) {
+        edge_os_log_with_error(errno, "net: failed to tcp fast open @ %s %u ",
+                                    __func__, __LINE__);
+        return -1;
+    }
+
+    return 0;
+}
+
 int edge_os_create_udp_mcast_client(char *ip, int port, char *mcast_group, char *ipaddr)
 {
     int sock;
@@ -430,12 +466,20 @@ int edge_os_create_udp_mcast_client(char *ip, int port, char *mcast_group, char 
 
 int edge_os_socket_ioctl_set_mcast_if(int fd, char *ipaddr)
 {
+    int ret;
     struct ip_mreq mcast_if;
 
     mcast_if.imr_interface.s_addr = inet_addr(ipaddr);
 
-    return setsockopt(fd, IPPROTO_IP, IP_MULTICAST_IF,
+    ret = setsockopt(fd, IPPROTO_IP, IP_MULTICAST_IF,
                       &mcast_if.imr_interface, sizeof(struct in_addr));
+    if (ret < 0) {
+        edge_os_log_with_error(errno, "net: failed to setsockopt @ %s %u ",
+                                    __func__, __LINE__);
+        return -1;
+    }
+
+    return 0;
 }
 
 int edge_os_socket_ioctl_set_mcast_add_member(int fd, char *ipaddr, char *group)
@@ -478,37 +522,77 @@ int edge_os_socket_ioctl_set_nonblock(int fd)
 
 int edge_os_socket_ioctl_bind_to_device(int fd)
 {
+    int ret;
     int set = 1;
 
-    return setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, &set, sizeof(set));
+    ret = setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, &set, sizeof(set));
+    if (ret < 0) {
+        edge_os_log_with_error(errno, "net: failed to setsockopt: @ %s %u ",
+                                        __func__, __LINE__);
+        return -1;
+    }
+
+    return 0;
 }
 
 int edge_os_socket_ioctl_reuse_addr(int fd)
 {
+    int ret;
     int set = 1;
 
-    return setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &set, sizeof(set));
+    ret = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &set, sizeof(set));
+    if (ret < 0) {
+        edge_os_log_with_error(errno, "net: failed to setsockopt: @ %s %u ",
+                                        __func__, __LINE__);
+        return -1;
+    }
+
+    return 0;
 }
 
 int edge_os_socket_ioctl_reset_reuse_addr(int fd)
 {
+    int ret;
     int set = 0;
 
-    return setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &set, sizeof(set));
+    ret = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &set, sizeof(set));
+    if (ret < 0) {
+        edge_os_log_with_error(errno, "net: failed to setsockopt: @ %s %u ",
+                                        __func__, __LINE__);
+        return -1;
+    }
+
+    return 0;
 }
 
 int edge_os_socket_ioctl_set_broadcast(int fd)
 {
+    int ret;
     int set = 1;
 
-    return setsockopt(fd, SOL_SOCKET, SO_BROADCAST, &set, sizeof(set));
+    ret = setsockopt(fd, SOL_SOCKET, SO_BROADCAST, &set, sizeof(set));
+    if (ret < 0) {
+        edge_os_log_with_error(errno, "net: failed to setsockopt: @ %s %u ",
+                                        __func__, __LINE__);
+        return -1;
+    }
+
+    return 0;
 }
 
 int edge_os_socket_ioctl_keepalive(int fd)
 {
+    int ret;
     int set = 1;
 
-    return setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &set, sizeof(set));
+    ret = setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &set, sizeof(set));
+    if (ret < 0) {
+        edge_os_log_with_error(errno, "net: failed to setsockopt: @ %s %u ",
+                                        __func__, __LINE__);
+        return -1;
+    }
+
+    return 0;
 }
 
 int edge_os_net_setmaxconn(int conns)
@@ -518,6 +602,7 @@ int edge_os_net_setmaxconn(int conns)
     char buf[10];
     int ret;
 
+    // setting -1 will result in a dynamic connections ? here or at listen()
     ret = snprintf(buf, sizeof(buf), "%d\n", conns);
 
     fd = open(SOMAX_CONN_FILE, O_WRONLY);
@@ -556,9 +641,32 @@ int edge_os_tcp_send(int fd, void *msg, int msglen)
     return send(fd, msg, msglen, 0);
 }
 
+int edge_os_tcp_send_tfo(int fd, void *msg, int msglen, char *dest, int dest_port)
+{
+    struct sockaddr_in d = {
+        .sin_addr.s_addr = inet_addr(dest),
+        .sin_port = htons(dest_port),
+        .sin_family = AF_INET,
+    };
+    int ret;
+
+    ret = sendto(fd, msg, msglen, MSG_FASTOPEN, (struct sockaddr *)&d, sizeof(d));
+    if (ret < 0) {
+        edge_os_log_with_error(errno, "failed to sendto @ %s %u ",
+                                        __func__, __LINE__);
+    }
+
+    return ret;
+}
+
 int edge_os_tcp_recv(int fd, void *msg, int msglen)
 {
     return recv(fd, msg, msglen, 0);
+}
+
+int edge_os_tcp_recv_tfo(int fd, void *msg, int msglen, char *dest, int *dest_port)
+{
+    return edge_os_udp_recvfrom(fd, msg, msglen, dest, dest_port);
 }
 
 int edge_os_udp_sendto(int fd, void *msg, int msglen, char *dest, int dest_port)
@@ -609,6 +717,31 @@ int edge_os_udp_recvfrom(int fd, void *msg, int msglen, char *dest, int *dest_po
 
     return ret;
 }
+
+
+int edge_os_raw_recvfrom(int fd,
+                         void *msg,
+                         int msglen,
+                         struct edge_os_raw_sock_rx_params *rx)
+{
+    struct sockaddr_ll ll;
+    socklen_t ll_l = sizeof(ll);
+    int ret;
+
+    ret = recvfrom(fd, msg, msglen, 0, (struct sockaddr *)&ll, &ll_l);
+    if (ret < 0) {
+        return -1;
+    }
+
+    if (rx) {
+        rx->protocol = ll.sll_protocol;
+        rx->ifindex = ll.sll_ifindex;
+        rx->pkt_type = ll.sll_pkttype;
+    }
+
+    return ret;
+}
+
 
 static int edge_os_client_list_for_each(void *data, void *priv)
 {
@@ -802,6 +935,7 @@ struct edge_os_raw_sock_params {
     struct ifreq ifr;
     uint8_t srcmac[6];
     uint8_t *txbuf;
+    int off;
     int txbuflen;
 };
 
@@ -812,43 +946,93 @@ void* edge_os_raw_socket_create(edge_os_raw_sock_type_t type, const char *ifname
 
     raw_params = calloc(1, sizeof(struct edge_os_raw_sock_params));
     if (!raw_params) {
+        edge_os_error("net: failed to allocate @ %s %u\n", __func__, __LINE__);
         return NULL;
     }
 
-    raw_params->fd = socket(AF_PACKET, SOCK_RAW, ETH_P_ALL);
+    int sock_type = 0;
+    int txbuf_adjustment = 0;
+
+    switch (type) {
+        case EDGEOS_RAW_SOCK_ETH:
+        case EDGEOS_RAW_SOCK_SNIFFER: {
+            sock_type = htons(ETH_P_ALL);
+
+            txbuf_adjustment = sizeof(struct ether_header);
+        } break;
+        case EDGEOS_RAW_SOCK_ARP:
+            sock_type = htons(ETH_P_ARP);
+        break;
+        case EDGEOS_RAW_SOCK_UDP:
+            // we let ip layer handle the ip fills
+            sock_type = IPPROTO_UDP;
+
+            txbuf_adjustment = sizeof(struct udphdr);
+        break;
+        case EDGEOS_RAW_SOCK_ICMP:
+        default:
+            goto bad;
+    }
+
+    raw_params->fd = socket(AF_PACKET, SOCK_RAW, sock_type);
     if (raw_params->fd < 0) {
+        edge_os_log_with_error(errno, "net: failed to socket @ %s %u ",
+                                    __func__, __LINE__);
+        goto bad;
+    }
+
+    raw_params->txbuf = calloc(1, txbuf_len + txbuf_adjustment);
+    if (!raw_params->txbuf) {
+        edge_os_alloc_err(__FILE__, __func__, __LINE__);
         return NULL;
     }
+
+    strcpy(raw_params->ifr.ifr_name, ifname);
+    ret = ioctl(raw_params->fd, SIOCGIFINDEX, &raw_params->ifr);
+    if (ret < 0) {
+        edge_os_log_with_error(errno, "net: failed to ioctl @ %s %u ",
+                                        __func__, __LINE__);
+        return NULL;
+    }
+
+    raw_params->ifidnex = raw_params->ifr.ifr_ifindex;
+
+    memset(&raw_params->ifr, 0, sizeof(raw_params->ifr));
+
+    strcpy(raw_params->ifr.ifr_name, ifname);
+    ret = ioctl(raw_params->fd, SIOCGIFHWADDR, &raw_params->ifr);
+    if (ret < 0) {
+        edge_os_log_with_error(errno, "net: failed to ioctl @ %s %u ",
+                                        __func__, __LINE__);
+        return NULL;
+    }
+
 
     if (type == EDGEOS_RAW_SOCK_ETH) {
-        raw_params->txbuf = calloc(1, txbuf_len + sizeof(struct ether_header));
-        if (!raw_params->txbuf) {
-            return NULL;
-        }
 
         raw_params->txbuflen = txbuf_len + sizeof(struct ether_header);
 
-        strcpy(raw_params->ifr.ifr_name, ifname);
-        ret = ioctl(raw_params->fd, SIOCGIFINDEX, &raw_params->ifr);
-        if (ret < 0) {
-            return NULL;
-        }
-
-        raw_params->ifidnex = raw_params->ifr.ifr_ifindex;
-
-        memset(&raw_params->ifr, 0, sizeof(raw_params->ifr));
-        ret = ioctl(raw_params->fd, SIOCGIFHWADDR, &raw_params->ifr);
-        if (ret < 0) {
-            return NULL;
-        }
-
         memcpy(raw_params->srcmac, (uint8_t *)(raw_params->ifr.ifr_hwaddr.sa_data), 6);
         memcpy(raw_params->eh.ether_shost, raw_params->srcmac, 6);
-    } else {
-        return NULL;
+    } else if (type == EDGEOS_RAW_SOCK_SNIFFER) {
+        ret = edge_os_set_iface_promisc(ifname);
+        if (ret < 0) {
+        }
     }
 
     return raw_params;
+
+bad:
+    if (raw_params) {
+        if (raw_params->txbuf)
+            free(raw_params->txbuf);
+
+        if (raw_params->fd > 0)
+            close(raw_params->fd);
+        free(raw_params);
+    }
+
+    return NULL;
 }
 
 int edge_os_raw_socket_send_eth_frame(
@@ -876,7 +1060,7 @@ int edge_os_raw_socket_send_eth_frame(
 
     memcpy(raw_params->eh.ether_shost, srcmac, 6);
     memcpy(raw_params->eh.ether_dhost, dstmac, 6);
-    raw_params->eh.ether_type = ethertype;
+    raw_params->eh.ether_type = htons(ethertype);
 
     memcpy(raw_params->txbuf, &raw_params->eh, sizeof(raw_params->eh));
     memcpy(raw_params->txbuf + sizeof(raw_params->eh),
@@ -890,5 +1074,228 @@ int edge_os_raw_socket_send_eth_frame(
     }
 
     return ret;
+}
+
+int edge_os_raw_socket_get_fd(void *raw_handle)
+{
+    struct edge_os_raw_sock_params *raw_params = raw_handle;
+
+    return raw_params->fd;
+}
+
+void edge_os_raw_socket_delete(void *raw_handle)
+{
+    struct edge_os_raw_sock_params *raw_params = raw_handle;
+
+    if (raw_params->txbuf)
+        free(raw_params->txbuf);
+
+    if (raw_params->fd > 0)
+        close(raw_params->fd);
+
+    free(raw_params);
+}
+
+int edge_os_is_ip_multicast(const char *ip)
+{
+    in_addr_t addr;
+
+    addr = inet_addr(ip);
+
+    return IN_MULTICAST(addr);
+}
+
+int edge_os_build_ether_addr(void *raw_handle,
+                             uint8_t *srcmac,
+                             uint8_t *dstmac,
+                             uint16_t ether_type)
+{
+    struct edge_os_raw_sock_params *raw_params = raw_handle;
+    struct ether_header *eh;
+
+    eh = (struct ether_header *)(raw_params->txbuf);
+    
+    eh->ether_shost[0] = srcmac[0];
+    eh->ether_shost[1] = srcmac[1];
+    eh->ether_shost[2] = srcmac[2];
+    eh->ether_shost[3] = srcmac[3];
+    eh->ether_shost[4] = srcmac[4];
+    eh->ether_shost[5] = srcmac[5];
+    
+    eh->ether_dhost[0] = dstmac[0];
+    eh->ether_dhost[1] = dstmac[1];
+    eh->ether_dhost[2] = dstmac[2];
+    eh->ether_dhost[3] = dstmac[3];
+    eh->ether_dhost[4] = dstmac[4];
+    eh->ether_dhost[5] = dstmac[5];
+    
+    eh->ether_type = htons(ether_type);
+
+    return 0;
+}
+
+int edge_os_build_arp_reply(void *raw_handle,
+                            uint8_t *myaddr,
+                            char *myip,
+                            uint8_t *taaddr,
+                            char *taip)
+{
+    struct edge_os_raw_sock_params *raw_params = raw_handle;
+    struct ether_arp *arp;
+    in_addr_t addr;
+
+    arp = (struct ether_arp *)(raw_params->txbuf + sizeof(struct ether_header));
+
+    arp->ea_hdr.ar_hrd = htons(ARPHRD_ETHER);
+    arp->ea_hdr.ar_pro = htons(0x800);
+    arp->ea_hdr.ar_hln = 6;
+    arp->ea_hdr.ar_pln = 4;
+    arp->ea_hdr.ar_op = htons(2);
+
+    arp->arp_sha[0] = myaddr[0];
+    arp->arp_sha[1] = myaddr[1];
+    arp->arp_sha[2] = myaddr[2];
+    arp->arp_sha[3] = myaddr[3];
+    arp->arp_sha[4] = myaddr[4];
+    arp->arp_sha[5] = myaddr[5];
+
+    addr = inet_addr(myip);
+
+    memcpy(arp->arp_spa, &addr, sizeof(arp->arp_spa));
+
+    arp->arp_tha[0] = taaddr[0];
+    arp->arp_tha[1] = taaddr[1];
+    arp->arp_tha[2] = taaddr[2];
+    arp->arp_tha[3] = taaddr[3];
+    arp->arp_tha[4] = taaddr[4];
+    arp->arp_tha[5] = taaddr[5];
+
+    addr = inet_addr(taip);
+
+    memcpy(arp->arp_tpa, &addr, sizeof(arp->arp_tpa));
+
+    return 0;
+}
+
+int edge_os_build_arp_request(void *raw_handle,
+                              uint8_t *myaddr,
+                              char *myip,
+                              uint8_t *taaddr,
+                              char *taip)
+{
+    struct edge_os_raw_sock_params *raw_params = raw_handle;
+    struct ether_arp *arp;
+    in_addr_t addr;
+
+    arp = (struct ether_arp *)(raw_params->txbuf + sizeof(struct ether_header));
+
+    arp->ea_hdr.ar_hrd = htons(ARPHRD_ETHER);
+    arp->ea_hdr.ar_pro = htons(0x800);
+    arp->ea_hdr.ar_hln = 6;
+    arp->ea_hdr.ar_pln = 4;
+    arp->ea_hdr.ar_op = htons(1);
+
+    arp->arp_sha[0] = myaddr[0];
+    arp->arp_sha[1] = myaddr[1];
+    arp->arp_sha[2] = myaddr[2];
+    arp->arp_sha[3] = myaddr[3];
+    arp->arp_sha[4] = myaddr[4];
+    arp->arp_sha[5] = myaddr[5];
+
+    addr = inet_addr(myip);
+
+    memcpy(arp->arp_spa, &addr, sizeof(arp->arp_spa));
+
+    arp->arp_tha[0] = 0x0;
+    arp->arp_tha[1] = 0x0;
+    arp->arp_tha[2] = 0x0;
+    arp->arp_tha[3] = 0x0;
+    arp->arp_tha[4] = 0x0;
+    arp->arp_tha[5] = 0x0;
+
+    addr = inet_addr(taip);
+
+    memcpy(arp->arp_tpa, &addr, sizeof(arp->arp_tpa));
+
+    return 0;
+}
+
+#define EDGEOS_ETHERTYPE_ARP 0x0806
+
+int edge_os_initiate_arp_reply(void *raw_handle,
+                                 uint8_t *myaddr,
+                                 char *myip,
+                                 uint8_t *taaddr,
+                                 char *taip)
+{
+    int ret;
+    struct sockaddr_ll d;
+    struct edge_os_raw_sock_params *raw_params = raw_handle;
+
+    // address all the nodes
+    ret = edge_os_build_ether_addr(raw_handle, myaddr, taaddr, EDGEOS_ETHERTYPE_ARP);
+    if (ret < 0) {
+        return -1;
+    }
+
+    ret = edge_os_build_arp_reply(raw_handle, myaddr, myip, taaddr, taip);
+    if (ret < 0) {
+        return -1;
+    }
+
+    d.sll_family = AF_PACKET;
+    d.sll_protocol = htons(0x806);
+    d.sll_ifindex = raw_params->ifidnex;
+    d.sll_hatype = htons(ARPHRD_ETHER);
+    d.sll_pkttype = PACKET_OTHERHOST;
+    d.sll_halen = 6;
+    d.sll_addr[0] = taaddr[0];
+    d.sll_addr[1] = taaddr[1];
+    d.sll_addr[2] = taaddr[2];
+    d.sll_addr[3] = taaddr[3];
+    d.sll_addr[4] = taaddr[4];
+    d.sll_addr[5] = taaddr[5];
+
+
+    return sendto(raw_params->fd, raw_params->txbuf, sizeof(struct ether_arp) + sizeof(struct ether_header), 0, (struct sockaddr *)&d, sizeof(struct sockaddr_ll));
+}
+
+int edge_os_initiate_arp_request(void *raw_handle,
+                                 uint8_t *myaddr,
+                                 char *myip,
+                                 uint8_t *taaddr,
+                                 char *taip)
+{
+    int ret;
+    struct sockaddr_ll d;
+    uint8_t bmac[] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+    struct edge_os_raw_sock_params *raw_params = raw_handle;
+
+    // address all the nodes
+    ret = edge_os_build_ether_addr(raw_handle, myaddr, bmac, EDGEOS_ETHERTYPE_ARP);
+    if (ret < 0) {
+        return -1;
+    }
+
+    ret = edge_os_build_arp_request(raw_handle, myaddr, myip, taaddr, taip);
+    if (ret < 0) {
+        return -1;
+    }
+
+    d.sll_family = AF_PACKET;
+    d.sll_protocol = htons(0x806);
+    d.sll_ifindex = raw_params->ifidnex;
+    d.sll_hatype = htons(ARPHRD_ETHER);
+    d.sll_pkttype = PACKET_OTHERHOST;
+    d.sll_halen = 6;
+    d.sll_addr[0] = bmac[0];
+    d.sll_addr[1] = bmac[1];
+    d.sll_addr[2] = bmac[2];
+    d.sll_addr[3] = bmac[3];
+    d.sll_addr[4] = bmac[4];
+    d.sll_addr[5] = bmac[5];
+
+
+    return sendto(raw_params->fd, raw_params->txbuf, sizeof(struct ether_arp) + sizeof(struct ether_header), 0, (struct sockaddr *)&d, sizeof(struct sockaddr_ll));
 }
 

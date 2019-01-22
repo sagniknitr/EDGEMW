@@ -68,6 +68,16 @@ int sysioctl_test(int argc, char **argv)
     }
     edge_os_free_netdev_info(ndev);
 
+    edge_os_set_iface_promisc("enp67s0");
+
+    printf("in promisc %s\n",
+                    edge_os_is_if_promisc("enp67s0") ? "Yes" : "No");
+
+    edge_os_set_iface_remove_promisc("enp67s0");
+
+    printf("in promisc %s\n",
+                    edge_os_is_if_promisc("enp67s0") ? "Yes" : "No");
+
     return 0;
 }
 

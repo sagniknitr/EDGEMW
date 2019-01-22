@@ -3,6 +3,7 @@
 
 typedef enum {
     EDGE_OS_SECP256K1 = 1,
+    EDGE_OS_prime256v1,
     EDGE_OS_SECP160k1,
     EDGE_OS_SECP160r1,
     EDGE_OS_SECP160r2,
@@ -72,6 +73,10 @@ int edge_os_crypto_aes_128_cbc_decrypt(void *cipher, int cipherlen, void *plain,
 int edge_os_crypto_aes_128_cbc_decrypt_file(const char *cypher_file, const char *output_file,
                                      const char *keyfile, const char *ivfile);
 
+int edge_os_crypto_encrypt_aes_gcm(void *plain, int plainlen, void *auth_header, int auth_header_len, void *tag, void *cipher, uint8_t *key, int keysize, uint8_t *iv, int ivsize);
+
+int edge_os_crypto_decrypt_aes_gcm(void *cipher, int cipherlen, uint8_t *tag, void *auth_header, int auth_header_len, uint8_t *key, int keysize, uint8_t *iv, int ivsize, void *plain);
+
 // signature and the length
 struct edge_os_ecc_signature {
     // ECC signature
@@ -116,5 +121,37 @@ void edge_os_crypto_init(void);
  */
 void edge_os_crypto_deinit(void);
 
+void *edge_os_crypto_ssl_tcp_server_create(const char *addr, int port, int n_conn,
+                                const char *certfile,  const char *privkeyfile);
+
+void *edge_os_crypto_ssl_accept_conn(void *priv);
+
+void *edge_os_crypto_ssl_tcp_client_create(const char *addr, const char *protocol, int port, const char *certpath, const char *keypath);
+
+int edge_os_crypto_ssl_server_send(void *priv, void *client_priv, void *msg, int msglen);
+
+int edge_os_crypto_ssl_server_recv(void *priv, void *client_priv, void *msg, int msglen);
+
+int edge_os_crypto_ssl_client_send(void *priv, void *msg, int msglen);
+
+int edge_os_crypto_ssl_client_recv(void *priv, void *msg, int msglen);
+
+int edge_os_crypto_make_hmac_key(uint8_t *key, int keysize);
+
+int edge_os_crypto_make_hmac_keyfile(const char *keyfile, int keysize);
+
+struct edge_os_hmac_signature {
+    uint8_t *signature;
+    long unsigned int signature_len;
+};
+
+
+struct edge_os_hmac_signature* edge_os_crypto_sign_hmac_sha256(void *input, int input_len, uint8_t *key);
+
+void edge_os_crypto_free_hmac_signatures(struct edge_os_hmac_signature *signature);
+
+int edge_os_crypto_verify_hmac_sha256(void *signature, long unsigned int signature_len, void *input, int input_len, uint8_t *key);
+
+  
 #endif
 

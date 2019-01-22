@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <edgeos_netapi.h>
 #include <edgeos_evtloop.h>

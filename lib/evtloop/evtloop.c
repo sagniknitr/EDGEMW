@@ -5,7 +5,7 @@
  *
  * @Author: Dev Naga (devendra.aaru@gmail.com)
  *
- * License Apache
+ * License MIT
  */
 
 #include <stdio.h>
@@ -27,6 +27,9 @@
 
 int edge_os_evtloop_init(struct edge_os_evtloop_base *base, void *priv)
 {
+    if (!base)
+        return -1;
+
     edge_os_list_init(&base->timer_base);
     edge_os_list_init(&base->socket_base);
     edge_os_list_init(&base->signal_base);
@@ -52,8 +55,7 @@ int __edge_os_evtloop_register_timer(void *handle, void *app_priv, int sec, int 
 
     timer = calloc(1, sizeof(struct edge_os_evtloop_timer));
     if (!timer) {
-        edge_os_error("evtloop: failed to allocate @ %s %u\n",
-                                    __func__, __LINE__);
+        edge_os_alloc_err(__FILE__, __func__, __LINE__);
         return -1;
     }
 
@@ -124,7 +126,7 @@ int edge_os_evtloop_unregister_socket(void *handle, int sock)
     struct edge_os_evtloop_socket *data;
 
     if (!handle || (sock < 0)) {
-        edge_os_error("evtloop: invalid handle @p / sock %d @ %s %u\n",
+        edge_os_error("evtloop: invalid handle %p / sock %d @ %s %u\n",
                                 handle, sock, __func__, __LINE__);
         return -1;
     }
@@ -156,8 +158,7 @@ int edge_os_evtloop_register_socket(void *handle, void *app_priv, int sock,
 
     sock_ = calloc(1, sizeof(struct edge_os_evtloop_socket));
     if (!sock_) {
-        edge_os_error("evtloop: failed to allocate @ %s %u\n",
-                            __func__, __LINE__);
+        edge_os_alloc_err(__FILE__, __func__, __LINE__);
         return -1;
     }
 
@@ -189,8 +190,7 @@ int edge_os_evtloop_register_signal(void *handle, void *app_priv, int sig,
 
     sig_ = calloc(1, sizeof(struct edge_os_evtloop_signal));
     if (!sig_) {
-        edge_os_error("evtloop: failed to allocate @ %s %u\n",
-                            __func__, __LINE__);
+        edge_os_alloc_err(__FILE__, __func__, __LINE__);
         return -1;
     }
 
@@ -369,6 +369,5 @@ void edge_os_evtloop_run(void *handle)
 
 void edge_os_evtloop_deinit(void *handle)
 {
-
 }
 

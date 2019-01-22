@@ -2,69 +2,12 @@
 
 [semaphore ci status](https://devnaga.semaphoreci.com/dashboards/my-work)
 
-[![codecov](https://codecov.io/gh/DevNaga/EDGEMW/branch/master/graph/badge.svg)](https://codecov.io/gh/DevNaga/EDGEMW)
 
 For planned features see [roadmap](roadmap.md)
 
 ## Features
 
-Below are some of the features. More to come soon.
-
-
-### Library interface
-
-1. Framework for timers, sockets and signals - event Loop library
-
-2. socket library API -
-    1. UNIX and IPv4  TCP and UDP server and clients
-    2. managed server abstraaction to reduce coding effort on user ende
-    3. C++ abstraction to the TCP server and client with Socket library and the Eventloop
-
-3. GPS parser library:
-    1. for NMEA messages:
-        `GPGGA`, `GPGSA`, `GPGSV`, `GPRMB`, `GPRMC`, `GPGGLL`
-
-4. cryptography APIs - wrappers for most popular libraries (openssl, wolfssl, tomcrypt) - currently openssl
-    1. hashing :
-        `MD5`, `SHA`, `SHA1`, `SHA224`, `SHA256`, `SHA384`, `SHA512`
-    2. encryption and decryption:
-        `AES-CBC-128`
-        `AES-CBC-192`
-        `AES-CBC-256`
-        `RC4`
-        and key generation and iv generation
-    3. ECC sign and verify:
-        `ECC-with-sha1`
-        `ECC-with-sha256`
-        curve support:
-            `SECP256k1`,
-            `SECP128r1`,
-            `SECP128r2`,
-            `SECP224r1`,
-            `SECP224r2`,
-            `SECP224k1`,
-            `SECP160k1`,
-            `SECP160r1`,
-            `SECP160r2`,
-            `SECP192k1`,
-            `brainpoolp224r1`,
-            `brainpoolp256r1`,
-        and ECC keygen
-
-5. Utilities -
-    1. CSV File reader / writer / parser
-    2. Token parser
-
-6. algorithms -
-    1. basic data structures for C
-        linked list
-
-
-### Services
-
-1. Logger service
-    1. remote logging, local logging yet to be done over unix domain
-    2. log rotate - every 1 MB (configurable)
+see [features.md](features.md). More to come soon.
 
 
 ### how to compile

@@ -43,7 +43,28 @@ run_gcc_tests() {
     ./build/TestExecutor crypto_test
     ./build/TestExecutor config_parser_test ./tests/supervisor.conf
     ./build/TestExecutor config_parser_test
-    exit 0
+    ./build/TestExecutor dlist_test
+    ./build/TestExecutor static_list_test
+    ./build/TestExecutor stack_test
+    ./build/TestExecutor queue_test
+    ./build/TestExecutor fifo_test
+    ./build/TestExecutor ssl_test server&
+    ./build/TestExecutor ssl_test client&
+    sleep 1
+    ./build/TestExecutor hashtbl_test
+    #./build/TestExecutor msg_queue_test server /mq_test&
+    #./build/TestExecutor msg_queue_test client /mq_test&
+	./build/TestExecutor evtloop_test server&
+	./build/TestExecutor evtloop_test client&
+    sleep 1
+    ./build/TestExecutor rawsock_test
+    sudo ./build/TestExecutor rawsock_test sender
+    toch f
+    ./build/TestExecutor monitor_test f&
+    touch f
+	sleep 1
+	echo "test complete.."
+	exit 0
 }
 
 make_release() {
@@ -58,6 +79,10 @@ make_release() {
     fi
 
     make -j12
+    if [ "$?" -ne 0 ] ; then
+        echo "failed to generate a release image.. check your tests"
+        exit 1
+    fi
 
     cd ..
 

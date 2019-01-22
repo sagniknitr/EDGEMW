@@ -21,13 +21,13 @@ else()
 
     if (CONFIG_RELEASE)
 
-        set(CMAKE_C_FLAGS "-O3 -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow -fPIE -fPIC -D_FORTIFY_SOURCE=2 -DWC_NO_HARDEN -DCONFIG_CRYPTO_LIB_OPENSSL ${OS_FLAGS}")
-        set(CMAKE_CXX_FLAGS "-O3 -Wall -Wextra -Werror -Wno-unused-parameter -Wshadow -fPIC -fPIE -std=c++11 -DWC_NO_HARDEN -DCONFIG_CRYPTO_LIB_OPENSSL ${OS_FLAGS}")
+        set(CMAKE_C_FLAGS "-Os -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow -fPIE -fPIC -D_FORTIFY_SOURCE=2 -DCONFIG_EDGEOS_DETAILED_ERRORS -DWC_NO_HARDEN -DCONFIG_CRYPTO_LIB_OPENSSL ${OS_FLAGS}")
+        set(CMAKE_CXX_FLAGS "-Os -Wall -Wextra -Werror -Wno-unused-parameter -Wshadow -fPIC -fPIE -std=c++11 -DCONFIG_EDGEOS_DETAILED_ERRORS -DWC_NO_HARDEN -DCONFIG_CRYPTO_LIB_OPENSSL ${OS_FLAGS}")
 
     else()
 
-        set(CMAKE_C_FLAGS "-O0 -ggdb -g -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow -fPIE -fPIC -fprofile-arcs -ftest-coverage -D_FORTIFY_SOURCE=2 -DWC_NO_HARDEN -DCONFIG_CRYPTO_LIB_OPENSSL -pg ${OS_FLAGS}")
-        set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -Wno-unused-parameter -Wshadow -fPIC -fPIE -std=c++11 -pg -fprofile-arcs -ftest-coverage -pg -std=c++11 -DWC_NO_HARDEN -DCONFIG_CRYPTO_LIB_OPENSSL ${OS_FLAGS}")
+        set(CMAKE_C_FLAGS "-O0 -ggdb -g -Wall -Werror -Wextra -Wno-unused-parameter -Wshadow -fPIE -fPIC -fprofile-arcs -ftest-coverage -D_FORTIFY_SOURCE=2 -DCONFIG_EDGEOS_DETAILED_ERRORS -DWC_NO_HARDEN -DCONFIG_CRYPTO_LIB_OPENSSL -pg ${OS_FLAGS}")
+        set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -Wno-unused-parameter -Wshadow -fPIC -fPIE -std=c++11 -pg -fprofile-arcs -ftest-coverage -pg -std=c++11 -DCONFIG_EDGEOS_DETAILED_ERRORS -DWC_NO_HARDEN -DCONFIG_CRYPTO_LIB_OPENSSL ${OS_FLAGS}")
 
     endif()
 
@@ -36,7 +36,12 @@ else()
 endif()
 
 SET(ALG_SOURCES
-        lib/algorithms/list.c)
+        lib/algorithms/list.c
+        lib/algorithms/dlist.c
+        lib/algorithms/static_list.c
+        lib/algorithms/stack.c
+        lib/algorithms/queue.c
+        lib/algorithms/hashtbl.c)
 
 SET(LINUX_SPEC_SOURCES
         lib/linux/net/socket.c
@@ -50,7 +55,10 @@ SET(LINUX_SPEC_SOURCES
         lib/linux/pthreads/pthreads.c
         lib/linux/net/ds/generated/dist_sdp.pb-c.c
         lib/linux/date_time/date_time.c
-        lib/linux/process/process.c)
+        lib/linux/process/process.c
+        lib/linux/fifo/fifo.c
+        lib/linux/msgqueue/msg_queue.c
+        lib/linux/monitoring/monitor.c)
 
 SET(UTIL_SOURCES
         lib/util/csvclass.cpp
@@ -80,7 +88,6 @@ set(SOURCES
         services/distcom/dist_sdp.c
         ${GPSLIB_SOURCES}
         ${CRYPTO_SOURCES}
-        lib/init.c
         ${CONFIG_PARSER_SOURCES})
 
 set(LIB_TEST_SOURCES
@@ -95,9 +102,6 @@ set(DIST_TEST_SOURCES
 set(NMEA_TEST_SOURCES
         lib/gpslib/src/tests/unit_tests/unit_core.cpp)
 
-set(EVTLOOP_TEST_SOURCES
-        tests/test_evtloop.cpp)
-
 set(TCPSERVER_TEST_SOURCES
         tests/test_TcpServer.cpp)
 
@@ -106,12 +110,23 @@ set(TEST_CASES_SOURCES
         tests/test_fsapi.cpp
         tests/test_tokparse.cpp
         tests/test_list.c
+        tests/test_evtloop.cpp
         tests/test_prng.c
         tests/test_sysioctl.c
         tests/test_pthread.c
         tests/test_crypto.c
         tests/test_sched.c
-        tests/test_config_parser.cpp)
+        tests/test_config_parser.cpp
+        tests/test_dlist.c
+        tests/test_static_list.c
+        tests/test_stack.c
+        tests/test_queue.c
+        tests/test_fifo.c
+        tests/test_ssl.c
+        tests/test_hashtbl.c
+        tests/test_msg_queue.cpp
+        tests/test_monitor.cpp
+        tests/test_raw.c)
 
 set(TRANSFER_TEST_SOURCES
         tests/transfer_test.c)
@@ -133,6 +148,7 @@ include_directories(
     lib/linux/transport/
     lib/linux/crypto/
     lib/incl/
+    lib/linux/fifo/
     services/distcom/
     lib/
     lib/gpslib/src/nmea/
@@ -145,9 +161,11 @@ include_directories(
     services/supervisor/
     services/ota/
     lib/crypto/
+    lib/linux/msgqueue/
     lib/config/
     lib/linux/date_time/
     lib/linux/process/
+    lib/linux/monitoring/
     services/cli/
     services/cli/library/)
 
@@ -169,6 +187,10 @@ SET(CLI_CLIENT_SOURCES
         services/cli/library/show_callback.c
         services/cli/rpc.c)
 
+set(ASN1_COMPILER_SOURCES
+        lib/asn1/compiler/core.cpp
+		lib/asn1/compiler/types.c)
+
 add_library(EdgeOS STATIC ${SOURCES})
 
 if (CONFIG_SHAREDLIB)
@@ -177,6 +199,9 @@ if (CONFIG_SHAREDLIB)
 endif()
 
 target_link_libraries(EdgeOS pthread rt gcov protobuf-c crypto ssl)
+
+add_executable(asn1compiler ${ASN1_COMPILER_SOURCES})
+target_link_libraries(asn1compiler rt)
 
 add_executable(EdgeOSLogger services/logsrv/edgeos_logsrv.cpp)
 target_link_libraries(EdgeOSLogger pthread EdgeOS gcov rt)
@@ -195,9 +220,6 @@ target_link_libraries(DistTest pthread EdgeOS gcov)
 
 add_executable(nmeaTest ${NMEA_TEST_SOURCES})
 target_link_libraries(nmeaTest pthread EdgeOS gcov)
-
-add_executable(ELTest ${EVTLOOP_TEST_SOURCES})
-target_link_libraries(ELTest pthread EdgeOS gcov)
 
 add_executable(TcpServerTest ${TCPSERVER_TEST_SOURCES})
 target_link_libraries(TcpServerTest pthread EdgeOS gcov)
@@ -228,4 +250,16 @@ target_link_libraries(EdgeOSCLId pthread EdgeOS gcov protobuf-c)
 
 add_executable(EdgeOSCLI ${CLI_CLIENT_SOURCES})
 target_link_libraries(EdgeOSCLI pthread EdgeOS gcov protobuf-c)
+
+## building sample applications
+
+SET(SAMPLE_UDP_CLIENT_SOURCES examples/udp_client.c)
+
+SET(SAMPLE_UDP_SERVER_SOURCES examples/udp_server.c)
+
+add_executable(sample_udp_client ${SAMPLE_UDP_CLIENT_SOURCES})
+target_link_libraries(sample_udp_client pthread EdgeOS gcov protobuf-c)
+
+add_executable(sample_udp_server ${SAMPLE_UDP_SERVER_SOURCES})
+target_link_libraries(sample_udp_server pthread EdgeOS gcov protobuf-c)
 

@@ -1,3 +1,9 @@
+/**
+ * @brief - networking layer interfaces from EDGEOS
+ * @Author - Devendra Naga (devendra.aaru@gmail.com)
+ * @Copyright  - all rights reserved
+ * License - MIT
+ */
 #ifndef __EDGEOS_NETAPI_H__
 #define __EDGEOS_NETAPI_H__
 
@@ -17,9 +23,33 @@ typedef enum {
 } edge_os_server_type_t;
 
 typedef enum {
+    // raw ethernet frame
     EDGEOS_RAW_SOCK_ETH = 1,
+
+    // icmp packet
     EDGEOS_RAW_SOCK_ICMP = 2,
+
+    // udp packet
+    EDGEOS_RAW_SOCK_UDP = 3,
+
+    // ARP packet
+    EDGEOS_RAW_SOCK_ARP = 4,
+
+    // listen and monitor
+    EDGEOS_RAW_SOCK_SNIFFER = 127,
 } edge_os_raw_sock_type_t;
+
+// raw packet receiver parameters
+struct edge_os_raw_sock_rx_params {
+    // receive protocol as ethertype
+    int protocol;
+
+    // interface index
+    int ifindex;
+
+    // packet type
+    int pkt_type;
+};
 
 /**
  * @brief - create new udp socket
@@ -97,7 +127,11 @@ int edge_os_udp_sendto(int fd, void *msg, int msglen, char *dest, int dest_port)
 int edge_os_udp_recvfrom(int fd, void *msg, int msglen, char *dest, int *dest_len);
 
 int edge_os_tcp_send(int fd, void *msg, int msglen);
+int edge_os_tcp_send_tfo(int fd, void *msg, int msglen, char *dest, int dest_port);
+
 int edge_os_tcp_recv(int fd, void *msg, int msglen);
+int edge_os_tcp_recv_tfo(int fd, void *msg, int msglen, char *dest, int *dest_port);
+
 
 int edge_os_udp_unix_sendto(int fd, void *msg, int msglen, char *dest);
 
@@ -106,6 +140,7 @@ int edge_os_socket_ioctl_set_mcast_add_member(int fd, char *ipaddr, char *ifname
 int edge_os_socket_ioctl_set_mcast_if(int fd, char *ipaddr);
 int edge_os_socket_ioctl_bind_to_device(int fd);
 int edge_os_socket_ioctl_reuse_addr(int fd);
+int edge_os_socket_ioctl_tfo(int fd, int que_len);
 
 
 
@@ -124,6 +159,39 @@ int edge_os_net_setmaxconn(int conns);
 int edge_os_connect_address6(const char *addr, const char *service_name);
 
 int edge_os_connect_address4(const char *addr, const char *service_name);
+
+void* edge_os_raw_socket_create(edge_os_raw_sock_type_t type, const char *ifname, int txbuf_len);
+
+int edge_os_raw_socket_send_eth_frame(
+                    void *raw_handle,
+                    uint8_t *srcmac,
+                    uint8_t *dstmac,
+                    uint16_t ethertype,
+                    uint8_t *data,
+                    uint32_t datalen);
+
+void edge_os_raw_socket_delete(void *raw_handle);
+
+int edge_os_raw_socket_get_fd(void *raw_handle);
+
+int edge_os_is_ip_multicast(const char *ip);
+
+int edge_os_raw_recvfrom(int fd,
+                         void *msg,
+                         int msglen,
+                         struct edge_os_raw_sock_rx_params *rx);
+
+int edge_os_initiate_arp_request(void *raw_handle,
+                                 uint8_t *myaddr,
+                                 char *myip,
+                                 uint8_t *taaddr,
+                                 char *taip);
+
+int edge_os_initiate_arp_reply(void *raw_handle,
+                                 uint8_t *myaddr,
+                                 char *myip,
+                                 uint8_t *taaddr,
+                                 char *taip);
 
 #endif
 
