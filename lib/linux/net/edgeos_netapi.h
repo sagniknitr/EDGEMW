@@ -27,13 +27,15 @@ typedef enum {
     EDGEOS_RAW_SOCK_ETH = 1,
 
     // icmp packet
-    EDGEOS_RAW_SOCK_ICMP = 2,
+    EDGEOS_RAW_SOCK_ICMP_V4 = 2,
 
     // udp packet
     EDGEOS_RAW_SOCK_UDP = 3,
 
     // ARP packet
     EDGEOS_RAW_SOCK_ARP = 4,
+
+    EDGEOS_RAW_SOCK_ICMP_V6 = 5,
 
     // listen and monitor
     EDGEOS_RAW_SOCK_SNIFFER = 127,

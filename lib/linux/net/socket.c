@@ -969,7 +969,11 @@ void* edge_os_raw_socket_create(edge_os_raw_sock_type_t type, const char *ifname
 
             txbuf_adjustment = sizeof(struct udphdr);
         break;
-        case EDGEOS_RAW_SOCK_ICMP:
+        case EDGEOS_RAW_SOCK_ICMP_V4:
+            sock_type = IPPROTO_ICMP;
+
+        case EDGE_OS_RAW_SOCK_ICMP_V6:
+            sock_type = IPPROTO_ICMPV6;
         default:
             goto bad;
     }
