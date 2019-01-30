@@ -34,7 +34,8 @@ typedef enum {
 
     // ARP packet
     EDGEOS_RAW_SOCK_ARP = 4,
-
+    
+    // ICMP version 6
     EDGEOS_RAW_SOCK_ICMP_V6 = 5,
 
     // listen and monitor
