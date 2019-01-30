@@ -26,7 +26,7 @@ typedef enum {
     // raw ethernet frame
     EDGEOS_RAW_SOCK_ETH = 1,
 
-    // icmp packet
+    // icmp packet version 6
     EDGEOS_RAW_SOCK_ICMP_V4 = 2,
 
     // udp packet
