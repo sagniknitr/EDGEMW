@@ -13,8 +13,8 @@ int ssl_test(int argc, char **argv)
                             "127.0.0.1",
                             4141,
                             10,
-                            "devnaga.crt",
-                            "devnaga_priv.key");
+                            "sagniknitr.crt",
+                            "sagniknitr_priv.key");
         if (!priv) {
             return -1;
         }

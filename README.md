@@ -1,6 +1,6 @@
 # EDGE OS - Lightweight Middleware distribution
 
-[semaphore ci status](https://devnaga.semaphoreci.com/dashboards/my-work)
+[semaphore ci status]()
 
 
 For planned features see [roadmap](roadmap.md)

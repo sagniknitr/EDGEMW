@@ -13,7 +13,7 @@ blocks:
         commands:
           - pip install --user cpp-coveralls
           - sudo apt-get --assume-yes install libprotobuf-c0-dev protobuf-c-compiler protobuf-compiler libprotobuf-dev libprotoc-dev libprotoc-dev libprotobuf-c-dev
-          - git clone https://github.com/devnaga/EDGEMW/
+          - git clone https://github.com/sagniknitr/EDGEMW/
           - cd EDGEMW
           - git checkout develop-0.1
             # test with clang (++)
@@ -27,7 +27,7 @@ blocks:
         commands:
           - pip install --user cpp-coveralls
           - sudo apt-get --assume-yes install libprotobuf-c0-dev protobuf-c-compiler protobuf-compiler libprotobuf-dev libprotoc-dev libprotoc-dev libprotobuf-c-dev
-          - git clone https://github.com/devnaga/EDGEMW/
+          - git clone https://github.com/sagniknitr/EDGEMW/
           - cd EDGEMW
             # test with clang (++)
           - bash build.sh run_gcc_tests clang

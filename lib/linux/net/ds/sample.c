@@ -224,7 +224,7 @@ int main(int argc, char **argv)
     edge_os_evtloop_init(&base, NULL);
 
     if (subscriver)
-        dc_subscriber_create(&base, "/devnaga", NULL, subscriber_callback);
+        dc_subscriber_create(&base, "/sagniknitr", NULL, subscriber_callback);
 
     edge_os_evtloop_run(&base);
 

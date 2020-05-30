@@ -28,7 +28,7 @@ int edge_os_token_parser(const char *input, int input_len, char token, char *op,
 #if 0
 int main()
 {
-    char *msg = "home//devnaga//////test/work/work1/work2";
+    char *msg = "home//sagniknitr//////test/work/work1/work2";
     int off = 0;
     char op[80];
 
