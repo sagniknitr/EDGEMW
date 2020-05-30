@@ -67,8 +67,8 @@ SET(UTIL_SOURCES
         lib/util/conv.c
         lib/util/hex.c)
 
-SET(CRYPTO_SOURCES
-        lib/crypto/crypto.c)
+SET(CRYPTO_SOURCES)
+        #lib/crypto/crypto.c)
 
 SET(GPSLIB_SOURCES
         lib/gpslib/src/nmea/nmea_parser.cpp)
@@ -114,7 +114,7 @@ set(TEST_CASES_SOURCES
         tests/test_prng.c
         tests/test_sysioctl.c
         tests/test_pthread.c
-        tests/test_crypto.c
+        #tests/test_crypto.c
         tests/test_sched.c
         tests/test_config_parser.cpp
         tests/test_dlist.c
@@ -122,7 +122,7 @@ set(TEST_CASES_SOURCES
         tests/test_stack.c
         tests/test_queue.c
         tests/test_fifo.c
-        tests/test_ssl.c
+        #tests/test_ssl.c
         tests/test_hashtbl.c
         tests/test_msg_queue.cpp
         tests/test_monitor.cpp

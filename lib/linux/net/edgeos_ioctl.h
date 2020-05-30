@@ -1,7 +1,7 @@
 /**
  * @brief - generic Linux IOCTL call support header (possibly more other ioctl calls as well)
  *
- * @Author - Devendra Naga (devendra.aaru@gmail.com)
+ * @Author - Sagnik Basu (sagnik.basu@outlook.com)
  * @Copyright - All rights reserved
  *
  * MIT License

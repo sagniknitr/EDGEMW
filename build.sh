@@ -40,7 +40,7 @@ run_gcc_tests() {
     ./build/TestExecutor sysioctl_test
     ./build/TestExecutor pthread_test
     ./build/TestExecutor sched_test
-    ./build/TestExecutor crypto_test
+    #./build/TestExecutor crypto_test
     ./build/TestExecutor config_parser_test ./tests/supervisor.conf
     ./build/TestExecutor config_parser_test
     ./build/TestExecutor dlist_test
@@ -48,10 +48,10 @@ run_gcc_tests() {
     ./build/TestExecutor stack_test
     ./build/TestExecutor queue_test
     ./build/TestExecutor fifo_test
-    ./build/TestExecutor ssl_test server&
-    ./build/TestExecutor ssl_test client&
+    #./build/TestExecutor ssl_test server&
+    #./build/TestExecutor ssl_test client&
     sleep 1
-    ./build/TestExecutor hashtbl_test
+    #./build/TestExecutor hashtbl_test
     #./build/TestExecutor msg_queue_test server /mq_test&
     #./build/TestExecutor msg_queue_test client /mq_test&
 	./build/TestExecutor evtloop_test server&

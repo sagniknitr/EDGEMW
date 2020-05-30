@@ -7,14 +7,14 @@ int prng_test(int argc, char **argv);
 int list_test(int argc, char **argv);
 int sysioctl_test(int argc, char **argv);
 int pthread_test(int argc, char **argv);
-int crypto_test(int argc, char **argv);
+//int crypto_test(int argc, char **argv);
 int sched_test(int argc, char **argv);
 int dlist_test(int argc, char **argv);
 int static_list_test(int argc, char **argv);
 int stack_test(int argc, char **argv);
 int queue_test(int argc, char **argv);
 int fifo_test(int argc, char **argv);
-int ssl_test(int argc, char **argv);
+//int ssl_test(int argc, char **argv);
 int hashtbl_test(int argc, char **argv);
 int rawsock_test(int argc, char **argv);
 }
@@ -37,7 +37,7 @@ static struct test_cases {
     {"tokparse_test", tokparse_test},
     {"sysioctl_test", sysioctl_test},
     {"pthread_test", pthread_test},
-    {"crypto_test", crypto_test},
+    //{"crypto_test", crypto_test},
     {"sched_test", sched_test},
     {"config_parser_test", config_parser_test},
     {"dlist_test", dlist_test},
@@ -45,7 +45,7 @@ static struct test_cases {
     {"stack_test", stack_test},
     {"queue_test", queue_test},
     {"fifo_test", fifo_test},
-    {"ssl_test", ssl_test},
+    //{"ssl_test", ssl_test},
     {"hashtbl_test", hashtbl_test},
     {"msg_queue_test", msg_queue_test},
     {"monitor_test", monitor_test},

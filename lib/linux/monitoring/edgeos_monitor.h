@@ -1,6 +1,6 @@
 /**
  * @brief - monitoring layer interfaces from EDGEOS
- * @Author - Devendra Naga (devendra.aaru@gmail.com)
+ * @Author - Sagnik Basu (sagnik.basu@outlook.com)
  * @Copyright  - all rights reserved
  * License - MIT
  */

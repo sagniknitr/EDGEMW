@@ -1,6 +1,6 @@
 /**
  * @brief - networking layer interfaces from EDGEOS
- * @Author - Devendra Naga (devendra.aaru@gmail.com)
+ * @Author - Sagnik Basu (sagnik.basu@outlook.com)
  * @Copyright  - all rights reserved
  * License - MIT
  */
@@ -40,6 +40,7 @@ typedef enum {
 
     // listen and monitor
     EDGEOS_RAW_SOCK_SNIFFER = 127,
+
 } edge_os_raw_sock_type_t;
 
 // raw packet receiver parameters

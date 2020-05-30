@@ -3,7 +3,7 @@
  *
  * event loop framework
  *
- * @Author: Dev Naga (devendra.aaru@gmail.com)
+ * @Author: Sagnik Basu (sagnik.basu@outlook.com)
  *
  * License MIT
  */

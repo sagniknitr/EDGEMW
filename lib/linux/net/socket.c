@@ -1,6 +1,6 @@
 /**
  * @brief - networking layer interfaces from EDGEOS
- * @Author - Devendra Naga (devendra.aaru@gmail.com)
+ * @Author - Sagnik Basu (sagnik.basu@outlook.com)
  * @Copyright  - all rights reserved
  * License - MIT 
  */
@@ -971,8 +971,9 @@ void* edge_os_raw_socket_create(edge_os_raw_sock_type_t type, const char *ifname
         break;
         case EDGEOS_RAW_SOCK_ICMP_V4:
             sock_type = IPPROTO_ICMP;
+        break;
 
-        case EDGE_OS_RAW_SOCK_ICMP_V6:
+        case EDGEOS_RAW_SOCK_ICMP_V6:
             sock_type = IPPROTO_ICMPV6;
         default:
             goto bad;
