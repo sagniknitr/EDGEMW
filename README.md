@@ -40,5 +40,5 @@ currently there is no cross `cmake` options for rpi, build directly on rpi for n
 Below are some of the screenshots of the tests that are run on the current software WIP master.
 
 
-![](tests/tcp_perf_test.png?raw=true)
+![](tests/tcp_perf_test.PNG?raw=true)
 
